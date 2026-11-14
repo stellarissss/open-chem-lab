@@ -1,0 +1,26 @@
+# 跨平台一致性硬约束（台账 9.1：Win + Linux 双平台兼容）
+# 源码与文本统一 LF，避免 CRLF 导致脚本/配置在 Linux 侧异常
+* text=auto eol=lf
+
+*.sh    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.rs    text eol=lf
+*.py    text eol=lf
+
+# 二进制资产不做换行转换
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.gif   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.wasm  binary
+*.mp3   binary
+*.ogg   binary

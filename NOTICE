@@ -1,83 +1,112 @@
-Open Chem Lab (Crucible)
-Copyright 2026 stellarissss and contributors
+ST Crucible / 《ST实验室》
+Copyright (C) 2026 stellarissss and contributors
 
-This product is licensed under the Apache License, Version 2.0 (see LICENSE).
-It includes software and assets developed by third parties, each under its own
-license. The following notices are provided for attribution purposes. The full,
-itemized list with links, licenses and per-asset attribution is maintained in
-CREDITS.md and assets/attribution/ASSETS.csv.
+===============================================================================
+1. 主许可证与显著声明（GNU LGPL 3.0 第 4 节要求）
+===============================================================================
 
--------------------------------------------------------------------------------
-Simulation core (derived from)
-  Sandspiel — https://github.com/MaxBittker/sandspiel — MIT
-    Copyright (c) Max Bittker and contributors
-  (fluid simulation code from PavelDoGreat/WebGL-Fluid-Simulation — MIT)
+This product uses libraries licensed under the GNU Lesser General Public
+License. ST Crucible itself is licensed under the GNU LESSER GENERAL PUBLIC
+LICENSE, Version 3 (LGPL-3.0).
 
-Cheminformatics
-  RDKit / RDKit.js MinimalLib — https://github.com/rdkit/rdkit — BSD-3-Clause
-    Copyright (c) 2016-2026 RDKit contributors
-  3Dmol.js — https://github.com/3dmol/3Dmol.js — BSD-3-Clause
-    Copyright (c) 2014, University of Pittsburgh and contributors
-    Please cite the 3Dmol.js Bioinformatics paper (DOI to be added in M0).
-  Kekule.js — https://github.com/partridgejiang/Kekule.js — MIT
-  SmilesDrawer — https://github.com/reymond-group/smilesDrawer — MIT
-  openchemlib-js — https://github.com/cheminfo/openchemlib-js — BSD-3-Clause
-  EPAM Indigo — https://github.com/epam/Indigo — Apache-2.0
-  OpenChemLib, CDK, Jmol are referenced only, not linked.
+  "This version of the GNU Lesser General Public License incorporates
+   the terms and conditions of version 3 of the GNU General Public License,
+   supplemented by the additional permissions listed below."
 
-Numerical / properties
-  Cantera (BSD-3-Clause, to be confirmed in M0), CoolProp (MIT),
-  thermo / chemicals (MIT, Caleb Bell), PyBaMM (BSD-3-Clause).
+依 LGPL-3.0 第 4 节，本产品随附并在此显著声明使用 LGPL 库，同时提供
+两份许可证全文：
 
-Frontend
-  React, Three.js, React Three Fiber, PixiJS, Zustand, Yjs, Vite (MIT),
-  Lucide (ISC), Tabler Icons / Iconify (MIT).
+  LICENSE.GPL-3    GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
+  LICENSE.LGPL-3   GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
 
-Education integration
-  ltijs (Apache-2.0), xAPI Spec (Apache-2.0), h5p-standalone (MIT).
+本 NOTICE 与上述两份全文、CREDITS.md、assets/attribution/ASSETS.csv
+共同构成本产品的第三方声明与署名交付。
 
--------------------------------------------------------------------------------
-Data
-  PubChem (NIH/NLM) — public domain / free public data. Retrieved via
-    PUG-REST subject to the usage policy (<= 5 requests/second).
-  Open Reaction Database (ord-data) — CC BY SA 4.0 —
+===============================================================================
+2. 库可替换性与使用者权利（LGPL-3.0 §4 / LGPL-2.1 §6 义务）
+===============================================================================
+
+本项目以【动态链接 + 运行时可替换】形态接入 LGPL 库，不将其 C/C++ 源码
+静态编入主二进制。据此：
+
+  - 使用者可为自用目的修改所链接的库，并替换为自行编译的版本；
+  - 使用者可为调试此类修改对该库进行逆向工程；
+  - 本产品不限制上述替换，并在部署说明中给出替换入口；
+  - 所用 LGPL 库的许可证全文、上游地址与修改版源码获取方式列于
+    CREDITS.md 与 docs/adr/ADR-0005-许可证边界与数据隔离.md；
+  - 分发包含该库的可执行文件时，随附本 NOTICE、两份许可证全文及
+    允许重新链接所需的信息。
+
+当前 LGPL 组件：
+  Reaktoro — https://github.com/reaktoro/reaktoro — LGPL-2.1
+    （主链动态链接组件；化学平衡 / 物种分布 / 热力学求解）
+
+LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目共存。
+
+===============================================================================
+3. 第三方软件（各自保留原许可证，完整清单见 CREDITS.md）
+===============================================================================
+
+化学信息学
+  RDKit / RDKit.js MinimalLib — BSD-3-Clause
+  Kekule.js — MIT · SmilesDrawer — MIT · openchemlib-js — BSD-3-Clause
+  EPAM Indigo — Apache-2.0（备选）
+
+定量求解与物性（服务端主链）
+  SUNDIALS CVODE/CVODES — BSD-3-Clause
+  SciPy — BSD-3-Clause · Cantera — BSD-3-Clause（License.txt 原文已核）
+  ChemPy — BSD-2-Clause · pyequion2 — BSD-3-Clause
+  chemicals / thermo / CoolProp — MIT
+  Reaktoro — LGPL-2.1（见第 2 节）
+
+表现与可视化
+  React / Three.js / PixiJS / Vite / SmilesDrawer — MIT 等宽松许可
+  3Dmol.js — BSD-3-Clause（仓库 LICENSE；M0 复核其 NOASSERTION 标注）
+    官方要求引用其 Bioinformatics 论文，DOI 于 M0 补齐后写入 About 页
+  Lucide — ISC · Tabler Icons / Iconify — MIT
+
+美术资产
+  tikz-chemlab — LPPL-1.3c — Aihua Wang；pst-labo 原作者 D. Girou,
+    C. Jorssen, M. Luque, H. Voss
+    重要：本产品仅使用其【编译输出物】（由 PDF 转出的 SVG），宏包源码
+    不入库、不随产品分发。LPPL 1.3c Clause 1：运行 Work 不受限制。
+  @itkdm/open-lab-components — MIT — itkdm（辅助资产）
+  LabIcons — CC BY 4.0 — illustrations by Manon Zuurmond (CPM)
+  bioicons — 平台 MIT，但每个图标各自 CC0 / MIT / CC BY（含 Servier
+    CC BY 3.0、DBCLS/TogoTV）；逐图标署名见 ASSETS.csv
+  Kenney Assets — CC0 1.0（包内 LICENSE 于 M0 复核）
+
+数据
+  PubChem (NIH/NLM) — 免费公开数据；PUG-REST ≤ 5 req/s
+  Open Reaction Database (ord-data) — CC BY-SA 4.0 —
     https://github.com/open-reaction-database/ord-data
-    Datasets and derived rule tables are kept in a separate repository
-    (data-ord/) with attribution and ShareAlike notice preserved.
-  ord-schema (Apache-2.0), ORDerly (MIT).
+    数据与衍生规则表存放于【独立公开仓库 data-ord】，保留署名与
+    ShareAlike 声明；主仓仅以 submodule 引用，仅抽取事实性反应式。
+  ord-schema — Apache-2.0 · ORDerly — MIT
 
--------------------------------------------------------------------------------
-Art assets
-  tikz-chemlab — https://github.com/aihua/tikz-chemlab — LPPL-1.3c
-    by Aihua Wang; a TikZ port of pst-labo v2.07 by Denis Girou,
-    Christophe Jorssen, Manuel Luque and Herbert Voss.
-    IMPORTANT: only COMPILED OUTPUT (SVG converted from generated PDF) is
-    used in this product. The macro package source is NOT distributed here.
-    Running the work is unrestricted under LPPL 1.3c Clause 1.
-  @itkdm/open-lab-components — https://github.com/itkdm/open-lab-components
-    — MIT — by itkdm.
-  LabIcons — Center for Proteomics and Metabolomics — CC BY 4.0 —
-    illustrations by Manon Zuurmond. Attribution: "Selected graphical
-    elements ... were designed by Manon Zuurmond and are used under a CC BY
-    license." Modifications noted in assets/attribution/ASSETS.csv.
-  bioicons — https://github.com/duerrsimon/bioicons — platform MIT, but EACH
-    ICON carries its own license (CC0 / MIT / CC BY, incl. Servier CC BY 3.0,
-    DBCLS/TogoTV). Per-icon attribution is recorded in ASSETS.csv.
-  Kenney Assets — https://kenney.nl/assets — CC0 1.0 (package LICENSE to be
-    verified in M0).
-  NIH BioArt — CC BY 4.0 / CC0 (per item).
+===============================================================================
+4. 仅作参考、不链接、不并入构建产物
+===============================================================================
 
--------------------------------------------------------------------------------
-Reference only — NOT linked, NOT bundled
-  The Powder Toy (GPL-3.0), tptmp (AGPL-3.0), PhET (GPL),
-  H5P core (GPL-3.0), Chemistry Development Kit (LGPL-2.1),
-  Jmol/SwingJS (LGPL-2.1). See ADR-0005.
+  tptmp — AGPL-3.0 —— 严格不兼容，完全隔离（FSF：AGPLv3 与 GPLv3
+    在严格意义上不兼容，仅可合并独立模块），不引入任何形态。
+  The Powder Toy — GPL-3.0 · PhET sims — GPL · H5P core — GPL-3.0
+    —— 换用 LGPL-3.0 后在许可证层面与 GPLv3 兼容，但依据选型决策
+    【不纳入主链】，仅作只读设计参考。理由见 ADR-0001 / ADR-0005。
+  Chemistry Development Kit — LGPL-2.1 · Jmol/SwingJS — LGPL-2.1
+    —— 仅作参考，未纳入选型。
+  Sandspiel — MIT —— 早期表现层原型源码实读对象；实验台范式确立后
+    无限画布落沙基座已废弃，不进入产品链路。
 
--------------------------------------------------------------------------------
-Trademark / benchmarking note
-  NB实验室 / NOBOOK are products and trademarks of 北京乐步教育科技有限公司.
-  This project is an independent open-source implementation that benchmarks
-  functionality only. No code, assets, templates, UI design or trademarks from
-  that product are used. No circumvention of licensing is provided.
+===============================================================================
+5. 商标与对标说明
+===============================================================================
 
-This notice reflects engineering judgment, not legal advice.
+NB实验室 / NOBOOK 是北京乐步教育科技有限公司的产品与商标。
+本项目公开点名对标并以其为超越目标，但为【独立开源实现】，与
+NB实验室 / NOBOOK 无任何隶属、授权、背书或合作关系；不使用其代码、
+素材、界面设计、模板文案或商标，不提供任何破解、绕过授权或账号共享
+内容。对外涉及 NB 的数据只采信一级来源（官网 / 价格页 / 应用商店
+官方描述），不使用未获证实的推广稿数字。
+
+本 NOTICE 中的许可证与合规分析为工程判断，非法律意见。

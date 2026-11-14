@@ -23,25 +23,49 @@ jobs:
           fail: true
         continue-on-error: true   # 阶段一外链可能波动，先告警不阻断；M1 起改为 fail
 
-      - name: 校验 CHARTER 与文档索引存在
+      - name: 校验核心文档与决策台账存在
         run: |
           test -f CHARTER.md
           test -f CREDITS.md
           test -f NOTICE
+          test -f README.md
+          test -f docs/11-问题与决策台账.md
           test -f docs/README.md
           test -f docs/10-完整规划与风险登记册.md
           test -f docs/design/01-总体架构.md
-          test -f docs/adr/ADR-0006-反应规则数据驱动.md
-          echo "核心文档齐全"
+          test -f docs/adr/ADR-0006-静态参数层与动态求解层.md
+          test -f docs/adr/ADR-0008-自适应定量调度.md
+          echo "核心文档与决策台账齐全"
+
+      - name: 校验 LGPL-3.0 双文本许可证交付
+        run: |
+          test -f LICENSE
+          test -f LICENSE.GPL-3
+          test -f LICENSE.LGPL-3
+          head -8 LICENSE.GPL-3 | grep -q "GNU GENERAL PUBLIC LICENSE"
+          head -8 LICENSE.LGPL-3 | grep -q "GNU LESSER GENERAL PUBLIC LICENSE"
+          grep -q "LICENSE.GPL-3" NOTICE
+          grep -q "LICENSE.LGPL-3" NOTICE
+          # 主许可证不得回退为 Apache-2.0
+          if head -8 LICENSE | grep -qi "Apache License"; then
+            echo "::error::主许可证回退为 Apache-2.0，违反台账 A1"; exit 1
+          fi
+          echo "LGPL-3.0 双文本与显著声明齐全"
 
       - name: 许可证红线静态检查（占位，M0 接 license-scan）
         run: |
+          echo "白名单：MIT / BSD-2 / BSD-3 / Apache-2.0 / ISC / CC0 / CC-BY / LGPL-2.1 / LGPL-3.0"
+          echo "禁止：AGPL-* / GPL-2.0-only；GPL-3.0 组件依选型决策不纳入主链（引入须 ADR）"
           echo "检查仓库内不含 tikz-chemlab 宏包源码（LPPL 边界，ADR-0004）"
           if find . -path ./.git -prune -o \( -name 'tikz-chemlab.sty' -o -name 'tikz-chemlabObj.tex' -o -name 'tikz-chemlab.tex' \) -print | grep -q .; then
             echo "::error::检测到 tikz-chemlab 宏包源码，违反 ADR-0004"; exit 1
           fi
           echo "检查 .gitignore 排除密钥与数据"
           grep -q '^.env' .gitignore && grep -q 'data-ord/' .gitignore
+          echo "检查无明文 token 入库"
+          if grep -rIl --exclude-dir=.git -E 'ghp_[A-Za-z0-9]{20,}' . | grep -q .; then
+            echo "::error::检测到疑似明文 GitHub token"; exit 1
+          fi
           echo "合规静态检查通过"
 
       - name: 资产署名清单格式检查（占位）
@@ -50,5 +74,13 @@ jobs:
           head -1 assets/attribution/ASSETS.csv | grep -q 'asset_id,source_project'
           echo "署名清单表头正确"
 
+      - name: 校验历史归档标识（防止初版方案被误读为现行设计）
+        run: |
+          test -f docs/research/data/README.md
+          head -6 "docs/research/data/开源化学沙盒实验室_调研与二次开发方案.md" | grep -q "历史归档"
+          head -6 "docs/research/data/NB实验室功能调研报告.md" | grep -q "历史归档"
+          echo "历史归档标识齐全"
+
 # 后续（M0/M1）补充的门禁见 docs/design/05：
-#   license-scan / schema-validate / rule-lint / golden-cases / asset-attribution / build / e2e
+#   license-scan / lgpl-link-check / schema-validate / rule-lint
+#   golden-cases / asset-attribution / build / e2e
