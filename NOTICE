@@ -1,0 +1,83 @@
+Open Chem Lab (Crucible)
+Copyright 2026 stellarissss and contributors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+It includes software and assets developed by third parties, each under its own
+license. The following notices are provided for attribution purposes. The full,
+itemized list with links, licenses and per-asset attribution is maintained in
+CREDITS.md and assets/attribution/ASSETS.csv.
+
+-------------------------------------------------------------------------------
+Simulation core (derived from)
+  Sandspiel — https://github.com/MaxBittker/sandspiel — MIT
+    Copyright (c) Max Bittker and contributors
+  (fluid simulation code from PavelDoGreat/WebGL-Fluid-Simulation — MIT)
+
+Cheminformatics
+  RDKit / RDKit.js MinimalLib — https://github.com/rdkit/rdkit — BSD-3-Clause
+    Copyright (c) 2016-2026 RDKit contributors
+  3Dmol.js — https://github.com/3dmol/3Dmol.js — BSD-3-Clause
+    Copyright (c) 2014, University of Pittsburgh and contributors
+    Please cite the 3Dmol.js Bioinformatics paper (DOI to be added in M0).
+  Kekule.js — https://github.com/partridgejiang/Kekule.js — MIT
+  SmilesDrawer — https://github.com/reymond-group/smilesDrawer — MIT
+  openchemlib-js — https://github.com/cheminfo/openchemlib-js — BSD-3-Clause
+  EPAM Indigo — https://github.com/epam/Indigo — Apache-2.0
+  OpenChemLib, CDK, Jmol are referenced only, not linked.
+
+Numerical / properties
+  Cantera (BSD-3-Clause, to be confirmed in M0), CoolProp (MIT),
+  thermo / chemicals (MIT, Caleb Bell), PyBaMM (BSD-3-Clause).
+
+Frontend
+  React, Three.js, React Three Fiber, PixiJS, Zustand, Yjs, Vite (MIT),
+  Lucide (ISC), Tabler Icons / Iconify (MIT).
+
+Education integration
+  ltijs (Apache-2.0), xAPI Spec (Apache-2.0), h5p-standalone (MIT).
+
+-------------------------------------------------------------------------------
+Data
+  PubChem (NIH/NLM) — public domain / free public data. Retrieved via
+    PUG-REST subject to the usage policy (<= 5 requests/second).
+  Open Reaction Database (ord-data) — CC BY SA 4.0 —
+    https://github.com/open-reaction-database/ord-data
+    Datasets and derived rule tables are kept in a separate repository
+    (data-ord/) with attribution and ShareAlike notice preserved.
+  ord-schema (Apache-2.0), ORDerly (MIT).
+
+-------------------------------------------------------------------------------
+Art assets
+  tikz-chemlab — https://github.com/aihua/tikz-chemlab — LPPL-1.3c
+    by Aihua Wang; a TikZ port of pst-labo v2.07 by Denis Girou,
+    Christophe Jorssen, Manuel Luque and Herbert Voss.
+    IMPORTANT: only COMPILED OUTPUT (SVG converted from generated PDF) is
+    used in this product. The macro package source is NOT distributed here.
+    Running the work is unrestricted under LPPL 1.3c Clause 1.
+  @itkdm/open-lab-components — https://github.com/itkdm/open-lab-components
+    — MIT — by itkdm.
+  LabIcons — Center for Proteomics and Metabolomics — CC BY 4.0 —
+    illustrations by Manon Zuurmond. Attribution: "Selected graphical
+    elements ... were designed by Manon Zuurmond and are used under a CC BY
+    license." Modifications noted in assets/attribution/ASSETS.csv.
+  bioicons — https://github.com/duerrsimon/bioicons — platform MIT, but EACH
+    ICON carries its own license (CC0 / MIT / CC BY, incl. Servier CC BY 3.0,
+    DBCLS/TogoTV). Per-icon attribution is recorded in ASSETS.csv.
+  Kenney Assets — https://kenney.nl/assets — CC0 1.0 (package LICENSE to be
+    verified in M0).
+  NIH BioArt — CC BY 4.0 / CC0 (per item).
+
+-------------------------------------------------------------------------------
+Reference only — NOT linked, NOT bundled
+  The Powder Toy (GPL-3.0), tptmp (AGPL-3.0), PhET (GPL),
+  H5P core (GPL-3.0), Chemistry Development Kit (LGPL-2.1),
+  Jmol/SwingJS (LGPL-2.1). See ADR-0005.
+
+-------------------------------------------------------------------------------
+Trademark / benchmarking note
+  NB实验室 / NOBOOK are products and trademarks of 北京乐步教育科技有限公司.
+  This project is an independent open-source implementation that benchmarks
+  functionality only. No code, assets, templates, UI design or trademarks from
+  that product are used. No circumvention of licensing is provided.
+
+This notice reflects engineering judgment, not legal advice.

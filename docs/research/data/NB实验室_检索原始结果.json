@@ -1,0 +1,172 @@
+{
+  "query": "NB实验室 仿真化学实验室 功能",
+  "mode": "fetch",
+  "searched_at": "2026-11-13T22:23:50",
+  "engines_ok": [
+    "bing-cn",
+    "sogou"
+  ],
+  "engines_failed": [
+    {
+      "engine": "baidu",
+      "reason": "出现验证码/人机校验，已按规范停止抓取"
+    },
+    {
+      "engine": "so360",
+      "reason": "页面已返回但未解析到结果（结构变化或地区重定向）"
+    }
+  ],
+  "result_count": 16,
+  "results": [
+    {
+      "rank": 1,
+      "title": "物理实验软件_NB物理模拟仿真实验-NOBOOK虚拟实验室",
+      "url": "https://wl.nobook.com/console/templates/resource/",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 2,
+      "title": "nb化学实验室免费版-NB化学虚拟实验室下载 v2.4.2官方版--pc6下载站",
+      "url": "https://www.sogou.com/link?url=hedJjaC291OTevX0DuWsG4AqL-xlKZ_dnqz-1z61fjGsuVEJieSEIpvC7rtF-zdXri2jTBr9OJ8.",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 3,
+      "title": "New Balance中国官方商城",
+      "url": "https://www.newbalance.com.cn/",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 4,
+      "title": "初高中化学实验_化学软件_仿真化学实验室_NB化学实验",
+      "url": "https://www.sogou.com/link?url=DSOYnZeCC_qeJIzNo8Dr5Oqm3o8Q7W4bEpSpq7I8HcQ.",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 5,
+      "title": "化学实验软件_NB化学模拟仿真实验-NOBOOK虚拟实验室",
+      "url": "https://hx.nobook.com/index.html",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 6,
+      "title": "nb化学实验室mac版下载-nb化学实验苹果电脑版下载 v3.14.0官方版 - ...",
+      "url": "https://www.sogou.com/link?url=DSOYnZeCC_oX-M1ztpwEupxspV_DrxUO8e_NrnJA1QwYjpKaZjYUwQ..",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 7,
+      "title": "NOBOOK虚拟实验 - 中小学理化生与科学仿真实验教学平台 ...",
+      "url": "https://www.nobook.com/index.html",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 8,
+      "title": "【第329期】NB化学实验室——虚拟化学实验室",
+      "url": "http://mp.weixin.qq.com/s?src=11&timestamp=1794579829&ver=7086&signature=JlYbKo5fDQfJN7oY5qX7d1T7LlwvSrB830DnzGf*ye4LZzxEqnfRIjd5YxuVUBSy2SJAF1kFF96n7WJ*tXSVJzEsyplVbR8bHSUK5rATzfjZCcXwXgxkguled1OJkFHU&new=1",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 9,
+      "title": "物理实验软件_NB物理模拟仿真实验-NOBOOK虚拟实验室",
+      "url": "https://wl.nobook.com/",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 10,
+      "title": "仿真化学实验室最新版 - NOBOOK虚拟实验室",
+      "url": "https://www.sogou.com/link?url=hedJjaC291M46u1HBohh6FBuO4_ULDy3NCgRGW3tEVk.",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 11,
+      "title": "NB Map",
+      "url": "https://www.nbcharts.com/map/map.php",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 12,
+      "title": "NB化学实验_化学反应模拟软件 - NOBOOK虚拟实验室",
+      "url": "https://www.sogou.com/link?url=hedJjaC291M46u1HBohh6FBuO4_ULDy3VzcWGF4cAxI.",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 13,
+      "title": "NB化学实验",
+      "url": "https://hx.nobook.com/chemical/new?moduleId=9",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 14,
+      "title": "仿真化学实验室怎么用 - NOBOOK虚拟实验室",
+      "url": "https://www.sogou.com/link?url=hedJjaC291M46u1HBohh6FBuO4_ULDy38uz_Ktki-jE.",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 15,
+      "title": "NB化学实验",
+      "url": "https://hx-app.nobook.com/",
+      "engines": [
+        "bing-cn"
+      ],
+      "snippet": ""
+    },
+    {
+      "rank": 16,
+      "title": "仿真化学实验室 - NOBOOK虚拟实验室",
+      "url": "https://www.sogou.com/link?url=hedJjaC291M46u1HBohh6FBuO4_ULDy3u3Q_nXnaNvA.",
+      "engines": [
+        "sogou"
+      ],
+      "snippet": ""
+    }
+  ],
+  "search_links": {
+    "bing-cn": "https://cn.bing.com/search?q=NB%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E4%BB%BF%E7%9C%9F%E5%8C%96%E5%AD%A6%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E5%8A%9F%E8%83%BD&ensearch=0",
+    "baidu": "https://www.baidu.com/s?wd=NB%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E4%BB%BF%E7%9C%9F%E5%8C%96%E5%AD%A6%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E5%8A%9F%E8%83%BD&rn=10",
+    "so360": "https://www.so.com/s?q=NB%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E4%BB%BF%E7%9C%9F%E5%8C%96%E5%AD%A6%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E5%8A%9F%E8%83%BD",
+    "sogou": "https://www.sogou.com/web?query=NB%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E4%BB%BF%E7%9C%9F%E5%8C%96%E5%AD%A6%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E5%8A%9F%E8%83%BD"
+  }
+}

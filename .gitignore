@@ -1,0 +1,60 @@
+# 构建产物
+node_modules/
+dist/
+build/
+target/
+pkg/
+*.wasm
+.pnpm-store/
+.turbo/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Rust
+Cargo.lock.bak
+
+# 环境与密钥（严禁入库）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+**/token*
+!**/tokenizer*
+
+# 本地数据 / 大体量资产（走独立仓或对象存储）
+data-ord/
+*.parquet
+*.pb.gz
+*.sqlite
+*.duckdb
+/uploads/
+/tmp/
+
+# 编辑器与系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+
+# TeX 转换中间产物（源码与中间文件不入库，只留最终 SVG）
+tools/asset-pipeline/build/
+*.aux *.log *.dvi *.out *.toc *.fls *.fdb_latexmk *.synctex.gz
+!assets/**/*.svg
+
+# 文档工具
+.site/

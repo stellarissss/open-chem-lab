@@ -1,0 +1,4 @@
+﻿asset_id,source_project,source_url,author,license,modified,attribution_text,used_in
+# 说明：本文件为模板/表头，M0 起随资产实际入库逐条填充；每入库一个资产必须新增一行，CI 会校验覆盖。
+# license 取值必须在白名单内：MIT / BSD-3-Clause / Apache-2.0 / ISC / CC0-1.0 / CC-BY-4.0 / CC-BY-3.0 / LPPL-1.3c (generated output only)
+# 详见 assets/attribution/README.md 与 docs/design/04-美术资产管线.md 第六节。
