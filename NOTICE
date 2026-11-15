@@ -26,8 +26,9 @@ LICENSE, Version 3 (LGPL-3.0).
 2. 库可替换性与使用者权利（LGPL-3.0 §4 / LGPL-2.1 §6 义务）
 ===============================================================================
 
-本项目以【动态链接 + 运行时可替换】形态接入 LGPL 库，不将其 C/C++ 源码
-静态编入主二进制。据此：
+本项目以【独立微服务 + 动态链接 + 运行时可替换】形态接入 LGPL 库：
+`reaktoro-service` 使用独立 conda 镜像，经 UDS/protobuf 与主进程低延迟通讯，
+不将其 C/C++ 源码静态编入主二进制。**进程隔离不免除 §6 义务**。据此：
 
   - 使用者可为自用目的修改所链接的库，并替换为自行编译的版本；
   - 使用者可为调试此类修改对该库进行逆向工程；
@@ -39,7 +40,10 @@ LICENSE, Version 3 (LGPL-3.0).
 
 当前 LGPL 组件：
   Reaktoro — https://github.com/reaktoro/reaktoro — LGPL-2.1
-    （主链动态链接组件；化学平衡 / 物种分布 / 热力学求解）
+    （reaktoro-service 独立微服务，conda-forge 分发；承担多相 / 固相 / 气相、
+     高温高压、燃烧爆炸平衡终态与复杂体系；服务镜像内动态链接、运行时可替换）
+  替换入口：替换服务镜像内动态链接的 libReaktoro 即可，主链无需重新编译；
+    详见 docs/adr/ADR-0005 与 ADR-0009。
 
 LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目共存。
 
@@ -53,16 +57,20 @@ LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目�
   EPAM Indigo — Apache-2.0（备选）
 
 定量求解与物性（服务端主链）
-  SUNDIALS CVODE/CVODES — BSD-3-Clause
-  SciPy — BSD-3-Clause · Cantera — BSD-3-Clause（License.txt 原文已核）
-  ChemPy — BSD-2-Clause · pyequion2 — BSD-3-Clause
+  phreeqpython / PHREEQC (USGS) — Apache-2.0（电解质 / 水溶液平衡主引擎）
+  SciPy — BSD-3-Clause（LSODA/BDF 刚性积分主力，内置自动刚性切换）
+  Cantera — BSD-3-Clause（License.txt 原文已核；燃烧 / 爆炸瞬态动力学）
+  ChemPy — BSD-2-Clause（动力学辅助 + AI 独立对拍）
+  pyequion2 — BSD-3-Clause（活度 / 离子强度；真实仓库 pyequion/pyequion2）
   chemicals / thermo / CoolProp — MIT
-  Reaktoro — LGPL-2.1（见第 2 节）
+  SUNDIALS CVODE/CVODES — BSD-3-Clause（后置 M1 可选加速）
+  Reaktoro — LGPL-2.1（独立微服务，见第 2 节）
 
 表现与可视化
   React / Three.js / PixiJS / Vite / SmilesDrawer — MIT 等宽松许可
-  3Dmol.js — BSD-3-Clause（仓库 LICENSE；M0 复核其 NOASSERTION 标注）
-    官方要求引用其 Bioinformatics 论文，DOI 于 M0 补齐后写入 About 页
+  3Dmol.js — BSD-3-Clause（仓库 LICENSE 原文，M0 已销项 F2）
+    官方要求引用其 Bioinformatics 论文：DOI 10.1093/bioinformatics/btu829
+    （Crossref 核实，已写入 About 页与 ASSETS.csv）
   Lucide — ISC · Tabler Icons / Iconify — MIT
 
 美术资产
@@ -70,11 +78,11 @@ LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目�
     C. Jorssen, M. Luque, H. Voss
     重要：本产品仅使用其【编译输出物】（由 PDF 转出的 SVG），宏包源码
     不入库、不随产品分发。LPPL 1.3c Clause 1：运行 Work 不受限制。
-  @itkdm/open-lab-components — MIT — itkdm（辅助资产）
+  @itkdm/open-lab-components — MIT — itkdm（HTML fragment 库；仅 UI / 缩略图，不进写实主视图）
   LabIcons — CC BY 4.0 — illustrations by Manon Zuurmond (CPM)
   bioicons — 平台 MIT，但每个图标各自 CC0 / MIT / CC BY（含 Servier
     CC BY 3.0、DBCLS/TogoTV）；逐图标署名见 ASSETS.csv
-  Kenney Assets — CC0 1.0（包内 LICENSE 于 M0 复核）
+  Kenney Assets — CC0 1.0（包内 LICENSE 尚未复核，F3 未销项；当前禁止入库）
 
 数据
   PubChem (NIH/NLM) — 免费公开数据；PUG-REST ≤ 5 req/s

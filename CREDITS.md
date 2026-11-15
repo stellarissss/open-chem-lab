@@ -18,15 +18,16 @@
 
 | 项目 | 许可证 | 指标（2026-11-14 快照） | 角色 | 用途 |
 |---|---|---|---|---|
-| [**SUNDIALS CVODE/CVODES**](https://github.com/LLNL/sundials) — LLNL | **BSD-3-Clause** | ★707 · 活跃 | 直接集成 | 自适应步长 BDF / Adams 刚性 ODE 积分；局部误差估计与 `rtol`/`atol` 容差驱动步长，刚性检测自动切换 —— SP-1「消灭硬编码阈值」的数值基石；Cantera / ChemPy 底层即它 |
-| [**SciPy**](https://github.com/scipy/scipy) | **BSD-3-Clause** | ★15,217 | 直接集成 | `solve_ivp` 自适应 RK45 / BDF 参考实现与验证对拍 |
+| [**phreeqpython / PHREEQC (USGS)**](https://github.com/Vitens/phreeqpython) | **Apache-2.0**（M0 核实） | ★94 · 2026-11-15 快照 | **电解质 / 水溶液平衡主引擎（D1）** | pH、物种分布、活度、离子强度、**SI 饱和度指数**、沉淀 / 溶解（`desaturate`）、加料重算（`add`）、溶液混合运算（`s1*0.5+s2*0.5`）；直接依赖 **3 个**（chempy 为 46 个），官方用例 **9/9 PASS**、单次 <1ms |
+| [**SUNDIALS CVODE/CVODES**](https://github.com/LLNL/sundials) — LLNL | **BSD-3-Clause** | ★707 · 活跃 | **后置 M1 可选加速** | M0 实测 SciPy LSODA 已内置 Adams/BDF 自动刚性切换（262 次 / 1.48ms vs RK45 42500 次 / 259ms），主链改用 SciPy 以免编译成本；CVODES 保留为未来可选加速，M1 再评估（D3） |
+| [**SciPy**](https://github.com/scipy/scipy) | **BSD-3-Clause** | ★15,217 | **刚性积分主力（D3）** | `solve_ivp` 的 **LSODA / BDF**：M0 实测 LSODA 内置 Adams↔BDF 自动刚性切换（262 次 / 1.48ms vs RK45 42500 次 / 259ms，约 175 倍），兑现台账 4.3「不硬编码阈值」；免编译，CVODES 后置 M1 可选加速 |
 | [**Cantera**](https://github.com/Cantera/cantera) | **BSD-3-Clause**（`License.txt` 原文已核：标准三条款，含 Caltech / Sandia 政府权利声明） | ★885 | 直接集成 | 化学动力学、热力学与输运。**F1**：GitHub API 的 `NOASSERTION` 仅因多版权头未被自动识别，原文已确认可并入 LGPL-3.0 主链 |
-| [**ChemPy**](https://github.com/bjodah/chempy) — Björn Dahlgren | **BSD-2-Clause** | ★660 | 直接集成 | 电解质平衡 + 动力学；AI 独立对拍的复算工具 |
-| [**pyequion2**](https://github.com/pyequion/pyequion) | **BSD-3-Clause** | ★35 | 直接集成 | 物种分布 / 活度 / pH 求解 |
-| [**Reaktoro**](https://github.com/reaktoro/reaktoro) | **LGPL-2.1**（LICENSE 原文核实） | ★224 | **动态链接（主链）** | 化学平衡 / 物种分布 / 热力学。依台账【补正 A】：以**动态链接 + 运行时可替换**形态接入，不把 C++ 源码静态编入主二进制；配齐 §6 义务（显著声明、附 LGPL 全文、允许逆向调试、库可替换、修改版源码可得）。LGPL-2.1 与 GPLv3 兼容 |
+| [**ChemPy**](https://github.com/bjodah/chempy) — Björn Dahlgren | **BSD-2-Clause** | ★660 | 辅助 / 对拍 | **降级**：不再作水溶液平衡主引擎（直接依赖 46 个、拖入 Jupyter 整栈）；承担动力学 ODE 辅助与 **AI 独立对拍复算**（D1） |
+| [**pyequion2**](https://github.com/pyequion/pyequion2) | **BSD-3-Clause** | ★35 | 辅助 | 物种分布 / 活度 / 离子强度求解（M0 实测 pH=6.98、I=0.1000、残差 1e-12）；**真实仓库为 `pyequion/pyequion2`** |
+| [**Reaktoro**](https://github.com/reaktoro/reaktoro) | **LGPL-2.1**（LICENSE 原文核实） | ★224 | **独立微服务（conda 镜像）** | 承担多相 / 固相 / 气相、高温高压、燃烧爆炸平衡终态与复杂体系（D2 / D2-补）。**不在 PyPI，仅 conda-forge**；与主进程经 UDS/protobuf 低延迟通讯。依台账【补正 A】：以**动态链接 + 运行时可替换**形态接入，配齐 §6 义务（显著声明、附 LGPL 全文、允许逆向调试、库可替换、修改版源码可得）。进程隔离不免除义务 |
 | **Significance Manager / simulation LOD** | **借鉴的调度范式（概念，非实测仓库）** | — | 设计范式 | 按「观察者关注度」分配更新预算的游戏引擎成熟范式。**F4**：与上方「已核实库」严格区分，不冒充现成仓库，避免稀释「不重复造轮子」口径 |
 
-> **PHREEQC**：许可证未定，暂不纳入主链，保留观察。SP-1 全链为 BSD-2 / BSD-3 / LGPL-2.1，**不引入 AGPL / GPLv2-only，GPL-3.0 组件因选型决策不纳入**（台账 6.2 / C15）。
+> **全链许可证**：phreeqpython（Apache-2.0）+ SciPy / Cantera / pyequion2（BSD-3）+ ChemPy（BSD-2）+ reaktoro-service（LGPL-2.1）均与 LGPL-3.0 主项目兼容；**不引入 AGPL / GPLv2-only，GPL-3.0 组件因选型决策不纳入**（台账 6.2 / C15）。M0 已核实 phreeqpython 许可证为 Apache-2.0 并升为主引擎（D1），阶段一「许可证未定、暂不纳入主链」的判断作废。
 
 ## 2. 物性数据
 
@@ -92,7 +93,7 @@
 | 资产 | 许可证 | 指标 | 角色 | 用途与关键约束 |
 |---|---|---|---|---|
 | [**tikz-chemlab**](https://github.com/aihua/tikz-chemlab) / [CTAN](https://ctan.org/pkg/tikz-chemlab) — Aihua Wang | **LPPL-1.3c** | v1.0.0 · ★3 · 已入 TeX Live / MiKTeX | **主资产（输出转译）** | 13 个参数化器材宏（试管 / 烧杯 / 锥形瓶 / 圆底烧瓶 / 量筒 / 滴定 / 蒸馏 / 分液漏斗 / 铁架台…），带液位、倾斜角、颜色、塞子、pH 计、搅拌器等选项，出版级写实线条。**它是 [pst-labo](https://ctan.org/pkg/pst-labo) 的 TikZ 移植**，原作者 Denis Girou / Christophe Jorssen / Manuel Luque / Herbert Voß，一并致谢。**LPPL 第 1 条：运行 Work 不受限制 → 编译出的 PDF/SVG 是输出物，可用于产品；但修改 `.sty/.tex` 源码再分发触发第 6 条（改名 + 变更日志 + 附原始副本）**。策略：「只把编译产物转成 SVG/组件，不改宏包源码」 |
-| [**@itkdm/open-lab-components**](https://github.com/itkdm/open-lab-components) — itkdm | **MIT** | ★10 · npm v0.1.1 | **辅助资产** | 零依赖 HTML fragment 组件库，**213+ 组件 / 41 分类**，化学相关 **37 个**：`chemistry/labware` 26 件器材、`chemistry/reaction` 5 个交互、`chemistry/model` 球棍分子与周期表等。台账 5.3：由「主资产」降为**辅**，与出版级写实主调不冲突时才使用 |
+| [**@itkdm/open-lab-components**](https://github.com/itkdm/open-lab-components) — itkdm | **MIT** | ★10 · npm v0.1.1 | **仅 UI / 缩略图** | 零依赖 **HTML fragment 库**（非 React），210 组件 / 化学相关 35 个，SVG + `--cmp-*` CSS 变量、简笔示意风（无渐变 / 高光）。M0 实测与「出版级写实」主调冲突，D8 裁决**仅作 UI 元素与缩略图**，不进实验台写实主视图 |
 | [LabIcons](https://github.com/Center-for-Proteomics-and-Metabolomics/LabIcons) — CPM / 插画师 Manon Zuurmond | **CC-BY-4.0** | ★24 | 资产（**需署名**） | 专业科研器材插画；CC-BY 要求在图注 / 致谢中署名并说明改动 |
 | [bioicons](https://github.com/duerrsimon/bioicons) — Simon Dürr | 平台 **MIT**；**单个图标各自 CC0/MIT/CC-BY** | ★1,795 | 资产（**逐个核验许可**） | **平台 MIT 不等于每个图标 MIT**；来源含 Servier（CC-BY 3.0）、DBCLS / TogoTV。必须建逐图标署名清单 |
 | [Kenney Assets](https://kenney.nl/assets) — Kenney | **CC0 1.0**（官网 `/license` 页 404，**M0 需包内 LICENSE 复核**） | — | 资产（需复核） | 通用 UI / 音效 / 粒子贴图。**卡通风格不与出版级写实主调混用**，仅取通用音效与粒子贴图 |
@@ -134,7 +135,7 @@
 | 义务 | 涉及资产 | 落地方式 |
 |---|---|---|
 | **LGPL-3.0 双文本 + 显著声明** | 主项目 | `LICENSE` + `LICENSE.GPL-3` + `LICENSE.LGPL-3` + `NOTICE`（§4） |
-| **动态链接 / 库可替换 / 允许逆向调试 / 附 LGPL 全文** | **Reaktoro (LGPL-2.1)** | 台账【补正 A】§6 义务清单；运行时可替换、不静态编入主二进制；CI 增「动态链接 / 可替换性」检查 |
+| **动态链接 / 库可替换 / 允许逆向调试 / 附 LGPL 全文** | **reaktoro-service (LGPL-2.1)** | 台账【补正 A】§6 义务清单 + D2 独立微服务裁定；进程隔离不免除义务，运行时可替换、不静态编入主二进制；CI `lgpl-link-check` 校验服务镜像内的动态链接与可替换性 |
 | 保留版权声明 + 引用论文 | RDKit (BSD-3)、3Dmol.js (BSD-3，M0 复核) | About 页 + `assets/attribution/`；3Dmol.js 引用其 Bioinformatics 论文 |
 | **署名 + 声明改动** | LabIcons (CC-BY-4.0)、bioicons 中 CC-BY 图标、tikz-chemlab / pst-labo (LPPL) | 逐资产署名清单；图注 / 致谢页注明 |
 | **相同方式共享（SA）** | ord-data (CC-BY-SA-4.0) | **独立公开仓 `data-ord/` 物理分离**，主仓仅 submodule；衍生规则表单独署名并保留 SA 声明；只抽取事实性反应式与条件 |

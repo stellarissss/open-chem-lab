@@ -52,15 +52,15 @@
 | 能力 | 设计要点 |
 |---|---|
 | **实验台唯一主视图** | 按实验室规格摆放真实器材：倾倒 / 加热 / 点燃 / 通电 / 密封加压 / 搅拌 / 过滤 / 滴定 / 称量 / 连接导管。**不做无限画布、不做落沙沙盒、不做双视图融合** |
-| **出版级写实 2D** | 以 `tikz-chemlab` 编译输出 SVG 为主资产，`@itkdm/open-lab-components` 为辅；3D **只用于分子 / 晶体 / 球棍模型**（3Dmol.js），程序化 3D 器材降级为可选长线、不进 M1 |
-| **服务端动态定量求解** | 静态已验证参数（Ka/Kb/Ksp/E°/ΔG、热物性）+ 动态实时求解（SUNDIALS CVODES / SciPy / ChemPy / pyequion2 / Cantera / **Reaktoro**）；弱反应、可逆、电离、水解、隐藏反应**都真实发生**，不是脚本动画 |
+| **出版级写实 2D** | 以 `tikz-chemlab` 编译输出 SVG 为唯一主资产；`@itkdm/open-lab-components` 仅作 **UI / 缩略图**、不进写实主视图；3D **只用于分子 / 晶体 / 球棍模型**（3Dmol.js），程序化 3D 器材降级为可选长线、不进 M1 |
+| **服务端动态定量求解** | 静态已验证参数（Ka/Kb/Ksp/E°/ΔG、热物性）+ 动态实时求解（**phreeqpython 主引擎** / SciPy LSODA·BDF / `chempy` 对拍 / Cantera / **reaktoro-service 独立微服务**）；弱反应、可逆、电离、水解、隐藏反应**都真实发生**，不是脚本动画 |
 | **隐藏化学态可查** | 每容器维护 `solution_speciation`：分子、离子、络合、沉淀、浓度、活度、电离度、反应进度；提供**容器物种面板 + 微观视图 + 时间轴回放** |
 | **数值零错 · 视觉可夸张** | 红线：反应方向、产物、计量、守恒、平衡趋势、pH / 浓度数值必须准确；允许夸张粒子密度、色彩、冲击波、慢放、音效与现象编排；**近似规则不得进入化学事实层** |
 | **1000 个完全仿真反应下限** | 含弱 / 可逆 / 电离 / 水解，长线不封顶；**凡进资料卡必须可玩**，每个新增物质必须可玩；PubChem 降级为离线候选池，不堆不可玩资料卡 |
 | **四类好玩载体** | 错误操作后果、涌现与发现、图鉴与进度、装置建造 —— 全部在实验台范式内落地（涌现靠真实反应组合，装置建造=真实器材连接） |
 | **严格真实库 · 无工坊** | 不接受任何虚构物质、用户自制物质、自定义规则、MOD 或规则包工坊 |
 | **容器内 WASM 现象表现** | WASM 只负责容器内粒子 / 物理即时渲染（液体、气泡、沉淀、火焰、飞溅）与求解加速；求解、物种分布、规则、存档**全在服务端** |
-| **SP-1 自适应定量调度** | 复用 SUNDIALS CVODES 自适应步长与刚性检测、借鉴 Significance Manager 关注度范式；按 16.7ms 帧预算动态分配算力给正在观察的过程，60fps 与定量求解解耦 |
+| **SP-1 自适应定量调度** | 复用 **SciPy LSODA/BDF 内置 Adams↔BDF 自动刚性切换**（局部误差 + `rtol`/`atol`，不硬编码阈值）、借鉴 Significance Manager 关注度范式；按 16.7ms 帧预算动态分配算力给正在观察的过程，60fps 与定量求解解耦 |
 | **前后端常驻 · 双平台** | 本地服务器前后端常驻，**废弃「断网可玩」**；硬约束 **Windows + Linux 双平台兼容**（CRLF/LF、路径、大小写、卷挂载、WSL2/Docker Desktop） |
 | **教学层后置长线** | 核心玩法为绝对主体；教学功能作为附加内容整体后置，**不进 M1–M3 验收**；内容按课标知识点组织、标注多版本教材对应章节 |
 
@@ -79,7 +79,7 @@ flowchart TB
   end
   subgraph S[服务端 · 常驻（本地服务器）]
     GW[API 网关 REST / WS]
-    SOLVE[动态定量求解器<br/>CVODES / SciPy / ChemPy / pyequion2<br/>Cantera / Reaktoro(动态链接)]
+    SOLVE[动态定量求解器<br/>phreeqpython(主) / SciPy LSODA / chempy(对拍)<br/>Cantera / reaktoro-service(UDS)]
     SPEC[物种分布 / 平衡 / 动力学 / 时间轴]
     RULES[(真实反应库<br/>静态已验算参数 + 条件 + 来源/置信度)]
     SAVE[(轻量存档 + 关键快照回放)]
@@ -90,7 +90,7 @@ flowchart TB
   subgraph D[内容与资产]
     CONTENT[人工精校真实反应库<br/>权威源 + AI 对拍 + 用户签核]
     ORD[data-ord 独立仓 CC-BY-SA-4.0<br/>主仓仅 submodule 引用]
-    ART[tikz-chemlab 输出物 / open-lab-components<br/>ASSETS.csv 逐项署名]
+    ART[tikz-chemlab 输出物(写实主资产)<br/>open-lab-components(UI/缩略图) · ASSETS.csv 署名]
     CONTENT --> RULES
     ORD -.事实性反应式.-> RULES
     ART --> UI
@@ -106,12 +106,12 @@ flowchart TB
 
 | 层 | 主力开源组件 | 许可证 |
 |---|---|---|
-| 定量求解 | **SUNDIALS CVODES**、SciPy、ChemPy、pyequion2、Cantera、**Reaktoro**（动态链接） | BSD-3 / BSD-2 / LGPL-2.1 |
+| 定量求解 | **phreeqpython**（主，Apache-2.0）、**SciPy LSODA/BDF**、chempy（对拍，BSD-2）、Cantera（BSD-3）、pyequion2（BSD-3）、**reaktoro-service**（独立微服务，LGPL-2.1） | Apache-2.0 / BSD-2 / BSD-3 / LGPL-2.1 |
 | 化学信息学 | RDKit / RDKit.js MinimalLib、Kekule.js、SmilesDrawer、openchemlib-js | BSD-3 / MIT |
 | 物性数据 | chemicals、thermo、CoolProp | MIT |
 | 分子 3D | 3Dmol.js（M0 复核） | BSD-3 |
 | 前端 | React、PixiJS、Vite、Zustand、Lucide / Tabler | MIT / ISC |
-| 美术资产 | **tikz-chemlab**（主，LPPL 输出物）、open-lab-components（辅，MIT）、LabIcons、bioicons | 逐项见资产管线 |
+| 美术资产 | **tikz-chemlab**（写实主资产，LPPL 输出物）、open-lab-components（**仅 UI / 缩略图**，MIT）、LabIcons、bioicons | 逐项见资产管线 |
 | 数据 | PubChem（候选池）、Open Reaction Database（独立仓） | 免费公开 / CC-BY-SA-4.0 |
 
 > **许可证红线**：主项目 **LGPL-3.0**；宽松许可与 LGPL 组件按 §4/§6 义务接入（Reaktoro 动态链接 + 运行时可替换）；**AGPL（tptmp）严格隔离**；**GPL-3.0 组件（The Powder Toy、PhET、H5P core）在许可证层面虽与 LGPLv3 兼容，但依选型决策不纳入主链**，仅作只读参考；CC-BY-SA 数据（ORD）独立仓物理分离；LPPL 只用编译输出物、宏包源码不入库。详见 [合规矩阵](docs/design/07-API契约与部署.md)、[ADR-0001](docs/adr/ADR-0001-主许可证选LGPL-3.0.md) 与 [ADR-0005](docs/adr/ADR-0005-许可证边界与数据隔离.md)。
@@ -150,7 +150,7 @@ flowchart TB
 ```bash
 # 1. 通读顺序：CHARTER.md → docs/11-问题与决策台账.md → docs/README.md
 # 2. 基座验证（M0 清单见 docs/10-完整规划与风险登记册.md 第五节）
-#    - SUNDIALS / ChemPy / Cantera / pyequion2 定量求解链路
+#    - phreeqpython / SciPy LSODA / Cantera / chempy(对拍) / reaktoro-service 定量求解链路
 #    - tikz-chemlab 输出物 → SVG 转译（只取编译产物，不 fork 源码）
 #    - Windows + Linux 双平台最小部署
 # 3. 许可证：LICENSE + LICENSE.GPL-3 + LICENSE.LGPL-3 三份文件构成完整交付

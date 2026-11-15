@@ -42,7 +42,7 @@
   "playable": true,
   "source": {"type": "nist_crc", "ref": "CRC Handbook 97th, …", "url": "…", "fetched_at": "2026-11-14"},
   "confidence": "verified",
-  "review": {"ai_crosscheck": "chempy/0.9.1 ΔpH < 1e-6", "signed_by": "stellarissss", "signed_at": "2026-11-14"}
+  "review": {"ai_crosscheck": "chempy/0.10.2 + phreeqpython/1.6.2 ΔpH < 1e-6", "signed_by": "stellarissss", "signed_at": "2026-11-14"}
 }
 ```
 
@@ -114,6 +114,7 @@ applicability:
 
 # —— 数值与调度（呼应 ADR-0008）——
 numerics: {rtol: 1e-8, atol: 1e-10, stiffness: auto, significance: auto}
+# stiffness: auto → SciPy LSODA 自动刚性检测（Adams↔BDF）；CVODES 后置 M1 可选加速（D3）
 
 # —— 现象指令（不是渲染代码）——
 effects:
@@ -131,7 +132,7 @@ source:
   url: null
   reviewed_by: "stellarissss"
   reviewed_at: "2026-11-14"
-ai_crosscheck: {tool: "chempy/0.9.1 + cantera/3.0", result: "pH(eq)=7.00, ΔT=+16.0K", match: true}
+ai_crosscheck: {tool: "independent-analytic + chempy/0.10.2 + phreeqpython/1.6.2 + cantera/3.2.0", result: "pH(eq)=7.00, ΔT=+16.0K", match: true}
 curriculum:
   knowledge_points: ["酸碱中和", "离子反应", "放热反应"]
   stages: ["初中"]
@@ -263,7 +264,7 @@ smarts: "[Cl-].[Na+].[OH-].[H+]>>[Cl-].[Na+].O"
 flowchart LR
   A[权威源<br/>NIST / CRC / IUPAC / 课标附录 / 开放教材] --> B[人工精校参数<br/>content/rules/*.yaml]
   ORD[data-ord 独立仓<br/>CC-BY-SA-4.0 只取事实性反应式] -.->|confidence: extracted| B
-  B --> C[AI 独立对拍<br/>ChemPy / Cantera 复算]
+  B --> C[AI 独立对拍<br/>独立解析解 + ChemPy / phreeqpython / Cantera 复算]
   C --> D[用户人工签核<br/>confidence: verified]
   D --> E[CI 黄金用例<br/>数值零错断言]
   E --> F[(真实反应库<br/>静态参数层)]

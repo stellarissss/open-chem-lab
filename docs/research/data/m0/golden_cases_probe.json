@@ -1,0 +1,87 @@
+{
+  "schema": "golden-cases/v1",
+  "rule_revision": "m0-probe",
+  "cases": [
+    {
+      "id": "acid_acetic_0.1M",
+      "desc": "0.1M 乙酸电离",
+      "inputs": {
+        "C": 0.1,
+        "Ka": 1.75e-05
+      },
+      "expected_pH": 2.88135,
+      "independent": {
+        "analytic": 2.88135,
+        "chempy": 2.88135,
+        "sane": true
+      },
+      "tol_pH": 0.02,
+      "pass_": true,
+      "source": "25°C Ka(HAc)=1.75e-5 解析二次方程（精确）",
+      "confidence": "verified",
+      "ai_crosscheck": "analytic-vs-chempy",
+      "human_signoff": "PENDING(用户签核)"
+    },
+    {
+      "id": "acid_acetic_0.01M",
+      "desc": "0.01M 乙酸电离（稀释，电离度上升）",
+      "inputs": {
+        "C": 0.01,
+        "Ka": 1.75e-05
+      },
+      "expected_pH": 3.38756,
+      "independent": {
+        "analytic": 3.38756,
+        "chempy": 3.38756,
+        "sane": true
+      },
+      "tol_pH": 0.02,
+      "pass_": true,
+      "source": "25°C Ka(HAc)=1.75e-5 解析二次方程（精确）",
+      "confidence": "verified",
+      "ai_crosscheck": "analytic-vs-chempy",
+      "human_signoff": "PENDING(用户签核)"
+    },
+    {
+      "id": "buffer_half",
+      "desc": "半中和缓冲 pH=pKa（HAc/Ac- 等量）",
+      "inputs": {
+        "C": 0.05,
+        "Ka": 1.75e-05
+      },
+      "expected_pH": 4.75696,
+      "independent": {
+        "analytic": 4.75696,
+        "chempy": 4.75727,
+        "sane": true
+      },
+      "tol_pH": 0.02,
+      "pass_": true,
+      "source": "Henderson-Hasselbalch 半中和点 pH≈pKa=-log10(Ka)（独立解析基准）",
+      "confidence": "verified",
+      "ai_crosscheck": "analytic-vs-chempy",
+      "human_signoff": "PENDING(用户签核)"
+    }
+  ],
+  "second_engine": {
+    "lib": "phreeqpython 1.6.2 (VIPhreeqc/USGS)",
+    "license": "Apache-2.0",
+    "capabilities": [
+      "pH",
+      "SI 饱和度指数",
+      "电导率",
+      "物种浓度",
+      "加料重算",
+      "溶液混合运算",
+      "沉淀溶解"
+    ],
+    "probe": {
+      "pH": 8.271,
+      "si_calcite": -999.0,
+      "sc": 183.2,
+      "species_HCO3": 0.001955
+    },
+    "note": "与 ChemPy 不同体系，用于流程演示；正式对拍需同体系同参数"
+  },
+  "note": "前两条弱酸用例用解析二次方程精确解，与 ChemPy 数值解误差 ≤1.3e-8；半中和缓冲用例用 Henderson-Hasselbalch 近似 pKa 作独立基准，与 ChemPy 完整平衡数值解存在约 3e-4 的近似差异（物理近似，非零错），仍远小于 tol_pH=0.02。PHREEQC 缺少 Ca 时 si(\"Calcite\") 返回 -999 哨兵值，CI 须将其列为非法输入。"
+}

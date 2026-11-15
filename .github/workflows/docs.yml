@@ -35,7 +35,11 @@ jobs:
           test -f docs/design/01-总体架构.md
           test -f docs/adr/ADR-0006-静态参数层与动态求解层.md
           test -f docs/adr/ADR-0008-自适应定量调度.md
-          echo "核心文档与决策台账齐全"
+          test -f docs/adr/ADR-0009-M0实测驱动的选型调整.md
+          test -f docs/12-阶段二开发流程.md
+          test -f docs/research/04-M0验证报告.md
+          test -f docs/research/data/m0/INDEX.json
+          echo "核心文档、决策台账与阶段二主交付物齐全"
 
       - name: 校验 LGPL-3.0 双文本许可证交付
         run: |
@@ -80,6 +84,19 @@ jobs:
           head -6 "docs/research/data/开源化学沙盒实验室_调研与二次开发方案.md" | grep -q "历史归档"
           head -6 "docs/research/data/NB实验室功能调研报告.md" | grep -q "历史归档"
           echo "历史归档标识齐全"
+
+      - name: 阶段二口径回归检查（防止旧选型回退）
+        run: |
+          grep -q "phreeqpython" CHARTER.md
+          grep -q "pdftocairo -svg" tools/asset-pipeline/README.md
+          grep -q "reaktoro-service" docs/design/07-API契约与部署.md
+          if grep -q "M0 二选一" docs/design/05-工程结构与路径.md; then
+            echo "::error::网关二选一旧口径残留"; exit 1
+          fi
+          if grep -q "dvisvgm --pdf --font-format" tools/asset-pipeline/README.md; then
+            echo "::error::DVI→dvisvgm 旧转换命令仍作为推荐命令"; exit 1
+          fi
+          echo "阶段二口径回归检查通过"
 
 # 后续（M0/M1）补充的门禁见 docs/design/05：
 #   license-scan / lgpl-link-check / schema-validate / rule-lint

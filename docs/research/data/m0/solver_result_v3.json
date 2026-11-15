@@ -1,0 +1,216 @@
+{
+  "date": "2026-11-15",
+  "python": "3.11.1",
+  "cases": [
+    {
+      "case": "0.1M 乙酸 pH",
+      "lib": "ChemPy",
+      "expected": 2.8814,
+      "got": 2.8814,
+      "unit": "pH",
+      "abs_err": 0.0,
+      "tol": 0.02,
+      "pass_": true,
+      "ms": 536.142,
+      "note": "非线性平衡 + 元素守恒"
+    },
+    {
+      "case": "0.1M 乙酸电离度",
+      "lib": "ChemPy",
+      "expected": 0.013142,
+      "got": 0.013142,
+      "unit": "frac",
+      "abs_err": 0.0,
+      "tol": 0.0001,
+      "pass_": true,
+      "ms": 0,
+      "note": "由守恒自动满足"
+    },
+    {
+      "case": "0.1M 乙酸钠水解 pH",
+      "lib": "ChemPy",
+      "expected": 8.8785,
+      "got": 8.8785,
+      "unit": "pH",
+      "abs_err": 0.0,
+      "tol": 0.05,
+      "pass_": true,
+      "ms": 27.391,
+      "note": "Ac-+H2O⇌HAc+OH-"
+    },
+    {
+      "case": "半中和缓冲 pH=pKa",
+      "lib": "ChemPy",
+      "expected": 4.757,
+      "got": 4.758,
+      "unit": "pH",
+      "abs_err": 0.001000000000000334,
+      "tol": 0.02,
+      "pass_": true,
+      "ms": 18.035,
+      "note": "Henderson-Hasselbalch"
+    },
+    {
+      "case": "AgCl 饱和 [Ag+]",
+      "lib": "ChemPy",
+      "expected": 1.33e-05,
+      "got": 1.33e-05,
+      "unit": "M",
+      "abs_err": 0.0,
+      "tol": 2e-06,
+      "pass_": true,
+      "ms": 11.498,
+      "note": "Ksp 平衡 + 守恒"
+    },
+    {
+      "case": "AgCl 沉淀生成量",
+      "lib": "ChemPy",
+      "expected": 0.05,
+      "got": 0.05,
+      "unit": "M",
+      "abs_err": 0.0,
+      "tol": 0.001,
+      "pass_": true,
+      "ms": 0,
+      "note": "等量混合应近完全沉淀"
+    },
+    {
+      "case": "0.1M NaCl pH",
+      "lib": "pyequion2",
+      "expected": 7.0,
+      "got": 6.98,
+      "unit": "pH",
+      "abs_err": 0.019999999999999574,
+      "tol": 0.3,
+      "pass_": true,
+      "ms": 23.25,
+      "note": "Debye-Hückel 活度"
+    },
+    {
+      "case": "0.1M NaCl 离子强度",
+      "lib": "pyequion2",
+      "expected": 0.1,
+      "got": 0.1,
+      "unit": "mol/kgw",
+      "abs_err": 0.0,
+      "tol": 0.02,
+      "pass_": true,
+      "ms": 0,
+      "note": "I=½Σm·z²"
+    },
+    {
+      "case": "一级动力学 RK45",
+      "lib": "SciPy",
+      "expected": 0.367879,
+      "got": 0.367879,
+      "unit": "M",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 1.354,
+      "note": "nfev=92"
+    },
+    {
+      "case": "一级动力学 LSODA",
+      "lib": "SciPy",
+      "expected": 0.367879,
+      "got": 0.367879,
+      "unit": "M",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 0.919,
+      "note": "nfev=69"
+    },
+    {
+      "case": "一级动力学 BDF",
+      "lib": "SciPy",
+      "expected": 0.367879,
+      "got": 0.367879,
+      "unit": "M",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 6.344,
+      "note": "nfev=102"
+    },
+    {
+      "case": "一级动力学 Radau",
+      "lib": "SciPy",
+      "expected": 0.367879,
+      "got": 0.367879,
+      "unit": "M",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 9.292,
+      "note": "nfev=309"
+    },
+    {
+      "case": "甲烷绝热火焰温度",
+      "lib": "Cantera",
+      "expected": 2220,
+      "got": 2226.0,
+      "unit": "K",
+      "abs_err": 6.0,
+      "tol": 150,
+      "pass_": true,
+      "ms": 68.145,
+      "note": "GRI30 HP 平衡（量级校验）"
+    },
+    {
+      "case": "PHREEQC 中性盐 pH",
+      "lib": "phreeqpython",
+      "expected": 7.0,
+      "got": 7.0,
+      "unit": "pH",
+      "abs_err": 0.0,
+      "tol": 0.3,
+      "pass_": true,
+      "ms": 0.155,
+      "note": "独立引擎（AI 对拍候选）"
+    }
+  ],
+  "stiffness": [
+    {
+      "method": "RK45",
+      "nfev": 42500,
+      "ms": 259.25,
+      "success": true
+    },
+    {
+      "method": "LSODA",
+      "nfev": 262,
+      "ms": 1.48,
+      "success": true
+    },
+    {
+      "method": "BDF",
+      "nfev": 548,
+      "ms": 21.24,
+      "success": true
+    },
+    {
+      "method": "Radau",
+      "nfev": 1194,
+      "ms": 30.71,
+      "success": true
+    }
+  ],
+  "libs": {
+    "cantera": "3.2.0",
+    "chempy": "0.10.2",
+    "pyequion2": "0.0.6.3",
+    "phreeqpython": "1.6.2",
+    "chemicals": "1.5.2",
+    "thermo": "0.6.1",
+    "CoolProp": "8.0.0",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "sympy": "1.14.0"
+  },
+  "summary": {
+    "pass": 14,
+    "total": 14
+  }
+}

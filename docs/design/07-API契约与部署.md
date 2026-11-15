@@ -60,13 +60,14 @@ Redis LRU；稳态冻结后复用（SP-1 第 4 层）；事件（加料 / 加热
 |---|---|---|---|
 | `web` | 80 | Nginx 静态前端 + 写实 2D 资产 | 必需 |
 | `gateway` | 3000 | REST + WS + 鉴权 | 必需 |
-| `solver-worker` | 内部 | Python 动态定量求解（独立 worker，资源隔离） | 必需 |
+| `solver-worker` | 内部 | Python 3.11 + **phreeqpython 主引擎** / SciPy LSODA·BDF / Cantera / chempy 对拍（独立 worker，资源隔离） | 必需 |
+| `reaktoro-service` | 内部 UDS | conda 镜像 + Reaktoro（LGPL-2.1 动态链接）；多相 / 固相 / 气相、高温高压、燃烧爆炸平衡终态与复杂体系，按需路由（D2 / D2-补） | 按需启用 |
 | `postgres` | 5432 | 主库（参数 / 存档 / 时间轴） | 必需 |
 | `redis` | 6379 | 缓存 / 会话 | 必需（单机可内嵌） |
 | `minio` | 9000 | 存档 / 快照 / 资产 | 单机用本地卷 |
 | `caddy` | 443 | 反代 + 自动 HTTPS | 可选 |
 
-> 单机 / 多机 / 公共 Demo 形态**延后到阶段二决策**（台账 9.1「到时候再说」）；本章只保证「前后端常驻本地服务器 + 双平台兼容」。
+> **D6 已锁定「单机自托管」**（台账 §9.1）：上述服务全部运行在单台本地服务器的一个 Compose 项目内，`reaktoro-service` 经本机 UDS / 回环通讯，不引入多机。多机横向扩展与公共 Demo 后置长线。本章保证「前后端常驻本地服务器 + Win + Linux 双平台兼容」。
 
 ### 2.2 自托管步骤（M1 交付，双平台各给一套）
 
@@ -99,7 +100,7 @@ docker compose -f deploy/docker-compose.minimal.yml up -d
 | 文件权限 | 容器以非 root 运行；不依赖宿主 umask | M0 验证 |
 | 端口占用 | `.env` 可配置所有端口；检查 Windows 常见占用 | M0 验证 |
 | TeX 转换管线 | 全程在 Docker 内执行，不依赖宿主 TeX 发行版 | M0 验证 |
-| 求解库二进制 | Reaktoro 动态链接库按平台分别构建 / 拉取对应 wheel 或镜像 | M0 验证 |
+| 求解库二进制 | `reaktoro-service` 使用 conda-forge 镜像（Reaktoro 仅 conda 分发）；LGPL-2.1 动态链接库在镜像内可替换 | M1 补验 |
 
 ### 2.4 环境要求
 
@@ -164,7 +165,7 @@ docker compose -f deploy/docker-compose.minimal.yml up -d
 
 | 对象 | 许可证 | 义务 | 落地 |
 |---|---|---|---|
-| **Reaktoro** | **LGPL-2.1** | **动态链接 + 运行时可替换 + 显著声明 + 附 LGPL 全文 + 允许逆向调试 + 修改版源码可得**（§6 / §4） | 不静态编入主二进制；`NOTICE` 第 2 节；CI `lgpl-link-check` |
+| **reaktoro-service（Reaktoro）** | **LGPL-2.1** | **独立微服务 + 动态链接 + 运行时可替换 + 显著声明 + 附 LGPL 全文 + 允许逆向调试 + 修改版源码可得**（§6 / §4） | conda 镜像内不静态编入二进制；经 UDS/protobuf 与主进程通讯；`NOTICE` 第 2 节；CI `lgpl-link-check` 校验服务镜像；**进程隔离不免除义务**（D2） |
 | **tikz-chemlab 宏包源码** | LPPL-1.3c | 不改源码、不随产品分发；只转译**编译输出物**（Clause 1）；若改源码须按 Clause 6 改名 + 变更日志 + 附原件 | 构建期从 CTAN 拉取，源码不入库；`ASSETS.csv` 署名五作者 |
 | **ord-data** | CC-BY-SA-4.0（数据）/ Apache-2.0（脚本） | 署名 + **相同方式共享** | **`data-ord/` 独立公开仓物理分离**，主仓仅 submodule；衍生规则标溯源；只抽事实性反应式 |
 | **LabIcons** | CC-BY-4.0 | 署名 Manon Zuurmond，注明改动 | About 页 + 图注 + `ASSETS.csv` |
@@ -203,7 +204,7 @@ docs-and-compliance
 |---|---|---|
 | 帧预算 | **16.7ms / 帧（60fps）**，表现层固定独立渲染 | ADR-0008 |
 | 求解算力 | 按**关注度分数**动态配额；焦点内高频高精度、焦点外降频 / 粗粒度 / 冻结 / 缓存 | SP-1 第 2 层 |
-| 数值自适应 | CVODES 局部误差 + `rtol`/`atol` 决定步长；刚性检测自动切 BDF ↔ Adams；**无硬编码时间阈值** | SP-1 第 1 层 |
+| 数值自适应 | **SciPy LSODA/BDF** 局部误差 + `rtol`/`atol` 决定步长；内置刚性检测自动切 BDF ↔ Adams；**无硬编码时间阈值**（CVODES 后置 M1 可选加速） | SP-1 第 1 层 / D3 |
 | 表现解耦 | 求解结果以「物种分布快照 + 时间戳」异步喂入，插值 / 外推平滑；**求解耗时不进入帧预算** | SP-1 第 3 层 |
 | 事件唤醒 | 加料 / 加热 / 改参数 / pH 突变 / 时间轴跳转立即重算；稳态冻结复用缓存 | SP-1 第 4 层 |
 | 带宽 | 服务端只推「快照 + 现象指令」，不推网格数据 | 表现解耦 |

@@ -1,0 +1,113 @@
+{
+  "cases": [
+    {
+      "case": "0.05M NaCl pH",
+      "expected": 7.0,
+      "got": 7.0,
+      "unit": "pH",
+      "abs_err": 0.0,
+      "tol": 0.15,
+      "pass_": true,
+      "ms": 0.228,
+      "note": "中性盐"
+    },
+    {
+      "case": "官方示例 pH",
+      "expected": 8.12,
+      "got": 8.123,
+      "unit": "pH",
+      "abs_err": 0.0030000000000001137,
+      "tol": 0.02,
+      "pass_": true,
+      "ms": 0.389,
+      "note": "CaCl2+NaHCO3 (mmol)"
+    },
+    {
+      "case": "官方示例 sc",
+      "expected": 427.32,
+      "got": 427.01,
+      "unit": "uS/cm",
+      "abs_err": 0.3100000000000023,
+      "tol": 1.0,
+      "pass_": true,
+      "ms": 0,
+      "note": "电导率"
+    },
+    {
+      "case": "官方示例 SI(Calcite)",
+      "expected": 0.38,
+      "got": 0.384,
+      "unit": "SI",
+      "abs_err": 0.0040000000000000036,
+      "tol": 0.02,
+      "pass_": true,
+      "ms": 0,
+      "note": "饱和度指数"
+    },
+    {
+      "case": "官方示例 HCO3-",
+      "expected": 0.0019,
+      "got": 0.001921,
+      "unit": "mol/kgw",
+      "abs_err": 2.099999999999997e-05,
+      "tol": 0.0001,
+      "pass_": true,
+      "ms": 0,
+      "note": "物种浓度"
+    },
+    {
+      "case": "官方示例 总 Cl",
+      "expected": 0.002,
+      "got": 0.002,
+      "unit": "mol",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 0,
+      "note": "元素总量"
+    },
+    {
+      "case": "加 NaOH 后 pH",
+      "expected": 9.47,
+      "got": 9.474,
+      "unit": "pH",
+      "abs_err": 0.0039999999999995595,
+      "tol": 0.02,
+      "pass_": true,
+      "ms": 0.931,
+      "note": "加料/事件唤醒重算"
+    },
+    {
+      "case": "desaturate 后总 Ca",
+      "expected": 0.000497,
+      "got": 0.000497,
+      "unit": "mol",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 0,
+      "note": "沉淀溶解"
+    },
+    {
+      "case": "50/50 混合总 K",
+      "expected": 0.0005,
+      "got": 0.0005,
+      "unit": "mol",
+      "abs_err": 0.0,
+      "tol": 1e-05,
+      "pass_": true,
+      "ms": 0.532,
+      "note": "溶液混合运算"
+    }
+  ],
+  "note": "add_solution_simple 默认单位 mmol（官方源码确认）；此前 1/5 系误用 mol 所致",
+  "summary": {
+    "pass": 9,
+    "total": 9
+  },
+  "deps": {
+    "phreeqpython": 3,
+    "chempy": 46,
+    "cantera": 6
+  }
+}

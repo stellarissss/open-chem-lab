@@ -13,14 +13,14 @@
 
 ## 背景
 
-用户指定美术资产须来自开源项目，点名 `tikz-chemlab`（LaTeX 宏包，需转换）与 `@itkdm/open-lab-components`（React/HTML 组件），并授权「找更好的」。
+用户指定美术资产须来自开源项目，点名 `tikz-chemlab`（LaTeX 宏包，需转换）与 `@itkdm/open-lab-components`（**M0 核实为 HTML fragment 库，非 React**），并授权「找更好的」。
 
 核实结果（2026-11-14）：
 
 | 项目 | 真实情况 |
 |---|---|
 | `aihua/tikz-chemlab` | v1.0.0，CTAN 收录，**LPPL-1.3c**，13 个参数化器材宏，是 `pst-labo` v2.07 的 TikZ 移植（原作者 Denis Girou / Christophe Jorssen / Manuel Luque / Herbert Voß）。GitHub API 显示「无许可证」是因无单独 LICENSE 文件，**CTAN 与 README 均明确 LPPL-1.3c** |
-| `@itkdm/open-lab-components` | MIT，★10（快照），npm v0.1.1，**213+ 组件 / 41 分类**，化学相关 **37 个**（26 器材 + 5 交互反应 + 模型 / 气体 / 溶液）。零依赖 HTML fragment + JS API + Registry + MCP Server |
+| `@itkdm/open-lab-components` | MIT，★10（快照），npm v0.1.1，**210 组件 / 化学相关 35 个**。M0 实测：零依赖 **HTML fragment 库**（`index.js` 提供 `list/get/readSync/load`），SVG + 14 个 `--cmp-*` CSS 变量，简笔示意风无渐变 / 高光 |
 
 **LPPL 1.3c 条款原文核实**（latex-project.org）：
 
@@ -37,7 +37,7 @@
 | 需求 | 来源 | 角色 |
 |---|---|---|
 | 写实器材与组合装置（滴定 / 蒸馏 / 回流，出版级线条） | **`tikz-chemlab` 13 宏 → 编译输出物转 SVG** | **主资产** |
-| 辅助器材 / 交互组件 | `@itkdm/open-lab-components` 化学相关组件（薄 React 包装，不改写 213 个 fragment） | **辅资产**（与写实主调不冲突时才用） |
+| UI 元素 / 缩略图 | `@itkdm/open-lab-components` 化学相关组件（CSS 变量注入或 Web Component 封装） | **仅 UI / 缩略图（D8）**，不进实验台写实主视图 |
 | 结构式 / 分子 3D | SmilesDrawer / Kekule.js / RDKit.js / **3Dmol.js**（运行时生成，不做静态资产） | 运行时 |
 | UI 图标 | Lucide (ISC) / Tabler (MIT) | — |
 | 高阶仪器插画 | LabIcons (CC-BY-4.0，署名 Manon Zuurmond) | 需署名 |
@@ -48,7 +48,8 @@
 ### 2. LPPL 输出物策略（关键，不变）
 
 ```
-构建期：从 CTAN 拉取源码 → standalone 编译 → dvisvgm/pdf2svg → SVG
+构建期：从 CTAN 拉取源码 → `lualatex` 编译为 PDF → `pdftocairo -svg` → `svgo` → SVG
+（M0 实测：DVI→dvisvgm 与 `dvisvgm --pdf` 双路径均失败，此链为唯一可行路径，D5）
    → 只有 SVG 产物进 assets/，宏包源码不入库、不随产品分发
 仓库内：只保留生成脚本 + 器材参数表 + SVG 产物 + 署名
 ```
@@ -82,8 +83,8 @@ tikz-chemlab 的「参数化」保留在**构建期**（批量生成不同液位
 
 ## 待 M0 验证 / 未决
 
-1. `dvisvgm --pdf` vs `pdf2svg` 对 TikZ 渐变 / 图案的保真度（择优）。
+1. ~~`dvisvgm --pdf` vs `pdf2svg` 保真度择优~~ → **M0 已实测销项**：改用 `pdftocairo -svg`，产物纯路径、零字体依赖、21 clipPath、液位可控（D5）。
 2. 液体层能否拆出；若不可，用 `clipPath` 遮罩兜底。
-3. open-lab-components 组件视觉质量与写实主调的兼容性、StrictMode 双挂载。
+3. ~~open-lab-components 写实主调兼容性、StrictMode 双挂载~~ → **M0 已实测销项**：非 React、简笔示意风与写实主调冲突，D8 限定仅 UI / 缩略图；StrictMode 验收项作废。
 4. Kenney 资产包内 LICENSE 是否确为 CC0 1.0（仅取通用音效 / 粒子贴图）。
 5. **法务确认（商业化前）**：LPPL 输出物商用边界 —— 本 ADR 是工程判断，非法律意见。
