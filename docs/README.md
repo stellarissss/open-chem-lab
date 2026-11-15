@@ -1,7 +1,7 @@
 # 文档索引 · Documentation Index
 
-> 仓库当前处于**第二阶段：可行性验证 / M0**（第一阶段规划与设计已收口、全仓已按台账修订）。本阶段不写产品代码，只消解不确定性；文档与可重跑实测数据即主要交付物。
-> **阅读顺序**：`../CHARTER.md` → **`11-问题与决策台账.md`（决策单一事实源）** → 本页 → `10-完整规划与风险登记册.md` → `design/` → `adr/` → `research/`；进入阶段二再读 `12-阶段二开发流程.md` → `research/04-M0验证报告.md` → `research/data/m0/`。
+> **第二阶段（可行性验证 / M0）已于 2026-11-15 正式结束**，M0 十项验证的技术不确定性全部消解；下一阶段为 M1 垂直切片（阶段三）。第一阶段规划与设计已收口、全仓已按台账修订。阶段二不写产品代码、只消解不确定性；文档与可重跑实测数据即主要交付物。
+> **阅读顺序**：`../CHARTER.md` → **`11-问题与决策台账.md`（决策单一事实源）** → 本页 → `10-完整规划与风险登记册.md` → `design/` → `adr/` → `research/`；阶段二再读 `12-阶段二开发流程.md` → `research/04-M0验证报告.md`（含 §8 阶段二结束判定）→ `research/data/m0/` → `deploy/README-windows.md`。
 
 ## 阅读顺序
 
@@ -20,9 +20,13 @@
 
 | 顺序 | 文档 | 用途 |
 |---|---|---|
-| 8 | [12-阶段二开发流程.md](12-阶段二开发流程.md) | **阶段二流程基准**：九步闭环 S1–S9、质量闸门、偏差分级 L0/L1/L2、调研方法、实测记录规范 |
-| 9 | [research/04-M0验证报告.md](research/04-M0验证报告.md) | **阶段二主交付物**：M0 十项验证逐项实测结论、事实销项、偏差登记、D1–D8 待决策清单（快照 2026-11-15） |
+| 8 | [12-阶段二开发流程.md](12-阶段二开发流程.md) | **阶段二流程基准**：九步闭环 S1–S9、质量闸门、偏差分级 L0/L1/L2、调研方法、实测记录规范；末尾含阶段二收束 |
+| 9 | [research/04-M0验证报告.md](research/04-M0验证报告.md) | **阶段二主交付物**：M0 十项验证逐项实测结论、事实销项、偏差登记、D1–D8 裁决、**§5.5–§5.7 收尾补验（C1–C6）**、**§8 阶段二结束判定**（快照 2026-11-15） |
 | 10 | [`research/data/m0/`](research/data/m0/INDEX.json) | M0 最小测试脚本与原始 JSON（三组脚本/结果成对、可重跑复现；配对登记见 `INDEX.json`） |
+| 11 | [`research/data/m0/s2_completion_result.json`](research/data/m0/s2_completion_result.json) | 阶段二收尾补验 C1–C6 结构化结论（WASM / WebGL / CC0 / LGPL §6 / Windows / CI） |
+| 12 | [`research/data/m0/RERUN.md`](research/data/m0/RERUN.md) | 全部补验的复跑步骤（WASM 编译 + bench、Xvfb WebGL、reaktoro 单包、门禁） |
+| 13 | [`research/data/m0/verify_m0_s2.py`](research/data/m0/verify_m0_s2.py) | 可运行门禁：41 项断言（归档自洽 + 静态合规 + 补验证据链），已接入 CI |
+| 14 | [`deploy/README-windows.md`](../deploy/README-windows.md) | Windows / WSL2 侧可执行补验清单（官方要点 + 11 项逐条检查 + 已知坑） |
 
 ## design/ · 设计文档
 
@@ -59,8 +63,15 @@
 | [01-NB实验室对标分析.md](research/01-NB实验室对标分析.md) | 对手功能全解、能力基线、**当前已独有 / 目标超越维度 / 合规兜底**三层对照表、非关联声明 |
 | [02-开源生态全景与选型.md](research/02-开源生态全景与选型.md) | 候选项目 star/许可证/活跃度核实表、淘汰理由、求解器链、star 快照说明 |
 | [03-美术资产链.md](research/03-美术资产链.md) | 点名项目核实 + 更优候选 + 许可证陷阱 + 出版级写实主调下的转换可行性 |
-| [04-M0验证报告.md](research/04-M0验证报告.md) | **阶段二主交付物**：M0 十项验证实测结论、偏差登记、D1–D8 待决策清单（快照 2026-11-15） |
+| [04-M0验证报告.md](research/04-M0验证报告.md) | **阶段二主交付物**：M0 十项验证实测结论、偏差登记、D1–D8 裁决、收尾补验 C1–C6、§8 阶段二结束判定（快照 2026-11-15） |
+| [`data/m0/`](research/data/m0/INDEX.json) | M0 可重跑实测数据（含阶段二收尾补验产物），配 `RERUN.md` 与 `verify_m0_s2.py` |
 | [`data/`](research/data/README.md) | **历史归档 · 不作现行设计依据**：前两轮原始报告（`NB实验室功能调研报告.md`、`开源化学沙盒实验室_调研与二次开发方案.md`）与检索原始 JSON。初版方案整体作废，逐条对照见归档说明；引用须标「历史归档」 |
+
+## deploy/ · 部署清单
+
+| 文档 | 内容 |
+|---|---|
+| [README-windows.md](../deploy/README-windows.md) | Windows / WSL2 / Docker Desktop 侧可执行补验清单；Linux 侧已实测，Windows 实机受限但给出逐条检查与回填要求 |
 
 ## 约定
 

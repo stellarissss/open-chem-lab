@@ -73,6 +73,6 @@ python3 tools/asset-pipeline/check-attribution.py
 
 ## M0 已销项 / 待补验
 
-**已销项**：转换链保真度（D5）；液体层可拆性（21 个 clipPath + `liquidLevel1` 可控）；open-lab-components 组件形态与用途（D8，非 React、仅 UI / 缩略图）；3Dmol.js 许可证与 DOI（BSD-3 / `10.1093/bioinformatics/btu829`）；tikz-chemlab LPPL-1.3c。
+**已销项（M0 + 阶段二收尾补验）**：转换链保真度（D5）；液体层可拆性（21 个 clipPath + `liquidLevel1` 可控）；open-lab-components 组件形态与用途（D8，非 React、仅 UI / 缩略图）；3Dmol.js 许可证与 DOI（BSD-3 / `10.1093/bioinformatics/btu829`）；tikz-chemlab LPPL-1.3c；**Kenney 包内 LICENSE（F3）→ CC0 1.0**；**3Dmol.js 真实浏览器 WebGL 球棍渲染 → Xvfb + SwiftShader `hasGeometry=true`**（见 `04` §5.5–§5.6）。
 
-**待补验**：Kenney 资产包内 LICENSE 是否确为 CC0 1.0（**F3 未销项，当前禁止入库**）；13 个宏全量批量生成与单文件体积；**Windows + Linux 双平台** Docker 卷挂载与路径换行符一致性；3Dmol.js 真实浏览器 WebGL 渲染。
+**仍待办**：13 个宏全量批量生成与单文件体积（内容生产）；**Windows 实机** Docker 卷挂载与路径换行符一致性，按 [`deploy/README-windows.md`](../../deploy/README-windows.md) 在本机补跑并回填（静态规范核查已通过）。

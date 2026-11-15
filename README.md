@@ -36,16 +36,17 @@
 
 ---
 
-## 当前状态：第一阶段 · 规划与设计
+## 当前状态：第二阶段（可行性验证 / M0）已结束 · 进入 M1
 
-本仓库目前**以文档为主**，处于「先详细规划、再准确执行」的规划阶段。已完成：
+本仓库目前**以文档与可重跑实测数据为主**，遵循「先详细规划、再准确执行」。已完成：
 
 - 两轮跨源调研（NB 产品功能、全球开源生态、许可证、美术资产链、同类产品工程经验）
 - 仓库建立、许可证选型（**LGPL-3.0**）、目标与开发规范固化
 - 11 批决策问询与矛盾销项，形成 [问题与决策台账](docs/11-问题与决策台账.md)
 - 以台账为唯一标准完成全仓设计文档系统性修订，并通过二次矛盾审计
+- **第二阶段 M0 可行性核验全部收口**（2026-11-15）：十项验证的技术不确定性全部消解；WASM 现象本体、3Dmol.js 真实 WebGL、Kenney CC0 销项、reaktoro LGPL §6 可替换性均经真实环境实测；结论见 [04-M0验证报告](docs/research/04-M0验证报告.md) §8，复跑见 [RERUN.md](docs/research/data/m0/RERUN.md)
 
-**尚不包含可运行的产品代码**。这是刻意的：先用文档把技术不确定性、许可证红线、资产来源、数据规模和工程路径全部消解，再动手写代码，避免推倒重来。
+**尚不包含可运行的产品代码**。这是刻意的：先用文档与最小测试把技术不确定性、许可证红线、资产来源、数据规模和工程路径全部消解，再在 M1 垂直切片动手写产品代码，避免推倒重来。Windows 实机部署清单见 [deploy/README-windows.md](deploy/README-windows.md)。
 
 ## 目标特性（规划）
 
@@ -109,7 +110,7 @@ flowchart TB
 | 定量求解 | **phreeqpython**（主，Apache-2.0）、**SciPy LSODA/BDF**、chempy（对拍，BSD-2）、Cantera（BSD-3）、pyequion2（BSD-3）、**reaktoro-service**（独立微服务，LGPL-2.1） | Apache-2.0 / BSD-2 / BSD-3 / LGPL-2.1 |
 | 化学信息学 | RDKit / RDKit.js MinimalLib、Kekule.js、SmilesDrawer、openchemlib-js | BSD-3 / MIT |
 | 物性数据 | chemicals、thermo、CoolProp | MIT |
-| 分子 3D | 3Dmol.js（M0 复核） | BSD-3 |
+| 分子 3D | 3Dmol.js（BSD-3，F2 已销项；真实 WebGL 球棍渲染 M0 实测通过） | BSD-3 |
 | 前端 | React、PixiJS、Vite、Zustand、Lucide / Tabler | MIT / ISC |
 | 美术资产 | **tikz-chemlab**（写实主资产，LPPL 输出物）、open-lab-components（**仅 UI / 缩略图**，MIT）、LabIcons、bioicons | 逐项见资产管线 |
 | 数据 | PubChem（候选池）、Open Reaction Database（独立仓） | 免费公开 / CC-BY-SA-4.0 |
@@ -135,7 +136,7 @@ flowchart TB
 
 | 里程碑 | 定义 | 验收闸门 |
 |---|---|---|
-| **M0 · 基座验证** | 消解技术不确定性、建骨架、跑通 CI 门禁；含 **Windows + Linux 双平台**部署验证 | 验证清单全部通过或产出替代方案 ADR；双平台最小部署均可起 |
+| **M0 · 基座验证** ✅ **已完成（2026-11-15）** | 消解技术不确定性、跑通可运行门禁；含 **Windows + Linux 双平台**验证（Windows 实机受限有清单） | 十项验证技术不确定性全部消解、裁决定稿、归档可复跑、`verify_m0_s2.py` 41 断言全绿 |
 | **M1 · 垂直切片** | **一个完整体系跑通全链路**：实验台取器材 → 服务端定量求解 → 容器内现象 → 物种面板 → 实验报告 → 时间轴回放，哪怕反应数很少 | 全链路贯通、数值零错、四项好玩载体落地、架构得到验证；**不以堆反应数为目标** |
 | **M2 · 反应覆盖扩张** | 按体系逐个加深，向 **1000 个完全仿真反应**下限推进；内容按课标知识点覆盖 K12 并标注多版本教材 | 每个新增体系都必须真实、定量、可玩、已验算；黄金用例全绿 |
 | **M3 · 体验与表现深化** | 现象系统、错误操作后果、图鉴与进度、微观视图、跨平台细节、SP-1 调度打磨 | 60fps 与定量求解协同；焦点内数值零错；对外不冒充「已超越」的既成事实 |
@@ -145,18 +146,21 @@ flowchart TB
 
 ## 快速开始（当前阶段）
 
-现在能做的是**读文档 + 验证基座**，而不是启动产品：
+现在能做的是**读文档 + 复跑基座验证**，而不是启动产品：
 
 ```bash
-# 1. 通读顺序：CHARTER.md → docs/11-问题与决策台账.md → docs/README.md
-# 2. 基座验证（M0 清单见 docs/10-完整规划与风险登记册.md 第五节）
-#    - phreeqpython / SciPy LSODA / Cantera / chempy(对拍) / reaktoro-service 定量求解链路
+# 1. 通读顺序：CHARTER.md → docs/11-问题与决策台账.md → docs/README.md → docs/research/04-M0验证报告.md（§8 结束判定）
+# 2. 一键复跑 M0 归档自洽 + 静态合规门禁（41 项断言）
+cd docs/research/data/m0 && python3 verify_m0_s2.py
+# 3. 全部最小测试与补验的复跑步骤见 docs/research/data/m0/RERUN.md
+#    - phreeqpython / SciPy LSODA / Cantera / chempy(对拍) 定量求解链路（14/14 · 9/9 · 3/3）
+#    - Rust→WASM 现象内核 + 帧预算、Xvfb + SwiftShader 3Dmol 球棍渲染、reaktoro LGPL §6 替换
 #    - tikz-chemlab 输出物 → SVG 转译（只取编译产物，不 fork 源码）
-#    - Windows + Linux 双平台最小部署
-# 3. 许可证：LICENSE + LICENSE.GPL-3 + LICENSE.LGPL-3 三份文件构成完整交付
+#    - Windows + Linux 双平台：静态核查已通过，实机清单见 deploy/README-windows.md
+# 4. 许可证：LICENSE + LICENSE.GPL-3 + LICENSE.LGPL-3 三份文件构成完整交付
 ```
 
-产品化部署（`docker compose up -d`）将在 M1 交付；单机/多机/公共 Demo 的具体形态**延后到阶段二决策**（用户裁决「到时候再说」），但 Windows + Linux 双平台兼容是硬约束。
+产品化部署（`docker compose up -d`）将在 M1 交付；部署形态已由 D6 锁定为**单机自托管**（多机 / 公共 Demo 后置长线），Windows + Linux 双平台兼容是硬约束。
 
 ## 产品与仓库命名
 

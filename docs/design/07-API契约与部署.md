@@ -170,7 +170,7 @@ docker compose -f deploy/docker-compose.minimal.yml up -d
 | **ord-data** | CC-BY-SA-4.0（数据）/ Apache-2.0（脚本） | 署名 + **相同方式共享** | **`data-ord/` 独立公开仓物理分离**，主仓仅 submodule；衍生规则标溯源；只抽事实性反应式 |
 | **LabIcons** | CC-BY-4.0 | 署名 Manon Zuurmond，注明改动 | About 页 + 图注 + `ASSETS.csv` |
 | **bioicons** 单图标 | CC0 / MIT / CC-BY 各自 | **逐个**引用作者与许可 | `ASSETS.csv` 逐行记录（Servier / DBCLS / TogoTV 等） |
-| **3Dmol.js** | BSD-3-Clause（**F2：M0 复核 NOASSERTION**） | 保留版权声明 + 引用 Bioinformatics 论文 | About 页 + `CREDITS.md`；DOI 于 M0 补齐 |
+| **3Dmol.js** | BSD-3-Clause（**F2 已销项**：仓库 LICENSE + npm 2.5.5） | 保留版权声明 + 引用 Bioinformatics 论文 | About 页 + `CREDITS.md`；DOI `10.1093/bioinformatics/btu829`（Crossref 核实） |
 | **Cantera** | **BSD-3-Clause（`License.txt` 原文已核，F1）** | 保留版权声明（含 Caltech / Sandia 政府权利声明） | `CREDITS.md` / About 页；可并入 LGPL-3.0 主链 |
 | RDKit / RDKit.js | BSD-3-Clause | 保留版权声明 | About 页 |
 | Lucide / Tabler / Iconify | ISC / MIT | 保留声明 | About 页 |

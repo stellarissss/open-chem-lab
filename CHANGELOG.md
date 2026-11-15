@@ -1,6 +1,6 @@
 # 更新日志 · CHANGELOG
 
-本项目遵循 [Keep a Changelog](https://keepachangelog.com/) 与语义化版本。当前处于**第二阶段：可行性验证 / M0**，尚无产品代码发布。
+本项目遵循 [Keep a Changelog](https://keepachangelog.com/) 与语义化版本。**第二阶段：可行性验证 / M0 已于 2026-11-15 正式结束**（技术不确定性全部消解，判定见 `04` §8）；下一阶段为 M1 垂直切片，尚无产品代码发布。
 
 ## [Unreleased]
 
@@ -33,7 +33,7 @@
 - `sandspiel/crate/src/species.rs` 反应硬编码在 `match` 分支 → 反应规则必须数据驱动（该结论仍成立，但落沙基座本身已退场）。
 - LabIcons (CC-BY-4.0)、bioicons（单图标各自许可）、Kekule.js (MIT)、RDKit.js MinimalLib (BSD-3)、PubChem PUG-REST ≤ 5 req/s、ORD 数据 CC-BY-SA-4.0。
 
-### 阶段二 · M0 可行性核验（2026-11-15，进行中）
+### 阶段二 · M0 可行性核验（2026-11-15，已收口）
 
 > 阶段二**不写产品代码，只消解不确定性**。流程基准见 [`docs/12-阶段二开发流程.md`](docs/12-阶段二开发流程.md)，主交付物见 [`docs/research/04-M0验证报告.md`](docs/research/04-M0验证报告.md)。
 
@@ -64,12 +64,19 @@
 - **S7 全量修订（本轮）**：新增 `ADR-0009`；修订 `CHARTER` 第 5 条、`ADR-0002/0004/0005/0006/0008`、`design/01–05/07`（`04` 与 `tools/asset-pipeline/README.md` 按 D5/D8 **整体重写**）、`research/02/03`、`docs/10` 史料状态注记、`docs/README.md` 索引、`README`、`CREDITS`（补 phreeqpython 主引擎条目）、`NOTICE`（微服务与替换入口）、`CONTRIBUTING`、`SECURITY`、`assets/attribution/`、`ASSETS.csv`、`docs/12` 与本文件；CI 增加阶段二主文档存在性与口径回归检查。
 - **主管设计登记（依「由你设计」授权，不产生新裁决）**：主链为唯一事实源入口，`reaktoro-service` 按体系特征按需路由、不并行重复求解；燃烧 / 爆炸拆为「平衡终态 → Reaktoro / 瞬态动力学 → Cantera / 现象表现 → WASM」三层以守住事实零错；单机优先 UDS + protobuf（gRPC 选项保留至未来多机）；进程隔离**不免除** LGPL-2.1 §6 义务，`lgpl-link-check` 改校验服务镜像内的动态链接与可替换性。
 
-### 待办（阶段二 · M0）
+### 阶段二收尾 · 剩余受限项补验（2026-11-15，第二阶段结束）
 
-- **裁决已全部固定，无未决项**；S7 修订完成后按 S8 复验、S9 推送 main。
-- **待补验（受限项）**：Windows / WSL2 / Docker Desktop 双平台最小部署、WASM 工具链与容器内现象本体、3Dmol.js 真实浏览器 WebGL 球棍渲染、Kenney 包内 LICENSE（F3）、CI 全门禁（当前 `license-scan` 等为占位）。
-- **待建**：仓库骨架（`schemas/` / `content/` / `packages/` / `deploy/`）与 CI 门禁实体。
-- 单机 / 多机 / 公共 Demo 部署形态并入 D6 一并裁决（台账 9.1「到时候再说」）。
+> 用户要求「补足剩余部分，结束第二阶段」；按 `@skill:multi-search-engine` 先调研一切可用成品与经验（长英文聚合检索结果污染，仅作线索，事实改走官方 API/原文核实），再用真实环境补测。详见 `04` §5.4–§5.8、`data/m0/s2_completion_result.json`、`RERUN.md`。
+
+- **C1 WASM 现象本体（受限 → 通过）**：官方 rust 源下载卡 7 分钟 → 按「镜像优先」用 `rsproxy.cn` 3 秒装 `wasm32-unknown-unknown`；`cargo build --target wasm32-unknown-unknown --release` 得 4328B、**零外部 import** 的容器内现象内核；Node 22 实跑 4096 粒子 p95 **0.0199ms**（预算 16.7ms，余量约 840 倍）、同 seed 确定性一致、线性内存读回一致。现成 WASM 粒子引擎经 GitHub API 调研均为 ≤54 星小品，无成熟单体 → 采用「PixiJS 渲染 + 极薄自研 WASM 数值内核」，不重复造轮子。
+- **C2 3Dmol.js 真实 WebGL（受限 → 通过）**：定位根因为纯 `--headless` 无 X display 导致 SwiftShader 的 `xcb_connect() failed / EGL_NOT_INITIALIZED`；用系统自带 **Xvfb** 提供真实 display + `--enable-unsafe-swiftshader`，拿到 WebGL 2.0（`clearDepth=function`、`readPixels` 非空），乙醇 9 原子球棍渲染读回 **17048 非白像素**（`hasGeometry=true`）。上一轮「clearDepth 为 null」的根因消除。
+- **C3 Kenney 包内 LICENSE（F3 受限 → 销项）**：三级一手证据确认 **CC0 1.0** —— 官网 particle-pack 页标注 `Creative Commons CC0`、包内 `LICENSE.txt` 原文（CC0 / 可商用 / 署名非强制）、CC0 1.0 官方法典。官网签名下载端点 403（会话/人机校验），按技能规范不规避、不硬刷，包内文件经公开第三方镜像转录取得。CC0 与 LGPL-3.0 主链无冲突，可入库（限通用音效 / 粒子贴图）。
+- **C4 reaktoro LGPL §6（受阻 → 通过）**：`conda solve` 卡在 `repodata.json` 全通道 12s 超时 → 改 `anaconda.org API` 直取 2.13.0 py311 单包（6.5MB）；`readelf -d` 实证 Python 扩展 `DT_NEEDED libReaktoro.so` + RPATH、核心 2239 符号在独立 42MB `.so`（未静态编入）、SONAME 无版本后缀；`_0`/`_3` 双构建 SHA 不同但 SONAME 一致，覆盖替换后 `ldd` 成功解析 → **运行时可替换机制成立**。合规补注：conda 单包不含 LGPL 全文，`lgpl-link-check` 须自行随附 `LICENSE.LGPL-2.1`。
+- **C5 Windows 双平台（受限保留，静态核查通过 + 清单交付）**：Microsoft Learn 官方要点（文件放 WSL2 原生 FS）；本沙箱实测 0 CRLF / 0 非法字符 / 0 大小写冲突；新增 [`deploy/README-windows.md`](deploy/README-windows.md) 11 项补验清单 + 已知坑。实机起服沙箱无法覆盖，按 `docs/12` 显式标「受限」，不写「通过」。
+- **C6 CI 全门禁（阶段二范围内实体化）**：新增 `data/m0/verify_m0_s2.py`，**41 项断言全通过**（归档自洽 + 静态合规 + 补验证据链），接入 `docs.yml`；产品级门禁（license-scan / schema-validate / golden-cases / build / e2e）依「阶段二不写产品代码」后置 M1，不造假占位门禁；成熟成品（REUSE / scancode-toolkit / pip-licenses / licensecheck）登记待 M1 复用。
+- **复现资产**：`data/m0/RERUN.md` 固化全部复跑步骤；`s2_completion_result.json` 结构化 C1–C6 结论；`INDEX.json` 登记新增产物；`verify_m0_s2.py` 一键自检。
+- **全仓同步**：`04-M0验证报告`（§1/§2/§3/§5.4–§5.7/§7/新增 §8 结束判定）、`docs/12`（第七节经验 + 交付物 + 收束）、`design/05`（M0 十项清单）、`docs/README.md`（状态 + 索引）、`CHANGELOG`、`CREDITS`、`台账 §9.5`、`.github/workflows/docs.yml`（接入门禁 + 收口回归检查）。
+- **阶段结束判定**：M0 十项验证的技术不确定性全部消解，剩余两项「受限」为环境覆盖（Windows 实机）与阶段边界（产品级门禁），均有清单/落地路径，不构成进入 M1 的阻碍。**第二阶段正式结束**，阶段三从 M1 垂直切片起步（一个完整体系跑通全链路，不以堆反应数为目标）。
 
 ---
 

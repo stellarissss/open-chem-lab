@@ -1,0 +1,120 @@
+{
+  "title": "阶段二剩余受限项补验结果",
+  "snapshot": "2026-11-15",
+  "phase": "阶段二收尾（补足剩余部分）",
+  "environment": {
+    "os": "Ubuntu 22.04 linux/amd64",
+    "chrome": "Google Chrome 144.0.7559.132",
+    "rustc": "1.93.0",
+    "rust_target_added": "wasm32-unknown-unknown（rsproxy.cn 镜像，3s）",
+    "node": "22.13.1",
+    "conda": "23.5.2",
+    "zstd": "apt 安装",
+    "xvfb": "系统自带"
+  },
+  "items": [
+    {
+      "id": "C1",
+      "name": "WASM 现象本体与帧预算",
+      "prior": "受限（wasm-pack / wasm32 target 未安装）",
+      "now": "通过",
+      "evidence": {
+        "toolchain": "rustup target add wasm32-unknown-unknown（官方源卡 7 分钟，改 rsproxy.cn 镜像 3 秒完成）",
+        "compile": "cargo build --target wasm32-unknown-unknown --release 成功",
+        "wasm_bytes": 4328,
+        "wasm_imports": 0,
+        "exports": ["memory", "init", "step", "count", "positions_ptr", "checksum"],
+        "runtime": "Node 22 原生 WebAssembly.instantiate",
+        "frame_budget_ms": 16.7,
+        "cases": [
+          {"particles": 500,  "p95_ms": 0.0052, "within_budget": true},
+          {"particles": 1000, "p95_ms": 0.0053, "within_budget": true},
+          {"particles": 2000, "p95_ms": 0.0098, "within_budget": true},
+          {"particles": 4096, "p95_ms": 0.0199, "within_budget": true}
+        ],
+        "max_p95_ms": 0.0199,
+        "budget_headroom_x": 839,
+        "determinism": {"seed": 777, "frames": 60, "identical": true},
+        "linear_memory_readback": true
+      },
+      "reuse_decision": "现成 WASM 粒子引擎经 GitHub API 调研均为 ≤54 星小品，无成熟单体；成熟表现层为 PixiJS（MIT，上轮实测 500 粒子 p95 1.2ms）。故采用「PixiJS 渲染 + 极薄自研 WASM 数值内核」，自研范围落在 CHARTER 允许的四类内，不重复造轮子。",
+      "raw": ["wasm_kernel.wasm", "wasm_kernel_lib.rs", "wasm_kernel_Cargo.toml", "wasm_kernel_harness.mjs", "wasm_bench_result.json"]
+    },
+    {
+      "id": "C2",
+      "name": "3Dmol.js 真实 WebGL 球棍渲染",
+      "prior": "受限（无头 SwiftShader 下 clearDepth 为 null）",
+      "now": "通过",
+      "evidence": {
+        "root_cause": "SwiftShader 走 Vulkan/XCB 后端，纯 --headless 无 X display 时 xcb_connect() failed，EGL_NOT_INITIALIZED，GPU 进程退出",
+        "fix": "xvfb-run -a 提供真实 X display + --enable-unsafe-swiftshader --use-gl=angle --use-angle=swiftshader（复用系统 Xvfb，未造轮子）",
+        "webgl": {"version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)", "renderer": "ANGLE Vulkan 1.3.0 SwiftShader Device (Subzero)", "clearDepth": "function", "readPixels": [51, 102, 204, 255], "pixelNonBlack": true},
+        "mol_render": {"lib": true, "viewerCreated": true, "hasWebGL": true, "molecule": "ethanol 9 atoms XYZ", "style": "stick+sphere", "canvas": "640x640", "nonWhitePixels": 17048, "hasGeometry": true, "ok": true}
+      },
+      "raw": ["webgl_real.html", "mol_render_real.html"]
+    },
+    {
+      "id": "C3",
+      "name": "Kenney 包内 LICENSE（F3）",
+      "prior": "受限（官网 /license 404、未下载资产包）",
+      "now": "销项（CC0 1.0，可入库；限定通用音效/粒子贴图）",
+      "evidence": {
+        "official_page": "kenney.nl/assets/particle-pack 带浏览器 UA 返回 HTTP 200；页面 <td>License</td> → Creative Commons CC0（链接 creativecommons.org/publicdomain/zero/1.0/）；og:description「Download this package (80 assets) for free, CC0 licensed!」",
+        "bundled_license": "第三方镜像 Calinou/kenney-particle-pack 的 LICENSE.txt 原文：「Particle Pack (1.1) by Kenney Vleugels」「License (Creative Commons Zero, CC0)」「You may use these assets in personal and commercial projects. Credit would be nice but is not mandatory.」",
+        "cc0_legalcode": "creativecommons.org/publicdomain/zero/1.0/legalcode.txt（HTTP 200，7048 bytes）",
+        "note": "官网签名下载端点 /download-link/{id} 返回 403 forbidden（需会话/人机校验），按技能规范立即停止不规避；包内 LICENSE.txt 经公开第三方镜像转录取得，与官网标注一致。",
+        "compat": "CC0 与 LGPL-3.0 主链无冲突，不触发 LGPL/AGPL 义务"
+      },
+      "raw": []
+    },
+    {
+      "id": "C4",
+      "name": "reaktoro 独立微服务 LGPL §6 可替换性",
+      "prior": "受阻（PyPI 404，仅 conda-forge；运行时替换无法按原设计验证）",
+      "now": "通过（D2 裁决的微服务方案落地可行性已实证）",
+      "evidence": {
+        "channel": "绕开 repodata.json（全通道 12s 超时，正是首次 conda solve 卡住根因），改用 anaconda.org API 直取单包",
+        "package": "conda-forge/linux-64/reaktoro-2.13.0-py311h9c93177_3.conda（6.5MB）+ _0 构建对照",
+        "license": "LGPL-2.1-only（anaconda API 元数据 + 包内 attrs）",
+        "depends_include": ["phreeqc4rkt", "autodiff", "optima", "thermofun", "yaml-cpp", "numpy", "python 3.11.*"],
+        "dynamic_link": "reaktoro4py.cpython-311-x86_64-linux-gnu.so 的 DT_NEEDED 含 libReaktoro.so + RPATH $ORIGIN/../../..；扩展仅 3 个自定义符号，核心 2239 个在独立 libReaktoro.so（42MB）→ 未静态编入",
+        "soname": "libReaktoro.so（无版本后缀），_0 与 _3 两构建 SONAME 完全一致、SHA256 不同",
+        "runtime_replace": "把 _0 的 libReaktoro.so 覆盖到 _3 layout 后，ldd 显示扩展经 RPATH 成功解析到替换后的 libReaktoro.so → 同名替换机制成立",
+        "compliance_caveat": "conda 单包 info/ 仅含 recipe-scripts-license.txt，不含 LGPL 全文；故 lgpl-link-check 必须自行随附 LICENSE.LGPL-2.1 全文（规划双文本义务须补注）",
+        "grpc_uds_note": "UDS/protobuf 为成熟成品（grpc 官方支持 unix: scheme），无需自研传输层；M1 骨架阶段落契约"
+      },
+      "raw": []
+    },
+    {
+      "id": "C5",
+      "name": "Win + Linux 双平台（Windows 侧）",
+      "prior": "部分通过（Linux Compose 4 服务 Healthy；Windows 侧无法实测）",
+      "now": "静态规范核查通过 + 可执行补验清单已交付；Windows 实机仍显式标注受限",
+      "evidence": {
+        "official": "Microsoft Learn《Working across Windows and Linux file systems》原文：「For the fastest performance speed, store your files in the WSL file system if you are working in a Linux command line」",
+        "static_checks": {"crlf_files": 0, "windows_illegal_filename_chars": 0, "case_collisions": 0, "gitattributes_lf": true},
+        "deliverable": "deploy/README-windows.md（本机执行清单：WSL2 文件系统存放、Docker Desktop WSL2 后端、卷挂载、端口、LF、TeX 管线、conda 镜像内依赖）",
+        "honest_note": "沙箱为 Linux，Windows 实机 Compose 起服无法覆盖；按 docs/12 第三节标「受限」并给出补验方案，不写「通过」"
+      },
+      "raw": []
+    },
+    {
+      "id": "C6",
+      "name": "CI 全门禁",
+      "prior": "部分通过（license-scan / golden-cases / schema-validate / lgpl-link-check 为占位）",
+      "now": "阶段二范围内实体化：M0 归档数据自洽门禁 + 静态合规门禁可运行；产品级门禁按 docs/12 第一条明确后置 M1 骨架",
+      "evidence": {
+        "runnable_now": "verify_m0_s2.py（校验全部归档 JSON 数值自洽、脚本/结果成对、许可证双文本、无 token、无 CRLF、WASM 产物零 import、Kenney CC0 证据链）",
+        "deferred_to_m1": "license-scan（依赖真实依赖树）/ schema-validate（依赖 content/ 实体）/ golden-cases（依赖产品内容）/ build+e2e：阶段二不写产品代码，无实体可校验，按规范后置，不造假门禁",
+        "docs_yml": "占位注释更新为「阶段二已验证的可运行门禁 + M1 待落地清单」，去除误导性的「占位」表述"
+      },
+      "raw": ["verify_m0_s2.py"]
+    }
+  ],
+  "summary": {
+    "restricted_items_before": 4,
+    "now_pass_or_closed": "C1/C2/C3/C4 共 4 项由受限/受阻转「通过 / 销项」",
+    "remaining_honest_limited": "C5 Windows 实机（有清单，非技术不确定性）、C6 产品级门禁（按阶段边界后置 M1）",
+    "conclusion": "阶段二 M0 十项验证的技术不确定性全部消解；剩余两项为「环境无法覆盖」与「阶段边界」，均有明确补验/落地路径，不构成进入 M1 的阻碍"
+  }
+}

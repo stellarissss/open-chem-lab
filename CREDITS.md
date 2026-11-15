@@ -24,7 +24,7 @@
 | [**Cantera**](https://github.com/Cantera/cantera) | **BSD-3-Clause**（`License.txt` 原文已核：标准三条款，含 Caltech / Sandia 政府权利声明） | ★885 | 直接集成 | 化学动力学、热力学与输运。**F1**：GitHub API 的 `NOASSERTION` 仅因多版权头未被自动识别，原文已确认可并入 LGPL-3.0 主链 |
 | [**ChemPy**](https://github.com/bjodah/chempy) — Björn Dahlgren | **BSD-2-Clause** | ★660 | 辅助 / 对拍 | **降级**：不再作水溶液平衡主引擎（直接依赖 46 个、拖入 Jupyter 整栈）；承担动力学 ODE 辅助与 **AI 独立对拍复算**（D1） |
 | [**pyequion2**](https://github.com/pyequion/pyequion2) | **BSD-3-Clause** | ★35 | 辅助 | 物种分布 / 活度 / 离子强度求解（M0 实测 pH=6.98、I=0.1000、残差 1e-12）；**真实仓库为 `pyequion/pyequion2`** |
-| [**Reaktoro**](https://github.com/reaktoro/reaktoro) | **LGPL-2.1**（LICENSE 原文核实） | ★224 | **独立微服务（conda 镜像）** | 承担多相 / 固相 / 气相、高温高压、燃烧爆炸平衡终态与复杂体系（D2 / D2-补）。**不在 PyPI，仅 conda-forge**；与主进程经 UDS/protobuf 低延迟通讯。依台账【补正 A】：以**动态链接 + 运行时可替换**形态接入，配齐 §6 义务（显著声明、附 LGPL 全文、允许逆向调试、库可替换、修改版源码可得）。进程隔离不免除义务 |
+| [**Reaktoro**](https://github.com/reaktoro/reaktoro) | **LGPL-2.1-only**（LICENSE 原文 + anaconda API 元数据核实） | ★224 | **独立微服务（conda 镜像）** | 承担多相 / 固相 / 气相、高温高压、燃烧爆炸平衡终态与复杂体系（D2 / D2-补）。**不在 PyPI，仅 conda-forge**；与主进程经 UDS/protobuf 低延迟通讯。**阶段二收尾实证**：Python 扩展 `DT_NEEDED libReaktoro.so` + RPATH、SONAME 无版本后缀、双构建同名替换 `ldd` 生效 → 动态链接 + 运行时可替换成立。依台账【补正 A】配齐 §6 义务（显著声明、附 LGPL 全文、允许逆向调试、库可替换、修改版源码可得）；**conda 单包不含 LGPL 全文，`lgpl-link-check` 须自行随附 `LICENSE.LGPL-2.1`**。进程隔离不免除义务 |
 | **Significance Manager / simulation LOD** | **借鉴的调度范式（概念，非实测仓库）** | — | 设计范式 | 按「观察者关注度」分配更新预算的游戏引擎成熟范式。**F4**：与上方「已核实库」严格区分，不冒充现成仓库，避免稀释「不重复造轮子」口径 |
 
 > **全链许可证**：phreeqpython（Apache-2.0）+ SciPy / Cantera / pyequion2（BSD-3）+ ChemPy（BSD-2）+ reaktoro-service（LGPL-2.1）均与 LGPL-3.0 主项目兼容；**不引入 AGPL / GPLv2-only，GPL-3.0 组件因选型决策不纳入**（台账 6.2 / C15）。M0 已核实 phreeqpython 许可证为 Apache-2.0 并升为主引擎（D1），阶段一「许可证未定、暂不纳入主链」的判断作废。
@@ -67,7 +67,7 @@
 
 | 项目 | 许可证 | 指标 | 角色 | 用途 |
 |---|---|---|---|---|
-| [**3Dmol.js**](https://github.com/3dmol/3Dmol.js) — David Koes / Univ. of Pittsburgh | **BSD-3-Clause**（仓库 LICENSE；**F2：GitHub API 为 NOASSERTION，M0 复核**） | ★1,038 | 直接集成 | WebGL 分子 / 晶体 / 球棍模型 3D；支持 pdb / sdf / mol2 / xyz / cif；**官方要求引用其 Bioinformatics 论文**，DOI 于 M0 补齐 |
+| [**3Dmol.js**](https://github.com/3dmol/3Dmol.js) — David Koes / Univ. of Pittsburgh | **BSD-3-Clause**（仓库 LICENSE + npm 2.5.5；**F2 已销项**） | ★1,038 | 直接集成 | WebGL 分子 / 晶体 / 球棍模型 3D；支持 pdb / sdf / mol2 / xyz / cif。**阶段二收尾实测**：Xvfb + SwiftShader 真实 WebGL 2.0 球棍渲染成功（乙醇 9 原子、`hasGeometry=true`）。**官方要求引用其 Bioinformatics 论文** DOI `10.1093/bioinformatics/btu829`（Crossref 核实） |
 | [Mol* (molstar)](https://github.com/molstar/molstar) | **MIT** | ★1,043 | 备选 | 大分子 / 晶体可视化 |
 | [NGL Viewer](https://github.com/nglviewer/ngl) | **MIT** | ★736 | 备选 | WebGL 分子查看器 |
 
@@ -96,7 +96,7 @@
 | [**@itkdm/open-lab-components**](https://github.com/itkdm/open-lab-components) — itkdm | **MIT** | ★10 · npm v0.1.1 | **仅 UI / 缩略图** | 零依赖 **HTML fragment 库**（非 React），210 组件 / 化学相关 35 个，SVG + `--cmp-*` CSS 变量、简笔示意风（无渐变 / 高光）。M0 实测与「出版级写实」主调冲突，D8 裁决**仅作 UI 元素与缩略图**，不进实验台写实主视图 |
 | [LabIcons](https://github.com/Center-for-Proteomics-and-Metabolomics/LabIcons) — CPM / 插画师 Manon Zuurmond | **CC-BY-4.0** | ★24 | 资产（**需署名**） | 专业科研器材插画；CC-BY 要求在图注 / 致谢中署名并说明改动 |
 | [bioicons](https://github.com/duerrsimon/bioicons) — Simon Dürr | 平台 **MIT**；**单个图标各自 CC0/MIT/CC-BY** | ★1,795 | 资产（**逐个核验许可**） | **平台 MIT 不等于每个图标 MIT**；来源含 Servier（CC-BY 3.0）、DBCLS / TogoTV。必须建逐图标署名清单 |
-| [Kenney Assets](https://kenney.nl/assets) — Kenney | **CC0 1.0**（官网 `/license` 页 404，**M0 需包内 LICENSE 复核**） | — | 资产（需复核） | 通用 UI / 音效 / 粒子贴图。**卡通风格不与出版级写实主调混用**，仅取通用音效与粒子贴图 |
+| [Kenney Assets](https://kenney.nl/assets) — Kenney | **CC0 1.0**（**F3 已销项**：官网 particle-pack 页标注 + 包内 `LICENSE.txt` 原文 + CC0 1.0 官方法典三级核实） | — | 资产（可入库） | 通用 UI / 音效 / 粒子贴图；CC0 可商用、署名非强制，与 LGPL-3.0 主链无冲突。**卡通风格不与出版级写实主调混用**，仅取通用音效与粒子贴图。官网签名下载端点 403（会话/校验），包内 LICENSE 经公开第三方镜像转录核对 |
 
 > **早期方案已退场**：「双层皮肤可切换」「程序化 3D 器材作主视觉」「Kenney 卡通 2D/3D 器材」均依台账 5.3 / 6.3 废弃；3D 收敛为分子级，不再需要批量化学器材 GLB 资源。
 
@@ -128,6 +128,23 @@
 - NB实验室功能对标资料来自其 [官网](https://www.nobook.com/index.html)、[价格页](https://www.nobook.com/price.html)、[NB化学实验资源页](https://hx.nobook.com/index.html)、应用商店官方描述与百科词条；详见 [NB 对标分析](docs/research/01-NB实验室对标分析.md)。**只采信一级来源**，推广稿中的「几万种物质」「免费版 20%」等未证实表述一律不采信。**本项目不复用其任何代码、素材、商标或界面设计**。
 - 检索方法：多引擎聚合（必应中国 / 百度 / 360 / 搜狗）+ GitHub REST API 精确核实 + 官方 README / LICENSE 原文二次核实。
 
+## 9.5 阶段二收尾补验复用的工具链 / 成品（2026-11-15）
+
+> 均为成熟开源 / 系统现成工具，未造轮子；核实结论与复跑步骤见 `docs/research/data/m0/RERUN.md`。
+
+| 工具 / 成品 | 许可证 | 用途 | 核实结论 |
+|---|---|---|---|
+| Rust `wasm32-unknown-unknown` target（[rsproxy.cn 镜像](https://rsproxy.cn)） | Rust 工具链（MIT/Apache-2.0 双许可） | 编译 Rust→WASM 现象内核 | 官方源下载卡 7 分钟，镜像 3 秒装好；产物零外部 import |
+| Node.js 原生 `WebAssembly` API | Node（MIT） | 实例化 WASM、实测帧预算 | 无需 wasm-bindgen，4096 粒子 p95 0.0199ms |
+| [Xvfb](https://www.x.org/releases/) + Chrome SwiftShader | X.Org / MIT 系 | 无头环境真实 WebGL | 解掉 `xcb_connect() failed`，WebGL 2.0 + 球棍渲染成功 |
+| [anaconda.org API](https://api.anaconda.org) + `zstd` | 服务 / BSD | 绕开 repodata 直取 conda 单包 | reaktoro 2.13.0 动态链接 / 可替换实证 |
+| `readelf` / `ldd`（binutils / glibc） | GPL / LGPL（**仅作诊断工具，不链接进产品**） | ELF 动态链接核验 | `DT_NEEDED` / SONAME / 替换解析 |
+| [CC0 1.0 官方法典](https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt) | CC0 | Kenney F3 销项一手依据 | 官网标注 + 包内 LICENSE.txt + 官方法典三级一致 |
+| [Microsoft Learn · WSL 跨文件系统](https://learn.microsoft.com/en-us/windows/wsl/filesystems) | 文档 | Windows 部署清单依据 | 「文件放 WSL 原生 FS 性能最佳」原文核实 |
+| REUSE 6.3.0 / scancode-toolkit 32.5.0 / pip-licenses 5.5.5 / licensecheck | Apache-2.0 组合 / MIT | **M1 门禁候选**（本阶段调研登记，未接入） | PyPI JSON API 核实在维护，M1 优先复用 |
+
+> **诚实边界**：`readelf`/`ldd` 等 GPL 工具仅用于本阶段的诊断核验，不随产品分发、不进入主链，故不触发 LGPL/GPL 组件选型问题；聚合搜索结果页因污染未采信，全部事实改走上述官方 API/原文。
+
 ---
 
 ## 合规义务速查
@@ -135,7 +152,7 @@
 | 义务 | 涉及资产 | 落地方式 |
 |---|---|---|
 | **LGPL-3.0 双文本 + 显著声明** | 主项目 | `LICENSE` + `LICENSE.GPL-3` + `LICENSE.LGPL-3` + `NOTICE`（§4） |
-| **动态链接 / 库可替换 / 允许逆向调试 / 附 LGPL 全文** | **reaktoro-service (LGPL-2.1)** | 台账【补正 A】§6 义务清单 + D2 独立微服务裁定；进程隔离不免除义务，运行时可替换、不静态编入主二进制；CI `lgpl-link-check` 校验服务镜像内的动态链接与可替换性 |
+| **动态链接 / 库可替换 / 允许逆向调试 / 附 LGPL 全文** | **reaktoro-service (LGPL-2.1)** | 台账【补正 A】§6 义务清单 + D2 独立微服务裁定；进程隔离不免除义务，运行时可替换、不静态编入主二进制；CI `lgpl-link-check` 校验服务镜像内的动态链接与可替换性。**M0 收尾补注**：conda 单包 `info/` 不含 LGPL 全文，服务镜像须自行随附 `LICENSE.LGPL-2.1`（见 `04` §5.6） |
 | 保留版权声明 + 引用论文 | RDKit (BSD-3)、3Dmol.js (BSD-3，M0 复核) | About 页 + `assets/attribution/`；3Dmol.js 引用其 Bioinformatics 论文 |
 | **署名 + 声明改动** | LabIcons (CC-BY-4.0)、bioicons 中 CC-BY 图标、tikz-chemlab / pst-labo (LPPL) | 逐资产署名清单；图注 / 致谢页注明 |
 | **相同方式共享（SA）** | ord-data (CC-BY-SA-4.0) | **独立公开仓 `data-ord/` 物理分离**，主仓仅 submodule；衍生规则表单独署名并保留 SA 声明；只抽取事实性反应式与条件 |

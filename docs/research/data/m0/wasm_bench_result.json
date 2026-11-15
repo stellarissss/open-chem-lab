@@ -1,0 +1,79 @@
+{
+  "title": "M0 WASM 现象内核帧预算验证",
+  "runtime": "Node v22.13.1 WebAssembly (native)",
+  "wasm_bytes": 4328,
+  "wasm_imports": 0,
+  "cases": [
+    {
+      "requested": 500,
+      "actual": 500,
+      "frames": 180,
+      "p50_ms": 0.0044,
+      "p95_ms": 0.0052,
+      "p99_ms": 0.0118,
+      "max_ms": 0.0177,
+      "budget_ms": 16.7,
+      "within_budget": true,
+      "active_particles_last_frame": 500,
+      "first_particle_x": 0.826267,
+      "checksum": 341.0527
+    },
+    {
+      "requested": 1000,
+      "actual": 1000,
+      "frames": 180,
+      "p50_ms": 0.0045,
+      "p95_ms": 0.0051,
+      "p99_ms": 0.0071,
+      "max_ms": 0.0136,
+      "budget_ms": 16.7,
+      "within_budget": true,
+      "active_particles_last_frame": 1000,
+      "first_particle_x": 0.840031,
+      "checksum": 674.7132
+    },
+    {
+      "requested": 2000,
+      "actual": 2000,
+      "frames": 180,
+      "p50_ms": 0.0088,
+      "p95_ms": 0.0096,
+      "p99_ms": 0.0157,
+      "max_ms": 0.0203,
+      "budget_ms": 16.7,
+      "within_budget": true,
+      "active_particles_last_frame": 2000,
+      "first_particle_x": 0.821332,
+      "checksum": 1370.1312
+    },
+    {
+      "requested": 4096,
+      "actual": 4096,
+      "frames": 180,
+      "p50_ms": 0.0178,
+      "p95_ms": 0.02,
+      "p99_ms": 0.0255,
+      "max_ms": 0.0289,
+      "budget_ms": 16.7,
+      "within_budget": true,
+      "active_particles_last_frame": 4096,
+      "first_particle_x": 0.870217,
+      "checksum": 2799.604
+    }
+  ],
+  "determinism": {
+    "seed": 777,
+    "frames": 60,
+    "checksums": [
+      390.579102,
+      390.579102
+    ],
+    "identical": true
+  },
+  "summary": {
+    "all_within_budget": true,
+    "max_p95_ms": 0.02,
+    "deterministic_same_seed": true
+  },
+  "source": "st_phenomenon_kernel.wasm 由 cargo build --target wasm32-unknown-unknown --release 编译；零外部 import"
+}
