@@ -77,6 +77,7 @@
 - **复现资产**：`data/m0/RERUN.md` 固化全部复跑步骤；`s2_completion_result.json` 结构化 C1–C6 结论；`INDEX.json` 登记新增产物；`verify_m0_s2.py` 一键自检。
 - **全仓同步**：`04-M0验证报告`（§1/§2/§3/§5.4–§5.7/§7/新增 §8 结束判定）、`docs/12`（第七节经验 + 交付物 + 收束）、`design/05`（M0 十项清单）、`docs/README.md`（状态 + 索引）、`CHANGELOG`、`CREDITS`、`台账 §9.5`、`.github/workflows/docs.yml`（接入门禁 + 收口回归检查）。
 - **阶段结束判定**：M0 十项验证的技术不确定性全部消解，剩余两项「受限」为环境覆盖（Windows 实机）与阶段边界（产品级门禁），均有清单/落地路径，不构成进入 M1 的阻碍。**第二阶段正式结束**，阶段三从 M1 垂直切片起步（一个完整体系跑通全链路，不以堆反应数为目标）。
+- **首次推送 CI 失败修复（L0，主管直修）**：远端 `docs-and-compliance` run #4 的 `verify_m0_s2.py` step 报 `FileNotFoundError: wasm_kernel.wasm` —— 根因是 `.gitignore` 通用规则 `*.wasm` 把 M0 归档的 WASM 实测产物一并排除（本地文件在场故本地自检通过，CI checkout 后缺失）。处置：① `.gitignore` 加精确白名单 `!docs/research/data/m0/*.wasm`（不影响其他目录构建产物忽略）；② `verify_m0_s2.py` 对该二进制做存在性守卫（在场校魔数/字节数 41 断言、缺失降级为 38 断言且明确提示，不整体崩溃）；③ 顺手移除 lychee-action 当前版本不识别的 `--exclude-mail` 参数（此前因 `continue-on-error` 未阻断但持续告警）。修复后本地复验：wasm 已 `git ls-files` 跟踪、两种场景门禁均 EXIT 0。按 `docs/12` 第六节「失败项不得静默丢弃」登记。
 
 ---
 

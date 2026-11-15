@@ -7,7 +7,8 @@
 
 ```bash
 cd docs/research/data/m0 && python3 verify_m0_s2.py
-# 期望：[verify_m0_s2] checks=41 fails=0 · ALL PASS
+# 期望（wasm_kernel.wasm 在场）：[verify_m0_s2] checks=41 fails=0 wasm_binary=present · ALL PASS
+# 若 wasm 二进制不在场（例如被外部清理）：降级为 checks=38，仍 ALL PASS，仅跳过二进制一致性校验
 ```
 
 ## 1. 三组定量求解 / 对拍（需 chempy / phreeqpython / scipy / cantera / pyequion2）

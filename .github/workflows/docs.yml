@@ -19,7 +19,7 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: >-
-            --no-progress --exclude-mail
+            --no-progress
             --exclude 'https://nobook.com|https://hx.nobook.com'
             '**/*.md'
           fail: true
@@ -61,7 +61,7 @@ jobs:
           fi
           echo "LGPL-3.0 双文本与显著声明齐全"
 
-      - name: 阶段二归档数据自洽 + 静态合规门禁（verify_m0_s2.py，41 项断言）
+      - name: 阶段二归档数据自洽 + 静态合规门禁（verify_m0_s2.py）
         run: |
           cd docs/research/data/m0 && python3 verify_m0_s2.py
 
