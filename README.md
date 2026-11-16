@@ -5,7 +5,7 @@
 > 仓库名 `open-chem-lab` ≠ 产品名（见 [命名说明](#产品与仓库命名)）。
 
 [![License](https://img.shields.io/badge/License-LGPL%203.0-blue.svg)](LICENSE)
-[![Stage](https://img.shields.io/badge/Stage-%E8%A7%84%E5%88%92%E4%B8%8E%E8%AE%BE%E8%AE%A1-orange.svg)](docs/10-完整规划与风险登记册.md)
+[![Stage](https://img.shields.io/badge/Stage-M1%20%E5%87%86%E5%A4%87-orange.svg)](docs/research/04-M0验证报告.md)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%2B%20Linux-green.svg)](docs/design/07-API契约与部署.md)
 [![Docs](https://img.shields.io/badge/Docs-%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3-brightgreen.svg)](docs/README.md)
 
@@ -22,7 +22,7 @@
 **为什么做**：NB实验室（NOBOOK / 北京乐步教育）把实验台范式做得很好，但它是闭源商业产品，完整功能需购买会员，且无法部署在自己的服务器上。经两轮多引擎 + GitHub 精确检索确认，**不存在可直接部署的开源单体替代品**——整体型虚拟化学实验室（NB、ChemCollective、Model ChemLab、ChemBox）全部闭源；但「零件层」开源生态极其成熟且许可证友好，缺的只是把它们串成一个产品的胶水层与内容层。本项目就是做这件事。
 
 > 目标与不可协商的约束已固化在 [CHARTER.md](CHARTER.md)；改动它必须走 ADR 流程。
-> **决策单一事实源**是 [docs/11-问题与决策台账.md](docs/11-问题与决策台账.md)：11 批、40+ 项裁决，所有规划文档均可追溯到其中某一条。
+> **决策单一事实源**是 [docs/11-问题与决策台账.md](docs/11-问题与决策台账.md)：11 批 40+ 项裁决 + 阶段二补充规划 16 项（E1–E16，§9.6），所有规划文档均可追溯到其中某一条。
 
 ### 对标口径（公开点名 · 三层一致）
 
@@ -45,6 +45,7 @@
 - 11 批决策问询与矛盾销项，形成 [问题与决策台账](docs/11-问题与决策台账.md)
 - 以台账为唯一标准完成全仓设计文档系统性修订，并通过二次矛盾审计
 - **第二阶段 M0 可行性核验全部收口**（2026-11-15）：十项验证的技术不确定性全部消解；WASM 现象本体、3Dmol.js 真实 WebGL、Kenney CC0 销项、reaktoro LGPL §6 可替换性均经真实环境实测；结论见 [04-M0验证报告](docs/research/04-M0验证报告.md) §8，复跑见 [RERUN.md](docs/research/data/m0/RERUN.md)
+- **第二阶段补充规划收口**（2026-11-16）：解决「权威信息源 + 反应缓存」问题，E1–E16 共 16 项裁决全部固定；权威源落到具体可机读供应链（USGS PHREEQC 库族为水溶液主源、NIST/JANAF/PubChem/CAMEO 分层），构建期物化、运行时零依赖；三组实测 14/14 通过；结论见 [05-权威数据源与缓存可行性核验](docs/research/05-权威数据源与缓存可行性核验.md) 与 [ADR-0010](docs/adr/ADR-0010-权威数据供应链与缓存分层.md)
 
 **尚不包含可运行的产品代码**。这是刻意的：先用文档与最小测试把技术不确定性、许可证红线、资产来源、数据规模和工程路径全部消解，再在 M1 垂直切片动手写产品代码，避免推倒重来。Windows 实机部署清单见 [deploy/README-windows.md](deploy/README-windows.md)。
 
@@ -63,7 +64,8 @@
 | **容器内 WASM 现象表现** | WASM 只负责容器内粒子 / 物理即时渲染（液体、气泡、沉淀、火焰、飞溅）与求解加速；求解、物种分布、规则、存档**全在服务端** |
 | **SP-1 自适应定量调度** | 复用 **SciPy LSODA/BDF 内置 Adams↔BDF 自动刚性切换**（局部误差 + `rtol`/`atol`，不硬编码阈值）、借鉴 Significance Manager 关注度范式；按 16.7ms 帧预算动态分配算力给正在观察的过程，60fps 与定量求解解耦 |
 | **前后端常驻 · 双平台** | 本地服务器前后端常驻，**废弃「断网可玩」**；硬约束 **Windows + Linux 双平台兼容**（CRLF/LF、路径、大小写、卷挂载、WSL2/Docker Desktop） |
-| **教学层后置长线** | 核心玩法为绝对主体；教学功能作为附加内容整体后置，**不进 M1–M3 验收**；内容按课标知识点组织、标注多版本教材对应章节 |
+| **教学层后置长线** | 核心玩法为绝对主体；教学功能作为附加内容整体后置，**不进 M1–M3 验收**；主线按「化学体系 / 玩法 / 器材」组织，课标与教材仅作**可选检索标签**（E9），不作覆盖边界、不设教学功能 |
+| **权威数据供应链 + 免计算缓存** | 权威源落到「具体可机读库 + 端点 + 许可证 + 快照日」：USGS PHREEQC 库族（水溶液主源）、NIST JANAF/Kinetics/46/ASD、PubChem、CAMEO（隔离）；外部数据**构建期离线物化、运行时零网络依赖**，经 AI 对拍 + 签核 + CI 黄金用例才进事实层；内容寻址键缓存（体系+条件+版本），数值可复现、零新中间件（E1–E16 / ADR-0010） |
 
 ## 架构速览
 
@@ -90,7 +92,7 @@ flowchart TB
   end
   subgraph D[内容与资产]
     CONTENT[人工精校真实反应库<br/>权威源 + AI 对拍 + 用户签核]
-    ORD[data-ord 独立仓 CC-BY-SA-4.0<br/>主仓仅 submodule 引用]
+    ORD[data-thirdparty/ord 独立仓 CC-BY-SA-4.0<br/>主仓仅 submodule 引用]
     ART[tikz-chemlab 输出物(写实主资产)<br/>open-lab-components(UI/缩略图) · ASSETS.csv 署名]
     CONTENT --> RULES
     ORD -.事实性反应式.-> RULES
@@ -113,7 +115,7 @@ flowchart TB
 | 分子 3D | 3Dmol.js（BSD-3，F2 已销项；真实 WebGL 球棍渲染 M0 实测通过） | BSD-3 |
 | 前端 | React、PixiJS、Vite、Zustand、Lucide / Tabler | MIT / ISC |
 | 美术资产 | **tikz-chemlab**（写实主资产，LPPL 输出物）、open-lab-components（**仅 UI / 缩略图**，MIT）、LabIcons、bioicons | 逐项见资产管线 |
-| 数据 | PubChem（候选池）、Open Reaction Database（独立仓） | 免费公开 / CC-BY-SA-4.0 |
+| 数据/权威源 | **USGS PHREEQC 库族**（水溶液 logK 主源）、NIST JANAF/Kinetics/SRD46/ASD、PubChem、ATcT（受限）、CAMEO（隔离）、Open Reaction Database（隔离仓） | PD / 免费 SRD / CC-BY-SA-4.0（隔离） |
 
 > **许可证红线**：主项目 **LGPL-3.0**；宽松许可与 LGPL 组件按 §4/§6 义务接入（Reaktoro 动态链接 + 运行时可替换）；**AGPL（tptmp）严格隔离**；**GPL-3.0 组件（The Powder Toy、PhET、H5P core）在许可证层面虽与 LGPLv3 兼容，但依选型决策不纳入主链**，仅作只读参考；CC-BY-SA 数据（ORD）独立仓物理分离；LPPL 只用编译输出物、宏包源码不入库。详见 [合规矩阵](docs/design/07-API契约与部署.md)、[ADR-0001](docs/adr/ADR-0001-主许可证选LGPL-3.0.md) 与 [ADR-0005](docs/adr/ADR-0005-许可证边界与数据隔离.md)。
 
@@ -125,9 +127,9 @@ flowchart TB
 | [CHARTER.md](CHARTER.md) | 项目宪章：使命、不可协商约束、开发规范、固定裁决 |
 | [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) | 完整致谢、逐项许可证与 LGPL 显著声明 |
 | [docs/README.md](docs/README.md) | 文档总索引与阅读顺序 |
-| [docs/research/](docs/research/) | 调研：NB 对标分析、开源生态全景、美术资产链 |
+| [docs/research/](docs/research/) | 调研：NB 对标分析、开源生态全景、美术资产链、[04-M0 可行性核验](docs/research/04-M0验证报告.md)、[05-权威数据源与缓存可行性核验](docs/research/05-权威数据源与缓存可行性核验.md) |
 | [docs/design/](docs/design/) | 设计：架构、仿真内核与玩法、数据模型与 Schema、美术资产管线、工程结构与路径、教学层（长线）、API 与部署 |
-| [docs/adr/](docs/adr/) | 架构决策记录（含 ADR-0008 自适应定量调度） |
+| [docs/adr/](docs/adr/) | 架构决策记录（含 ADR-0008 自适应定量调度、[ADR-0010 权威数据供应链与缓存分层](docs/adr/ADR-0010-权威数据供应链与缓存分层.md)） |
 | [docs/10-完整规划与风险登记册.md](docs/10-完整规划与风险登记册.md) | 第一阶段主交付物：质量闸门、验收标准、全部预料中的问题与预案 |
 
 ## 路线图（按质量闸门推进，不设时间预算）
@@ -138,7 +140,7 @@ flowchart TB
 |---|---|---|
 | **M0 · 基座验证** ✅ **已完成（2026-11-15）** | 消解技术不确定性、跑通可运行门禁；含 **Windows + Linux 双平台**验证（Windows 实机受限有清单） | 十项验证技术不确定性全部消解、裁决定稿、归档可复跑、`verify_m0_s2.py` 41 断言全绿 |
 | **M1 · 垂直切片** | **一个完整体系跑通全链路**：实验台取器材 → 服务端定量求解 → 容器内现象 → 物种面板 → 实验报告 → 时间轴回放，哪怕反应数很少 | 全链路贯通、数值零错、四项好玩载体落地、架构得到验证；**不以堆反应数为目标** |
-| **M2 · 反应覆盖扩张** | 按体系逐个加深，向 **1000 个完全仿真反应**下限推进；内容按课标知识点覆盖 K12 并标注多版本教材 | 每个新增体系都必须真实、定量、可玩、已验算；黄金用例全绿 |
+| **M2 · 反应覆盖扩张** | 按体系逐个加深，向 **1000 个完全仿真反应**下限推进；主线按化学体系/玩法/器材组织，课标/教材为可选检索标签（E9） | 每个新增体系都必须真实、定量、可玩、已验算；权威参数经物化层+对拍+签核，黄金用例全绿 |
 | **M3 · 体验与表现深化** | 现象系统、错误操作后果、图鉴与进度、微观视图、跨平台细节、SP-1 调度打磨 | 60fps 与定量求解协同；焦点内数值零错；对外不冒充「已超越」的既成事实 |
 | **M4 · 长线** | 反应数不封顶持续扩张 + **教学层（附加内容，后置到此）** | 教学层不进 M1–M3 验收；长线按独立 ADR 启动 |
 
@@ -149,13 +151,17 @@ flowchart TB
 现在能做的是**读文档 + 复跑基座验证**，而不是启动产品：
 
 ```bash
-# 1. 通读顺序：CHARTER.md → docs/11-问题与决策台账.md → docs/README.md → docs/research/04-M0验证报告.md（§8 结束判定）
-# 2. 一键复跑 M0 归档自洽 + 静态合规门禁（41 项断言）
-cd docs/research/data/m0 && python3 verify_m0_s2.py
-# 3. 全部最小测试与补验的复跑步骤见 docs/research/data/m0/RERUN.md
-#    - phreeqpython / SciPy LSODA / Cantera / chempy(对拍) 定量求解链路（14/14 · 9/9 · 3/3）
-#    - Rust→WASM 现象内核 + 帧预算、Xvfb + SwiftShader 3Dmol 球棍渲染、reaktoro LGPL §6 替换
-#    - tikz-chemlab 输出物 → SVG 转译（只取编译产物，不 fork 源码）
+# 1. 通读顺序：CHARTER.md → docs/11-问题与决策台账.md（§9.6 为最新 E1–E16）→ docs/README.md
+#    → docs/research/04-M0验证报告.md（§8 结束判定）→ docs/research/05-权威数据源与缓存可行性核验.md
+# 2. 一键复跑两组门禁：
+cd docs/research/data/m0 && python3 verify_m0_s2.py          # M0 归档自洽 + 静态合规（41 项断言）
+cd docs/research/data/s2-auth && python3 verify_auth_s2.py    # 权威源/缓存门禁（38 项断言）
+# 3. 全部最小测试复跑步骤：
+#    - M0：docs/research/data/m0/RERUN.md
+#      phreeqpython/LSODA/Cantera/chempy 求解（14/14·9/9·3/3）、Rust→WASM、3Dmol WebGL、reaktoro LGPL §6
+#    - 权威源：docs/research/data/s2-auth/RERUN.md
+#      PHREEQC logK 物化(4/4) + 端点可达性(5/5) + 内容寻址缓存键(5/5)，共 14/14
+#    - 资产：tikz-chemlab 输出物 → SVG（只取编译产物，不 fork 源码）
 #    - Windows + Linux 双平台：静态核查已通过，实机清单见 deploy/README-windows.md
 # 4. 许可证：LICENSE + LICENSE.GPL-3 + LICENSE.LGPL-3 三份文件构成完整交付
 ```

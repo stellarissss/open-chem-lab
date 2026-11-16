@@ -36,7 +36,8 @@ secrets/
 !**/tokenizer*
 
 # 本地数据 / 大体量资产（走独立仓或对象存储）
-data-ord/
+data-thirdparty/
+data-ord/               # 旧隔离仓名，兼容忽略（E12 已并入 data-thirdparty/ord/）
 *.parquet
 *.pb.gz
 *.sqlite

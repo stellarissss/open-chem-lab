@@ -167,7 +167,7 @@ docker compose -f deploy/docker-compose.minimal.yml up -d
 |---|---|---|---|
 | **reaktoro-service（Reaktoro）** | **LGPL-2.1** | **独立微服务 + 动态链接 + 运行时可替换 + 显著声明 + 附 LGPL 全文 + 允许逆向调试 + 修改版源码可得**（§6 / §4） | conda 镜像内不静态编入二进制；经 UDS/protobuf 与主进程通讯；`NOTICE` 第 2 节；CI `lgpl-link-check` 校验服务镜像；**进程隔离不免除义务**（D2） |
 | **tikz-chemlab 宏包源码** | LPPL-1.3c | 不改源码、不随产品分发；只转译**编译输出物**（Clause 1）；若改源码须按 Clause 6 改名 + 变更日志 + 附原件 | 构建期从 CTAN 拉取，源码不入库；`ASSETS.csv` 署名五作者 |
-| **ord-data** | CC-BY-SA-4.0（数据）/ Apache-2.0（脚本） | 署名 + **相同方式共享** | **`data-ord/` 独立公开仓物理分离**，主仓仅 submodule；衍生规则标溯源；只抽事实性反应式 |
+| **ord-data** | CC-BY-SA-4.0（数据）/ Apache-2.0（脚本） | 署名 + **相同方式共享** | **`data-thirdparty/ord/` 统一独立仓物理分离**，主仓仅 submodule；衍生规则标溯源；只抽事实性反应式 |
 | **LabIcons** | CC-BY-4.0 | 署名 Manon Zuurmond，注明改动 | About 页 + 图注 + `ASSETS.csv` |
 | **bioicons** 单图标 | CC0 / MIT / CC-BY 各自 | **逐个**引用作者与许可 | `ASSETS.csv` 逐行记录（Servier / DBCLS / TogoTV 等） |
 | **3Dmol.js** | BSD-3-Clause（**F2 已销项**：仓库 LICENSE + npm 2.5.5） | 保留版权声明 + 引用 Bioinformatics 论文 | About 页 + `CREDITS.md`；DOI `10.1093/bioinformatics/btu829`（Crossref 核实） |

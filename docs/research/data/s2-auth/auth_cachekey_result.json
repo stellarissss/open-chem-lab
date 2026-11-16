@@ -1,0 +1,75 @@
+{
+  "case": "auth_cachekey_and_snapshot_freeze",
+  "snapshot": "2026-11-16",
+  "key_dimensions": [
+    "system",
+    "conditions",
+    "solver_version",
+    "ruleset_version"
+  ],
+  "cases": [
+    {
+      "id": "deterministic_key",
+      "expect": "同输入 → 同键（可复现命中）",
+      "actual": {
+        "k1": "e1d9a16a5c310d36",
+        "k2": "e1d9a16a5c310d36"
+      },
+      "pass_": true
+    },
+    {
+      "id": "canonical_order_invariant",
+      "expect": "条件键顺序无关（规范化序列化）→ 同键",
+      "actual": {
+        "k1": "e1d9a16a5c310d36",
+        "k_reordered": "e1d9a16a5c310d36"
+      },
+      "pass_": true
+    },
+    {
+      "id": "invalidation_on_version_change",
+      "expect": "solver/ruleset/条件任一变化 → 键变化（缓存自动失效）",
+      "actual": {
+        "base": "e1d9a16a5c310d36",
+        "cond": "beafc99dfc2ce827",
+        "solver": "cf8604045bcdc780",
+        "ruleset": "e1196bdddc9739fc"
+      },
+      "pass_": true
+    },
+    {
+      "id": "snapshot_freeze_complete",
+      "expect": "快照记录含 endpoint / license / snapshot_date / sha256 四要素",
+      "actual": {
+        "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug",
+        "license": "public-domain-USGS",
+        "snapshot_date": "2026-11-16",
+        "sha256": "77e53d805434fe0750505ad037e12969ee5e4e7a10de2fe2cde0540ca1b81bb1"
+      },
+      "pass_": true
+    },
+    {
+      "id": "tamper_detection",
+      "expect": "内容变更 → sha256 变化（篡改可检出）；相同内容 → 校验和一致",
+      "actual": {
+        "ok": "77e53d805434fe0750505ad037e12969ee5e4e7a10de2fe2cde0540ca1b81bb1",
+        "recompute": "77e53d805434fe0750505ad037e12969ee5e4e7a10de2fe2cde0540ca1b81bb1",
+        "tampered": "8da1f58cc74b1669cd806a557d6413c819ca59eec63db0f9c1a73908533dccaf"
+      },
+      "pass_": true
+    }
+  ],
+  "summary": {
+    "status": "PASS",
+    "pass": 5,
+    "total": 5,
+    "base_key": "e1d9a16a5c310d36",
+    "conclusion": "内容寻址键确定性/区分性/失效语义成立；快照四要素完整、篡改可检出；零新中间件（复用 solve_cache 结构）"
+  },
+  "snapshot_record": {
+    "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug",
+    "license": "public-domain-USGS",
+    "snapshot_date": "2026-11-16",
+    "sha256": "77e53d805434fe0750505ad037e12969ee5e4e7a10de2fe2cde0540ca1b81bb1"
+  }
+}

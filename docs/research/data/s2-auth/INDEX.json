@@ -1,0 +1,29 @@
+{
+  "snapshot": "2026-11-16",
+  "phase": "阶段二补充规划 · 权威源/缓存源可行性实测（S3）",
+  "note": "脚本与结果逐项对齐：cd 到本目录后直接运行 test_*.py 即可复现同名 JSON。均为可行性原型，不写产品代码、不进产品构建（docs/12 第一节）。复跑步骤见 RERUN.md。",
+  "decisions_ref": "台账 §9.6 E13（做 3 组实测并归档）",
+  "pairs": [
+    {
+      "script": "test_auth_snapshot.py",
+      "result": "auth_snapshot_result.json",
+      "summary": "4/4 PASS：PHREEQC 4 库共 852 条 log_k 抽取；物化主源 wateq4f 749 条；NIST/WATEQ4F 溯源可追；发现 23 个多版本反应式（印证 E8 内容寻址键需带版本维度）；确定性 SHA-256 物化",
+      "finding": "phreeqpython 自带 phreeqc.dat 为压力依赖精简版仅 3 条 log_k，真正物化主源是 wateq4f_PWN.dat（L0 认知修正，非裁决变更）"
+    },
+    {
+      "script": "test_auth_endpoints.py",
+      "result": "auth_endpoints_result.json",
+      "summary": "5/5 PASS：PubChem PUG-REST 200 且 JSON 解析出乙醇 C2H6O/46.07；NIST WebBook 200（仅验算引用）；SRD46 data.gov 入口 404、ATcT 403 如实标受限并守『不硬刷』纪律",
+      "finding": "构建期离线固化可行（E11）；运行时零网络依赖；受限端点保留复跑路径"
+    },
+    {
+      "script": "test_auth_cachekey.py",
+      "result": "auth_cachekey_result.json",
+      "summary": "5/5 PASS：内容寻址键确定性/键顺序无关/版本变化即失效；快照四要素（endpoint/license/快照日/sha256）完整；篡改可检出",
+      "finding": "E4/E8『免计算+可复现分层』成立、零新中间件"
+    }
+  ],
+  "total": {"pass": 14, "total": 14},
+  "gate": "verify_auth_s2.py",
+  "discipline": "期望值来自数据库原文/NIST 溯源/解析恒等式，非被测层自证；失败项如实记录根因与修正（首版快照脚本曾 2/4 FAIL：溯源注释在 log_k 行内、多版本反应式键冲突，均修正后重跑 4/4）"
+}

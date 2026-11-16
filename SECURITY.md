@@ -28,7 +28,7 @@
 | **时间轴 / 物种快照回放** | 超长时间轴或全量快照导致内存耗尽 | 只存关键快照 + 增量事件；回放数据尺寸上限与分页加载；轻量存档 schema 校验 |
 | **存档导入** | 恶意构造的存档触发解析放大 | 存档 schema 校验 + 尺寸上限 + 白名单字段；不执行存档内任意代码 |
 | **规则 / 参数数据** | 伪造 `verified` 参数、注入非真实物质 | 严格真实库；每条参数带 `source` / `confidence` / 适用条件；**AI 独立对拍 + 用户人工签核 + CI 黄金用例**；非 `verified` 不进沙盒；`rule_revision` 可回滚 |
-| **ORD 数据拉取脚本** | CC-BY-SA 数据误入主仓 / 触发限流 | 独立仓 `data-ord/` 物理分离；主仓仅 submodule；PubChem ≤ 5 req/s 走官方批量通道 |
+| **受限数据拉取脚本（ORD / CAMEO）** | CC-BY-SA 数据误入主仓 / 触发限流 | 统一独立仓 `data-thirdparty/`（`ord/` `cameo/` 子目录 + 逐源 LICENSE）物理分离，主仓仅 submodule；PubChem ≤ 5 req/s 走官方批量通道，**仅构建期人工拉取，运行时零网络依赖**（E11/E12） |
 | **WebSocket** | 未鉴权的现象 / 物种快照推送 | 认证 + 会话授权 + 速率限制；服务端为唯一事实源，客户端不接受越权写入 |
 | **依赖供应链** | 引入 AGPL / GPLv2-only / 有漏洞依赖 | CI `license-scan` 白名单（放行 LGPL-2.1/3.0，禁止 AGPL / GPLv2-only）+ `lgpl-link-check` 可替换性检查 + 依赖漏洞扫描 + 锁定版本 |
 | **自托管暴露** | 默认口令 / 明文传输 | `.env.example` 强制设置 `POSTGRES_PASSWORD` / `JWT_SECRET`；Caddy 自动 HTTPS |

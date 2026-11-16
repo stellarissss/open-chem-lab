@@ -38,11 +38,16 @@ jobs:
           test -f docs/adr/ADR-0006-静态参数层与动态求解层.md
           test -f docs/adr/ADR-0008-自适应定量调度.md
           test -f docs/adr/ADR-0009-M0实测驱动的选型调整.md
+          test -f docs/adr/ADR-0010-权威数据供应链与缓存分层.md
           test -f docs/12-阶段二开发流程.md
           test -f docs/research/04-M0验证报告.md
+          test -f docs/research/05-权威数据源与缓存可行性核验.md
           test -f docs/research/data/m0/INDEX.json
           test -f docs/research/data/m0/s2_completion_result.json
           test -f docs/research/data/m0/RERUN.md
+          test -f docs/research/data/s2-auth/INDEX.json
+          test -f docs/research/data/s2-auth/RERUN.md
+          test -f docs/research/data/s2-auth/verify_auth_s2.py
           test -f deploy/README-windows.md
           echo "核心文档、决策台账与阶段二主交付物齐全"
 
@@ -65,6 +70,10 @@ jobs:
         run: |
           cd docs/research/data/m0 && python3 verify_m0_s2.py
 
+      - name: 权威源/缓存源门禁（verify_auth_s2.py，阶段二补充规划）
+        run: |
+          cd docs/research/data/s2-auth && python3 verify_auth_s2.py
+
       - name: 许可证红线静态检查（静态部分；依赖树级 license-scan 后置 M1）
         run: |
           echo "白名单：MIT / BSD-2 / BSD-3 / Apache-2.0 / ISC / CC0 / CC-BY / LGPL-2.1 / LGPL-3.0"
@@ -74,7 +83,7 @@ jobs:
             echo "::error::检测到 tikz-chemlab 宏包源码，违反 ADR-0004"; exit 1
           fi
           echo "检查 .gitignore 排除密钥与数据"
-          grep -q '^.env' .gitignore && grep -q 'data-ord/' .gitignore
+          grep -q '^.env' .gitignore && grep -q 'data-thirdparty/' .gitignore
           echo "检查无明文 token 入库"
           if grep -rIl --exclude-dir=.git -E 'ghp_[A-Za-z0-9]{20,}' . | grep -q .; then
             echo "::error::检测到疑似明文 GitHub token"; exit 1
@@ -115,6 +124,16 @@ jobs:
           grep -q "libReaktoro.so" docs/research/04-M0验证报告.md
           grep -q "第二阶段（可行性验证）正式结束" docs/research/04-M0验证报告.md
           echo "阶段二收口口径齐全"
+
+      - name: 阶段二补充规划回归检查（E1–E16 权威源/缓存口径）
+        run: |
+          grep -q "E1–E16" docs/11-问题与决策台账.md
+          grep -q "wateq4f" docs/research/05-权威数据源与缓存可行性核验.md
+          grep -q "data-thirdparty" docs/design/05-工程结构与路径.md
+          grep -q "可选检索标签" docs/design/03-数据模型与反应规则Schema.md
+          grep -q "构建期固化" docs/adr/ADR-0010-权威数据供应链与缓存分层.md
+          # 旧口径不得回退：现行文档不得把 Burcat 当作可用源（史料/禁用说明除外，由 verify_auth_s2 精确核验）
+          echo "阶段二补充规划口径齐全"
 
 # ---- M1 骨架阶段待落地的产品级门禁（阶段二无产品代码，不造假门禁，见 design/05 第四节）----
 #   license-scan（依赖树白名单，复用 REUSE / scancode-toolkit / pip-licenses）

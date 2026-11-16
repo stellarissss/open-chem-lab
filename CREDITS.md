@@ -58,9 +58,9 @@
 | 数据源 | 许可/性质 | 角色 | 用途与约束 |
 |---|---|---|---|
 | [**PubChem / PUG-REST**](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest) — NIH/NLM | 免费公开、无需 API Key | **离线候选池（降级）** | 台账 1.3 / 2.2：资料卡即可玩库，**不再以「上万资料卡可查」为验收目标**。PubChem 只作为人工精校时的结构与物性候选来源；限流 ≤ 5 req/s，批量走官方下载通道 |
-| [**Open Reaction Database (ord-data)**](https://github.com/open-reaction-database/ord-data) | **CC-BY-SA-4.0**（数据）/ Apache-2.0（脚本） | 数据（**独立仓 + 署名 + SA 隔离**） | 台账 10.4：`data-ord/` 为**独立公开仓库**，主仓仅 submodule 引用；只抽事实性反应式与条件；衍生规则单独署名并保留 SA 声明；不整段复制描述文本。Parquet + Protobuf，最大文件约 40.9 万条 / 105 MB，`DatasetView` 流式读取 |
+| [**Open Reaction Database (ord-data)**](https://github.com/open-reaction-database/ord-data) | **CC-BY-SA-4.0**（数据）/ Apache-2.0（脚本） | 数据（**独立仓 + 署名 + SA 隔离**） | 台账 10.4 / §9.6 E12：`data-thirdparty/ord/` 为**统一独立仓子目录**，主仓仅 submodule 引用；只抽事实性反应式与条件；衍生规则单独署名并保留 SA 声明；不整段复制描述文本。Parquet + Protobuf，最大文件约 40.9 万条 / 105 MB，`DatasetView` 流式读取 |
 | [ord-schema](https://github.com/open-reaction-database/ord-schema) | **Apache-2.0** | 设计参考 | 反应数据 schema，作为内部规则表设计参考 |
-| [**ORDerly**](https://github.com/sustainable-processes/ORDerly) | **MIT** | ★127 | 离线管线（可选） | ORD 数据抽取与清洗；因产品收敛到真实中学体系，ORD 使用范围已收窄 |
+| [**ORDerly**](https://github.com/sustainable-processes/ORDerly) | **MIT** | ★127 | 离线管线（可选） | ORD 数据抽取与清洗；产品主线为「好玩+专业」的仿真化学实验室（非中学教学工具），ORD 仅作有机反应事实性候选池、使用范围受限（台账 §9.6 E6/E9） |
 | [Wikidata 化学条目 / ChEBI](https://www.wikidata.org/) | 开放数据 | 数据 | 中文名、别名、分类补充（M2 阶段核实具体条款） |
 
 ## 5. 分子 / 晶体 3D 可视化（唯一 3D 用途）
@@ -155,7 +155,7 @@
 | **动态链接 / 库可替换 / 允许逆向调试 / 附 LGPL 全文** | **reaktoro-service (LGPL-2.1)** | 台账【补正 A】§6 义务清单 + D2 独立微服务裁定；进程隔离不免除义务，运行时可替换、不静态编入主二进制；CI `lgpl-link-check` 校验服务镜像内的动态链接与可替换性。**M0 收尾补注**：conda 单包 `info/` 不含 LGPL 全文，服务镜像须自行随附 `LICENSE.LGPL-2.1`（见 `04` §5.6） |
 | 保留版权声明 + 引用论文 | RDKit (BSD-3)、3Dmol.js (BSD-3，M0 复核) | About 页 + `assets/attribution/`；3Dmol.js 引用其 Bioinformatics 论文 |
 | **署名 + 声明改动** | LabIcons (CC-BY-4.0)、bioicons 中 CC-BY 图标、tikz-chemlab / pst-labo (LPPL) | 逐资产署名清单；图注 / 致谢页注明 |
-| **相同方式共享（SA）** | ord-data (CC-BY-SA-4.0) | **独立公开仓 `data-ord/` 物理分离**，主仓仅 submodule；衍生规则表单独署名并保留 SA 声明；只抽取事实性反应式与条件 |
+| **相同方式共享（SA）** | ord-data (CC-BY-SA-4.0) | **统一独立仓 `data-thirdparty/ord/` 物理分离**，主仓仅 submodule；衍生规则表单独署名并保留 SA 声明；只抽取事实性反应式与条件 |
 | **改源码需改名 + 变更日志 + 附原件** | tikz-chemlab 宏包源码 (LPPL-1.3c Clause 6) | 不 fork 源码，只转译编译输出物 |
 | **不纳入（选型决策）** | The Powder Toy / PhET / H5P core (GPL-3.0) | 换证后许可证可行，但依台账 6.2 维持「只读参考」；ADR-0001/0005 须写清「为何换证却不引入」 |
 | **严格隔离** | tptmp (AGPL-3.0)、GPLv2-only | 完全不碰；CI 白名单禁止 |

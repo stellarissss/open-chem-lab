@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### 阶段二补充规划 · 权威源 / 缓存源（2026-11-16，CHARTER v2.1）
+
+- **决策**：新增 E1–E16 共 16 项裁决并逐字固定入台账 §9.6（决策点穷尽）；触及固定裁决的 E3（改写 10.3）/ E9（K12 降为可选检索标签）/ E11（构建期固化、运行时零依赖）/ E12（统一 `data-thirdparty/` 隔离仓）经 **ADR-0010** + CHARTER 第 7 条落地，CHARTER 升 v2.1。
+- **权威源供应链**：台账 10.3 的机构名清单落到「具体可机读库 + 端点 + 许可证 + 快照日」——USGS PHREEQC 库族（水溶液主源）、NIST JANAF/Kinetics/SRD46/ASD、PubChem、CAMEO（隔离）、ATcT（受限）；外部数据一律待签核候选、禁直通；数据按 `fact`/`presentation`/`safety` 三类分层。红线库逐库定级（Burcat 永久禁用→JANAF 替代、NASA CEA 只读参考、Thermochimica/PyThermoCalcDB-NASA 弃用）。
+- **缓存纠错**：M0 实测主引擎 0.21ms 无需提速，缓存目标改为「免计算 + 可复现」：构建期物化 O(1) 查表 + 内容寻址键（体系+条件+solver_ver+ruleset_ver）+ 快照固化，复用 `solve_cache` 零新中间件。
+- **实测与门禁**：新增三组可重跑实测（`research/data/s2-auth/`，14/14 PASS）与 `verify_auth_s2.py`（38 断言），接入 `docs.yml`；新报告 [`research/05`](docs/research/05-权威数据源与缓存可行性核验.md) + [`ADR-0010`](docs/adr/ADR-0010-权威数据供应链与缓存分层.md)。
+- **全仓收尾**：按 AI Agent 方法论精简归并优化文档；清掉 4 处「中学体系」易混淆措辞；现行文档隔离仓口径统一为 `data-thirdparty/`（史料段保留）；README / docs/README / CHARTER / CREDITS / SECURITY / CONTRIBUTING / 全 design / 全 ADR / docs/10 / CI 口径回归同步。
+
 ### 阶段一 · 决策收口与全仓修订（2026-11-14，v2.0）
 
 **决策阶段**
@@ -22,7 +30,7 @@
 - **验算**：权威源（NIST / CRC / IUPAC / 课标附录 / 开放教材）+ AI 独立对拍 + 用户人工签核 + CI 黄金用例；每条参数带 `source` / `confidence` / 适用条件。
 - **路线图**：全仓**删除时间预算**，改为质量闸门；M0 基座验证 / M1 垂直切片（跑通全链路）/ M2 反应覆盖扩张向 1000 / M3 体验与表现深化 / M4 长线；教学层**保留愿景 · 后置长线**，不进 M1–M3；统一阶段归属，矛盾编号改用 `M-xx` 前缀。
 - **i18n**：UI 简中默认 + 英文可选；文档仅简体中文；物质名 / 术语 / 方程式中英双语。
-- **ORD**：独立公开仓物理分离，主仓仅 submodule 引用；目录树不再把 `data-ord/` 画在 monorepo 内。
+- **ORD**：独立公开仓物理分离，主仓仅 submodule 引用；目录树不再把 `data-ord/` 画在 monorepo 内（**现行口径见阶段二补充规划 E12**：已并入统一独立仓 `data-thirdparty/ord/`）。
 - **硬矛盾销项**：M-01 工期、M-02 阶段归属、M-03 i18n、M-04 ORD 隔离形态、M-05 `assets/structure(s)/` 命名统一为 `structures/`、M-06 未证实数据删除、M-07 分子可视化组件清单统一。
 - **工程规范**：`CONTRIBUTING` / `SECURITY` / `docs/README.md` / CI 工作流 / Issue 与 PR 模板 / 资产署名清单 / asset-pipeline 说明按新口径同步。
 - **二次矛盾审计**：内部链接、LGPL 双文本、token 泄露、LPPL / GPL / CC-BY-SA 隔离、旧口径回归扫描、CRLF 与 `git diff --check` 全部通过；新增 [`docs/research/data/README.md`](docs/research/data/README.md) 归档声明与 11 条作废口径对照表，两份原始报告头部追加警示块（史料原文不改），`docs/README.md` 索引改标「历史归档 · 不作现行设计依据」，CI 增加归档标识门禁，消除「初版史料被误读为现行设计」的疏漏；`design/01` 图节点 `M3`→`V3D`、`design/03` 引用消歧。完整审计结果见台账 §8.4。

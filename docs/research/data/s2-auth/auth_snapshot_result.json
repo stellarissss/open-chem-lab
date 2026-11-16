@@ -1,0 +1,67 @@
+{
+  "case": "auth_snapshot_PHREEQC_logK_materialization",
+  "snapshot": "2026-11-16",
+  "source": "phreeqpython bundled USGS PHREEQC databases (USGS government work / public domain)",
+  "dbdir": "/root/.pyenv/versions/3.11.1/lib/python3.11/site-packages/phreeqpython/database",
+  "per_db": {
+    "wateq4f_PWN.dat": {
+      "logk_entries": 749,
+      "with_trace_note": 1,
+      "raw_logk_lines": 753
+    },
+    "pitzer.dat": {
+      "logk_entries": 94,
+      "with_trace_note": 2,
+      "raw_logk_lines": 98
+    },
+    "phreeqc.dat": {
+      "logk_entries": 3,
+      "with_trace_note": 1,
+      "raw_logk_lines": 3
+    },
+    "vitens.dat": {
+      "logk_entries": 6,
+      "with_trace_note": 1,
+      "raw_logk_lines": 6
+    }
+  },
+  "cases": [
+    {
+      "id": "wateq4f_rich_logk",
+      "expect": "≥500 条水溶液 log_k（权威物化价值）",
+      "actual": 749,
+      "pass_": true
+    },
+    {
+      "id": "nist_trace_note",
+      "expect": "≥1 条带 NIST/minteq/WATEQ4F 溯源注释（权威可追溯）",
+      "actual": 1,
+      "pass_": true
+    },
+    {
+      "id": "o1_lookup_index",
+      "expect": "带版本维度的物化索引命中一致（多版本反应式不丢失）",
+      "actual": {
+        "index_size": 852,
+        "items": 852,
+        "multi_version_rxns": 23
+      },
+      "pass_": true
+    },
+    {
+      "id": "deterministic_checksum",
+      "expect": "规范化序列化 SHA-256 稳定",
+      "actual": "1328244226cec407dff1ec3adc9a9c27007c7ea5799d08bca276da9b556c729c",
+      "pass_": true
+    }
+  ],
+  "summary": {
+    "status": "PASS",
+    "pass": 4,
+    "total": 4,
+    "wateq4f_materialized": 749,
+    "all_db_logk_entries": 852,
+    "materialized_checksum": "1328244226cec407dff1ec3adc9a9c27007c7ea5799d08bca276da9b556c729c",
+    "note": "phreeqc.dat 精简版仅 3 条 log_k；物化主源选 wateq4f_PWN.dat（754 条）"
+  }
+}

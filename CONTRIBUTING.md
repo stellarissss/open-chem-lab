@@ -55,7 +55,7 @@ effects: [ ... ]              # 现象指令，不是渲染代码
 
 - 流程：**权威源**（NIST / CRC / IUPAC / 课标附录 / 开放教材）→ **AI 用独立解析解 + ChemPy / Cantera / phreeqpython 交叉对拍** → **用户人工签核** → **黄金用例进 CI**，错了不许进沙盒（台账 4.4 / 10.3）。黄金用例须同时校验 `sane` 与 `success`，并把 PHREEQC 的 `-999` 哨兵值列为非法输入（M0 §4.6 / §5.2）。
 - **数值零错红线**：反应方向、产物、计量、守恒、平衡趋势、pH / 浓度数值必须准确；近似只作用于视觉、时间尺度与夸张程度，**不得进入化学事实层**。
-- **禁止**整段复制 Open Reaction Database 描述文本（CC-BY-SA 边界），只取事实性反应式与条件，并标注溯源；ORD 数据放独立仓 `data-ord/`。
+- **禁止**整段复制 Open Reaction Database 描述文本（CC-BY-SA 边界），只取事实性反应式与条件，并标注溯源；受限数据放统一独立仓 `data-thirdparty/`（`ord/` 子目录）。
 - 规则改动须在 `golden-cases/` 补断言，并走 `rule_revision`（禁止原地覆盖）。
 - i18n：字段名英文 snake_case；物质名 / 术语 / 方程式中英双语（UI 简中默认 + 英文可选，文档仅简体中文）。
 
