@@ -46,6 +46,7 @@
 - 以台账为唯一标准完成全仓设计文档系统性修订，并通过二次矛盾审计
 - **第二阶段 M0 可行性核验全部收口**（2026-11-15）：十项验证的技术不确定性全部消解；WASM 现象本体、3Dmol.js 真实 WebGL、Kenney CC0 销项、reaktoro LGPL §6 可替换性均经真实环境实测；结论见 [04-M0验证报告](docs/research/04-M0验证报告.md) §8，复跑见 [RERUN.md](docs/research/data/m0/RERUN.md)
 - **第二阶段补充规划收口**（2026-11-16）：解决「权威信息源 + 反应缓存」问题，E1–E16 共 16 项裁决全部固定；权威源落到具体可机读供应链（USGS PHREEQC 库族为水溶液主源、NIST/JANAF/PubChem/CAMEO 分层），构建期物化、运行时零依赖；三组实测 14/14 通过；结论见 [05-权威数据源与缓存可行性核验](docs/research/05-权威数据源与缓存可行性核验.md) 与 [ADR-0010](docs/adr/ADR-0010-权威数据供应链与缓存分层.md)
+- **阶段三开发流程（DocDD）规划收口**（2026-11-20）：确立**文档驱动开发**总体模式，台账 §10 固定 P1–P6；按「个人娱乐开源、不套企业标准」定为**轻量务实**流程；新增 AI 入口 [`AGENTS.md`](AGENTS.md)、流程正文 [`docs/13`](docs/13-文档驱动开发流程.md)、交接区 [`docs/progress/`](docs/progress/README.md)
 
 **尚不包含可运行的产品代码**。这是刻意的：先用文档与最小测试把技术不确定性、许可证红线、资产来源、数据规模和工程路径全部消解，再在 M1 垂直切片动手写产品代码，避免推倒重来。Windows 实机部署清单见 [deploy/README-windows.md](deploy/README-windows.md)。
 
@@ -123,10 +124,13 @@ flowchart TB
 
 | 文档 | 内容 |
 |---|---|
-| [docs/11-问题与决策台账.md](docs/11-问题与决策台账.md) | **决策单一事实源**：11 批裁决、矛盾销项、噪音/幻觉审计 |
+| [AGENTS.md](AGENTS.md) | **AI 开发第一站**：项目卡、硬约束、现场指针（上下文压缩后先读它恢复记忆） |
+| [docs/11-问题与决策台账.md](docs/11-问题与决策台账.md) | **决策单一事实源**：11 批裁决 + E1–E16 + P1–P6（§10）、矛盾销项、噪音/幻觉审计 |
 | [CHARTER.md](CHARTER.md) | 项目宪章：使命、不可协商约束、开发规范、固定裁决 |
 | [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) | 完整致谢、逐项许可证与 LGPL 显著声明 |
 | [docs/README.md](docs/README.md) | 文档总索引与阅读顺序 |
+| [docs/13-文档驱动开发流程.md](docs/13-文档驱动开发流程.md) | **阶段三起开发流程**：DocDD 轻量落地、任务闭环、交接留痕、无强制门禁、M1 薄切片 |
+| [docs/progress/](docs/progress/README.md) | 开发进度：`LAST_SESSION.md` 会话交接 + `done/` 执行报告 |
 | [docs/research/](docs/research/) | 调研：NB 对标分析、开源生态全景、美术资产链、[04-M0 可行性核验](docs/research/04-M0验证报告.md)、[05-权威数据源与缓存可行性核验](docs/research/05-权威数据源与缓存可行性核验.md) |
 | [docs/design/](docs/design/) | 设计：架构、仿真内核与玩法、数据模型与 Schema、美术资产管线、工程结构与路径、教学层（长线）、API 与部署 |
 | [docs/adr/](docs/adr/) | 架构决策记录（含 ADR-0008 自适应定量调度、[ADR-0010 权威数据供应链与缓存分层](docs/adr/ADR-0010-权威数据供应链与缓存分层.md)） |
@@ -151,8 +155,9 @@ flowchart TB
 现在能做的是**读文档 + 复跑基座验证**，而不是启动产品：
 
 ```bash
-# 1. 通读顺序：CHARTER.md → docs/11-问题与决策台账.md（§9.6 为最新 E1–E16）→ docs/README.md
-#    → docs/research/04-M0验证报告.md（§8 结束判定）→ docs/research/05-权威数据源与缓存可行性核验.md
+# 1. AI/开发者入口：AGENTS.md（核心记忆）→ docs/progress/LAST_SESSION.md（当前现场）
+#    通读顺序：CHARTER.md → docs/11-问题与决策台账.md（§9.6=E1–E16，§10=P1–P6）→ docs/README.md
+#    → docs/13-文档驱动开发流程.md → docs/research/04-M0验证报告.md（§8）→ docs/research/05-权威数据源与缓存可行性核验.md
 # 2. 一键复跑两组门禁：
 cd docs/research/data/m0 && python3 verify_m0_s2.py          # M0 归档自洽 + 静态合规（41 项断言）
 cd docs/research/data/s2-auth && python3 verify_auth_s2.py    # 权威源/缓存门禁（38 项断言）

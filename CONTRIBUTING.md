@@ -1,12 +1,13 @@
 # 贡献指南 · CONTRIBUTING
 
-欢迎参与。本项目**第一阶段（规划与设计）已收口、第二阶段（可行性验证 / M0）已于 2026-11-15 结束**，正进入阶段三 M1 垂直切片（尚无产品代码）。工作体制为**单人 + AI Agent**，贡献者协议从简，不设复杂协作机制（台账 9.4）。阶段二实测证据与复跑步骤见 [`docs/research/04-M0验证报告.md`](docs/research/04-M0验证报告.md) 与 [`docs/research/data/m0/RERUN.md`](docs/research/data/m0/RERUN.md)。
+欢迎参与。本项目**第一阶段（规划与设计）已收口、第二阶段（可行性验证 / M0）已于 2026-11-16 结束**，正进入阶段三 M1 垂直切片（尚无产品代码）。工作体制为**单人 + AI Agent**，贡献者协议从简，不设复杂协作机制（台账 9.4）。阶段三起遵循**文档驱动开发（DocDD）轻量流程**（[`docs/13`](docs/13-文档驱动开发流程.md)：按规模伸缩闭环、无强制门禁、留痕可追溯）。阶段二实测证据与复跑步骤见 [`docs/research/04-M0验证报告.md`](docs/research/04-M0验证报告.md) 与 [`docs/research/data/m0/RERUN.md`](docs/research/data/m0/RERUN.md)。
 
 贡献前请先读：
 
+0. [AGENTS.md](AGENTS.md) — **AI/开发者第一站**（项目卡 + 硬约束 + 现场指针）；再读 [docs/progress/LAST_SESSION.md](docs/progress/LAST_SESSION.md)（当前现场）
 1. [docs/11-问题与决策台账.md](docs/11-问题与决策台账.md) — **决策单一事实源，先读**
 2. [CHARTER.md](CHARTER.md) — 使命、开发规范、固定裁决（**不可绕过**）
-3. [docs/README.md](docs/README.md) — 文档索引
+3. [docs/README.md](docs/README.md) — 文档索引；[docs/13](docs/13-文档驱动开发流程.md) — 开发流程
 4. [docs/adr/](docs/adr/) — 关键决策及理由
 5. [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) — 许可证基线与 LGPL 显著声明
 
@@ -17,7 +18,7 @@
 | **真实反应内容精校** | `content/rules/` 中已验算的真实反应参数（Ka/Kb/Ksp/E°/ΔG、热物性、动力学），带**权威源 + 适用条件 + AI 对拍记录 + 人工签核** —— **最高价值** |
 | M0 验证 | `docs/10-完整规划与风险登记册.md` 的 M0 验证清单，含 Win / Linux 双平台 |
 | 美术资产 | tikz-chemlab 编译输出物 → SVG 转译、写实风格统一、逐资产署名清单整理 |
-| 课标知识点整理 | 按课标知识点组织反应覆盖、标注多版本教材对应章节（**内容组织，不是内置教学功能**） |
+| 内容体系整理 | 按化学体系 / 玩法 / 器材组织反应覆盖；课标 / 教材为可选检索标签（E9，**不是内置教学功能**） |
 | 文档 | 纠正事实、补充一级来源、术语双语 |
 
 ## 规范
