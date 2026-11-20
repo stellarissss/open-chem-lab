@@ -52,17 +52,25 @@
 
 ## 快速开始
 
-当前处于 **M1 准备阶段，尚无产品代码**——现在能做的是读文档：
+M1 切片 001「骨架搭建」已交付：可运行的产品骨架（前后端常驻 + Docker Compose 单机自托管）。产品化部署已可用：
 
 ```bash
-# AI/开发者入口，按顺序：
-# AGENTS.md → docs/02-Roadmap.md（当前进度）→ docs/01-Architecture.md（技术真理源）
-# → docs/03-DocDD-Process.md（流程）→ docs/specs/（当前切片规格）
+# 1. 构建并起服（仓库根执行；需 Node 20.19+ / pnpm 10 / Docker）
+cp deploy/.env.example deploy/.env        # 按需修改端口与本地开发口令
+docker compose -f deploy/docker-compose.minimal.yml up -d --build
+
+# 2. 浏览器打开 http://localhost:8080 —— 实验台壳页显示后端 health=OK
+#    网关 health: curl http://localhost:3001/api/v1/health
+#    停止: docker compose -f deploy/docker-compose.minimal.yml down
+
+# 开发者本地构建（不起容器）：
+pnpm install && pnpm build
+python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
 ```
 
-阶段一/二的实测脚本、原始 JSON 与门禁（`verify_m0_s2.py` 41 断言、`verify_auth_s2.py` 38 断言）作为**历史证据资产**保留在 `docs/归档/research/data/`，证明技术不确定性已消解；它们基于归档前目录结构，**不作现行运行门禁**（见 `docs/03-DocDD-Process.md` 第四节）。
+> 当前骨架**无任何真实化学体系或求解逻辑**——那是从切片 002/003 起逐片接入的内容。AI/开发者入口按 `AGENTS.md` → `docs/02-Roadmap.md` → `docs/01-Architecture.md` → `docs/03-DocDD-Process.md` → `docs/specs/` 顺序。
 
-产品化部署（`docker compose up -d`）将在 **M1 切片 001「骨架搭建」** 交付；部署形态锁定单机自托管，双平台兼容。
+阶段一/二的实测脚本、原始 JSON 与门禁（`verify_m0_s2.py` 41 断言、`verify_auth_s2.py` 38 断言）作为**历史证据资产**保留在 `docs/归档/research/data/`，证明技术不确定性已消解；它们基于归档前目录结构，**不作现行运行门禁**（见 `docs/03-DocDD-Process.md` 第四节）。
 
 ---
 

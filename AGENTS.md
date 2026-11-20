@@ -26,8 +26,10 @@
 
 ## 当前焦点
 
-- 阶段三 M1 准备中，仓库尚无产品代码。下一步：启动切片 001「骨架搭建」，规格见 `docs/specs/spec-001-骨架搭建.md`。
+- 阶段三 M1 迭代中：切片 001「骨架搭建」✅ 已完成并实测通过（2026-11-20）。下一步：切片 002「内容 schema」（可玩物质库 + 静态参数物化层），开工先写 `specs/spec-002-*.md`。
+- 产品骨架：pnpm monorepo（`@st/protocol` / `@st/gateway` / `@st/web-ui` / `solver-worker` / `reaktoro-service` 占位）+ Docker Compose 单机自托管。构建 `pnpm build`；起服 `docker compose -f deploy/docker-compose.minimal.yml up -d --build`；许可证门禁 `python3 tests/license-scan/scan.py`。
 
 ## 变更留痕（最近在上）
 
+- 2026-11-20：M1 切片 001「骨架搭建」完成——pnpm monorepo + protocol schema/类型生成 + Fastify gateway(health/WS) + React/Vite 壳页 + Python worker + reaktoro 占位 + Compose 四服务 + CI 雏形；全量构建/联调/license-scan 实测通过；Windows 实机待用户补测。
 - 2026-11-20：文档体系重构完成——台账/CHARTER/旧规划/ADR/design/research/CHANGELOG 归档；新建 `01-Architecture`（唯一真理源）/`02-Roadmap`/`03-DocDD` + `specs/spec-001`；AGENTS/README/CONTRIBUTING/CREDITS/模板/CI 全量对齐；现行文档零断链。

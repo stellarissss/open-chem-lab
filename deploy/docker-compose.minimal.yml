@@ -1,0 +1,68 @@
+# ST Crucible 最小单机自托管编排（spec-001）
+# 构建上下文为仓库根；从仓库根执行：
+#   docker compose -f deploy/docker-compose.minimal.yml up -d
+name: st-crucible
+
+services:
+  gateway:
+    build:
+      context: ..
+      dockerfile: packages/gateway/Dockerfile
+    environment:
+      PORT: 3001
+      HOST: 0.0.0.0
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+    # 仅回环发布，避免直接暴露到公网（单机自托管）。
+    ports:
+      - "${GATEWAY_PORT:-127.0.0.1:3001}:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: packages/web-ui/Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
+  solver-worker:
+    build:
+      context: ..
+      dockerfile: packages/solver-worker/Dockerfile
+    environment:
+      HEARTBEAT_SECONDS: ${HEARTBEAT_SECONDS:-5}
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-st_crucible}
+      POSTGRES_USER: ${POSTGRES_USER:-st}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-st_local_dev_only}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-st} -d ${POSTGRES_DB:-st_crucible}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # 占位服务：默认不启动（profile），spec-003 之后接入真实 conda 镜像与 gRPC。
+  reaktoro-service:
+    build:
+      context: ..
+      dockerfile: packages/reaktoro-service/Dockerfile
+    profiles: ["reaktoro"]
+
+volumes:
+  pgdata:

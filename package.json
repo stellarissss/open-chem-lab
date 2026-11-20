@@ -1,0 +1,23 @@
+{
+  "name": "st-crucible",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ST Crucible / ST实验室 — 开源、可自托管的仿真化学实验室",
+  "license": "LGPL-3.0-only",
+  "engines": {
+    "node": ">=20.19.0",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "build": "pnpm -r --filter './packages/**' build",
+    "build:types": "pnpm --filter @st/protocol build:types",
+    "dev": "pnpm -r --parallel --filter './packages/**' dev",
+    "typecheck": "pnpm -r --filter './packages/**' typecheck",
+    "clean": "pnpm -r --filter './packages/**' clean",
+    "license:scan": "python3 tests/license-scan/scan.py"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

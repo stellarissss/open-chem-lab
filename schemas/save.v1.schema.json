@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/save.v1.schema.json",
+  "title": "SaveGame",
+  "description": "轻量存档：实验台上的器材与物质摆布 + 时间轴引用 + 规则集版本。刻意不含网格/RLE/多人协作/Yjs。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "save_id", "ruleset_version", "apparatus", "substances", "created_at"],
+  "properties": {
+    "schema_version": { "const": "st.save.v1" },
+    "save_id": { "type": "string", "minLength": 1 },
+    "ruleset_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "规则集版本，存档回放必须用同版规则集以保证数值可复现"
+    },
+    "apparatus": {
+      "type": "array",
+      "description": "实验台器材摆布（位置/朝向/连接关系，坐标由表现层定义）",
+      "items": { "$ref": "#/$defs/ApparatusPlacement" }
+    },
+    "substances": {
+      "type": "array",
+      "description": "已取用物质（引用 content 中的物质 ID，不内联虚构数据）",
+      "items": { "$ref": "#/$defs/SubstanceRef" }
+    },
+    "timeline_ref": {
+      "type": ["string", "null"],
+      "description": "关联的时间轴快照引用；null 表示尚未产生时间轴"
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "ApparatusPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["apparatus_id", "placement_id", "x", "y"],
+      "properties": {
+        "placement_id": { "type": "string", "minLength": 1 },
+        "apparatus_id": { "type": "string", "minLength": 1, "description": "引用 apparatus 实体的 ID" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "rotation_deg": { "type": "number", "default": 0 },
+        "connections": {
+          "type": "array",
+          "description": "导管等连接关系（对端 placement_id）",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+    "SubstanceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compound_id", "placement_id"],
+      "properties": {
+        "compound_id": { "type": "string", "minLength": 1, "description": "引用 content 中的真实物质 ID" },
+        "placement_id": { "type": "string", "minLength": 1, "description": "所在器材摆位 ID" },
+        "amount": { "type": "number", "minimum": 0, "description": "取用量（单位由物质卡定义）" }
+      }
+    }
+  }
+}

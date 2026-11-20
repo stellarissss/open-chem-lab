@@ -1,0 +1,25 @@
+{
+  "name": "@st/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API 网关：Fastify REST + WS，鉴权/会话/限流的落点（骨架仅健康检查 + WS 握手）",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --import tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@fastify/websocket": "11.3.7",
+    "@st/protocol": "workspace:*",
+    "fastify": "5.12.8"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@st/protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "st.phenomenon.v1 / 存档 / 时间轴的最小类型与协议（monorepo 最底层，不依赖任何业务包）",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build:types": "node scripts/generate-types.mjs",
+    "build": "pnpm build:types && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist src/generated"
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "16.0.0",
+    "typescript": "5.9.3"
+  }
+}

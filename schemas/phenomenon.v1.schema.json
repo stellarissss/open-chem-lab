@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/phenomenon.v1.schema.json",
+  "title": "PhenomenonDirective",
+  "description": "st.phenomenon.v1 — 求解层与表现层的解耦协议。服务端只发『现象指令』，WASM 表现层只认指令 ID 与物理量，不认分子、不认求解细节。数值零错红线不作用于本协议（表现层可夸张）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "directive_id", "container_id", "type", "timestamp_ms"],
+  "properties": {
+    "schema_version": {
+      "const": "st.phenomenon.v1",
+      "description": "协议版本常量，解耦双方的唯一握手凭据"
+    },
+    "directive_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "指令唯一 ID，供幂等与回放去重"
+    },
+    "container_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "目标容器/器材 ID"
+    },
+    "type": {
+      "$ref": "#/$defs/PhenomenonType",
+      "description": "现象类别（表现层注册表，新增类别走协议版本升级，不进化学事实层）"
+    },
+    "timestamp_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "相对仿真起点的毫秒时间戳，驱动时间轴对齐"
+    },
+    "intensity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5,
+      "description": "归一化表现强度（可夸张，非化学量）"
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "表现持续时长；0 表示瞬时事件"
+    },
+    "physics": {
+      "type": "object",
+      "description": "关联物理量快照（仅表现所需，如温度/体积，均为显示值）",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "PhenomenonType": {
+      "type": "string",
+      "description": "表现层现象类别。当前为最小集，长线扩到 12 类须升 schema_version。",
+      "enum": [
+        "liquid_change",
+        "gas_bubble",
+        "precipitate",
+        "flame",
+        "splash",
+        "color_change",
+        "temperature_change",
+        "crystallization",
+        "smoke",
+        "glow",
+        "phase_separation",
+        "motion"
+      ]
+    }
+  }
+}

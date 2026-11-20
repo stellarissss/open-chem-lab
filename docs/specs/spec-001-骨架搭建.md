@@ -53,4 +53,13 @@
 
 ## 状态
 
-⬜ 待开始（当前 M1 第一个切片）
+✅ 已完成（2026-11-20，M1 第一个切片）
+
+**验证记录**（最小充分证据，无强制门禁）：
+- 全量构建：`pnpm build` 通过（protocol 类型生成 + gateway tsc + web-ui tsc+vite）。
+- 运行时：gateway health 200、WS 握手+echo 通过；`docker compose up -d --build` 四服务全起、gateway/postgres/web healthy。
+- 浏览器链路：web 首页 200，经 nginx 反代 `/api/v1/health` 返回 OK；前端 bundle 含 health 展示逻辑与实验台壳页。
+- 静态：license-scan 142 依赖无禁止许可；无 CRLF、无明文凭证；lockfile（pnpm/uv）入库；生成类型由 schema 构建期生成。
+- **受限**：Windows 实机未测（沙箱为 Ubuntu），按 `deploy/README-windows.md` 做静态核查；`.gitattributes` 已强制 LF、路径无平台敏感字符。reaktoro-service 为占位（profile，本切片不接真实求解，符合范围）。
+
+**关键实现决策**（L1，已同步）：ESM `NodeNext` 仅用于 gateway（tsc 输出可被 node 直接跑），protocol/web-ui 用 `Bundler`；Web 经 nginx 反代 gateway（浏览器单一入口，符合"web-ui 经 gateway 访问"）；TS 锁 5.9.3、Vite 7.3.8 + plugin-react 5（避开激进的 TS7/Vite8，符合真理源 5.x）。

@@ -1,0 +1,43 @@
+# 产品级 CI 雏形（spec-001）：构建 + 依赖许可证门禁。
+# 文档合规门禁在 docs.yml。数值零错/golden-cases/schema-validate 随后续切片接入。
+# 按 03-DocDD-Process.md：无强制门禁文化，CI 是最小充分证据，不是开发阻塞。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: 全量构建（protocol 类型生成 + gateway/web-ui 编译）
+        run: pnpm build
+
+  license-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: 依赖许可证白名单门禁
+        run: python3 tests/license-scan/scan.py

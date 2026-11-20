@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/timeline.v1.schema.json",
+  "title": "SpeciationTimeline",
+  "description": "关键快照时间轴：隐藏化学态每帧变化的稀疏快照 + 曲线。物种面板与时间轴回放的数据来源。事实层数据（非表现）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "timeline_id", "ruleset_version", "keyframes"],
+  "properties": {
+    "schema_version": { "const": "st.timeline.v1" },
+    "timeline_id": { "type": "string", "minLength": 1 },
+    "ruleset_version": { "type": "string", "minLength": 1 },
+    "keyframes": {
+      "type": "array",
+      "description": "按时间升序的关键帧快照",
+      "items": { "$ref": "#/$defs/Keyframe" }
+    },
+    "curves": {
+      "type": "array",
+      "description": "按物种/物理量聚合的连续曲线（可选，回放时可插值）",
+      "items": { "$ref": "#/$defs/Curve" },
+      "default": []
+    }
+  },
+  "$defs": {
+    "Keyframe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp_ms", "container_id", "speciation"],
+      "properties": {
+        "timestamp_ms": { "type": "integer", "minimum": 0 },
+        "container_id": { "type": "string", "minLength": 1 },
+        "speciation": { "$ref": "#/$defs/SpeciationSnapshot" }
+      }
+    },
+    "SpeciationSnapshot": {
+      "type": "object",
+      "description": "每容器隐藏化学态快照（solution_speciation 的投影）",
+      "additionalProperties": true,
+      "required": ["ph"],
+      "properties": {
+        "ph": { "type": "number" },
+        "ionic_strength": { "type": "number", "minimum": 0 },
+        "species": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "concentration_mol_l"],
+            "properties": {
+              "name": { "type": "string", "description": "物种名（引用事实层标识）" },
+              "concentration_mol_l": { "type": "number", "minimum": 0 },
+              "phase": { "type": "string", "description": "aq/s/g 等相态" }
+            }
+          },
+          "default": []
+        }
+      }
+    },
+    "Curve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["species", "points"],
+      "properties": {
+        "species": { "type": "string" },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[timestamp_ms, value]"
+          }
+        }
+      }
+    }
+  }
+}
