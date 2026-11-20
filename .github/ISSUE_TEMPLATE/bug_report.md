@@ -22,7 +22,7 @@ labels: bug
 
 ## 涉及文件
 
-<!-- 例如 docs/design/03-...md、ADR-0006、content/rules/... -->
+<!-- 例如 docs/01-Architecture.md、docs/specs/spec-001-骨架搭建.md、content/rules/... -->
 
 ## 建议（可选）
 

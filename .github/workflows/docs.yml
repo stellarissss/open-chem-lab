@@ -1,6 +1,6 @@
-# 文档与合规 CI（阶段一即生效；阶段二 M0 收尾已接入归档自洽门禁；产品级门禁 M1 骨架补齐）
-# 阶段边界依 docs/12 第一节：阶段二不写产品代码，故 license-scan/schema-validate/golden-cases/build/e2e
-# 需真实依赖树/content//产品用例才有意义，后置 M1；当前 run 的 verify_m0_s2.py 校验归档实测数据与静态合规红线。
+# 文档与合规 CI（轻量）
+# 校验现行文档结构、LGPL-3.0 交付与静态合规红线。
+# 阶段二历史门禁脚本已归档（docs/归档/research/data/），属历史证据资产，不作现行运行门禁。
 name: docs-and-compliance
 
 on:
@@ -15,41 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 检查文档内部链接
-        uses: lycheeverse/lychee-action@v2
-        with:
-          args: >-
-            --no-progress
-            --exclude 'https://nobook.com|https://hx.nobook.com'
-            '**/*.md'
-          fail: true
-        continue-on-error: true   # 阶段一外链可能波动，先告警不阻断；M1 起改为 fail
-
-      - name: 校验核心文档与决策台账存在
+      - name: 校验现行核心文档结构
         run: |
-          test -f CHARTER.md
+          test -f AGENTS.md
+          test -f README.md
           test -f CREDITS.md
           test -f NOTICE
-          test -f README.md
-          test -f docs/11-问题与决策台账.md
-          test -f docs/README.md
-          test -f docs/10-完整规划与风险登记册.md
-          test -f docs/design/01-总体架构.md
-          test -f docs/adr/ADR-0006-静态参数层与动态求解层.md
-          test -f docs/adr/ADR-0008-自适应定量调度.md
-          test -f docs/adr/ADR-0009-M0实测驱动的选型调整.md
-          test -f docs/adr/ADR-0010-权威数据供应链与缓存分层.md
-          test -f docs/12-阶段二开发流程.md
-          test -f docs/research/04-M0验证报告.md
-          test -f docs/research/05-权威数据源与缓存可行性核验.md
-          test -f docs/research/data/m0/INDEX.json
-          test -f docs/research/data/m0/s2_completion_result.json
-          test -f docs/research/data/m0/RERUN.md
-          test -f docs/research/data/s2-auth/INDEX.json
-          test -f docs/research/data/s2-auth/RERUN.md
-          test -f docs/research/data/s2-auth/verify_auth_s2.py
+          test -f docs/01-Architecture.md
+          test -f docs/02-Roadmap.md
+          test -f docs/03-DocDD-Process.md
+          test -f docs/specs/spec-001-骨架搭建.md
           test -f deploy/README-windows.md
-          echo "核心文档、决策台账与阶段二主交付物齐全"
+          echo "AI 入口 + 三份权威文档 + 当前切片规格齐全"
 
       - name: 校验 LGPL-3.0 双文本许可证交付
         run: |
@@ -60,35 +37,22 @@ jobs:
           head -8 LICENSE.LGPL-3 | grep -q "GNU LESSER GENERAL PUBLIC LICENSE"
           grep -q "LICENSE.GPL-3" NOTICE
           grep -q "LICENSE.LGPL-3" NOTICE
-          # 主许可证不得回退为 Apache-2.0
           if head -8 LICENSE | grep -qi "Apache License"; then
-            echo "::error::主许可证回退为 Apache-2.0，违反台账 A1"; exit 1
+            echo "::error::主许可证回退为 Apache-2.0"; exit 1
           fi
           echo "LGPL-3.0 双文本与显著声明齐全"
 
-      - name: 阶段二归档数据自洽 + 静态合规门禁（verify_m0_s2.py）
+      - name: 静态合规红线检查
         run: |
-          cd docs/research/data/m0 && python3 verify_m0_s2.py
-
-      - name: 权威源/缓存源门禁（verify_auth_s2.py，阶段二补充规划）
-        run: |
-          cd docs/research/data/s2-auth && python3 verify_auth_s2.py
-
-      - name: 许可证红线静态检查（静态部分；依赖树级 license-scan 后置 M1）
-        run: |
-          echo "白名单：MIT / BSD-2 / BSD-3 / Apache-2.0 / ISC / CC0 / CC-BY / LGPL-2.1 / LGPL-3.0"
-          echo "禁止：AGPL-* / GPL-2.0-only；GPL-3.0 组件依选型决策不纳入主链（引入须 ADR）"
-          echo "检查仓库内不含 tikz-chemlab 宏包源码（LPPL 边界，ADR-0004）"
+          echo "白名单：MIT / BSD / Apache-2.0 / ISC / CC0 / CC-BY / LGPL-2.1 / LGPL-3.0；禁止 AGPL / GPLv2-only"
           if find . -path ./.git -prune -o \( -name 'tikz-chemlab.sty' -o -name 'tikz-chemlabObj.tex' -o -name 'tikz-chemlab.tex' \) -print | grep -q .; then
-            echo "::error::检测到 tikz-chemlab 宏包源码，违反 ADR-0004"; exit 1
+            echo "::error::检测到 tikz-chemlab 宏包源码（LPPL 边界）"; exit 1
           fi
-          echo "检查 .gitignore 排除密钥与数据"
           grep -q '^.env' .gitignore && grep -q 'data-thirdparty/' .gitignore
-          echo "检查无明文 token 入库"
           if grep -rIl --exclude-dir=.git -E 'ghp_[A-Za-z0-9]{20,}' . | grep -q .; then
             echo "::error::检测到疑似明文 GitHub token"; exit 1
           fi
-          echo "合规静态检查通过"
+          echo "静态合规检查通过"
 
       - name: 资产署名清单格式检查
         run: |
@@ -96,47 +60,16 @@ jobs:
           head -1 assets/attribution/ASSETS.csv | grep -q 'asset_id,source_project'
           echo "署名清单表头正确"
 
-      - name: 校验历史归档标识（防止初版方案被误读为现行设计）
-        run: |
-          test -f docs/research/data/README.md
-          head -6 "docs/research/data/开源化学沙盒实验室_调研与二次开发方案.md" | grep -q "历史归档"
-          head -6 "docs/research/data/NB实验室功能调研报告.md" | grep -q "历史归档"
-          echo "历史归档标识齐全"
+      - name: 现行文档内部链接检查
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --exclude 'https://nobook.com|https://hx.nobook.com'
+            AGENTS.md README.md CONTRIBUTING.md CREDITS.md 'docs/01-Architecture.md' 'docs/02-Roadmap.md' 'docs/03-DocDD-Process.md' 'docs/specs/**/*.md'
+          fail: true
+        continue-on-error: true
 
-      - name: 阶段二口径回归检查（防止旧选型回退）
-        run: |
-          grep -q "phreeqpython" CHARTER.md
-          grep -q "pdftocairo -svg" tools/asset-pipeline/README.md
-          grep -q "reaktoro-service" docs/design/07-API契约与部署.md
-          if grep -q "M0 二选一" docs/design/05-工程结构与路径.md; then
-            echo "::error::网关二选一旧口径残留"; exit 1
-          fi
-          if grep -q "dvisvgm --pdf --font-format" tools/asset-pipeline/README.md; then
-            echo "::error::DVI→dvisvgm 旧转换命令仍作为推荐命令"; exit 1
-          fi
-          echo "阶段二口径回归检查通过"
-
-      - name: 阶段二收口回归检查（受限项销项口径不得回退）
-        run: |
-          grep -q "Xvfb" docs/research/04-M0验证报告.md
-          grep -q "wasm32-unknown-unknown" docs/research/04-M0验证报告.md
-          grep -q "CC0 1.0" docs/research/04-M0验证报告.md
-          grep -q "libReaktoro.so" docs/research/04-M0验证报告.md
-          grep -q "第二阶段（可行性验证）正式结束" docs/research/04-M0验证报告.md
-          echo "阶段二收口口径齐全"
-
-      - name: 阶段二补充规划回归检查（E1–E16 权威源/缓存口径）
-        run: |
-          grep -q "E1–E16" docs/11-问题与决策台账.md
-          grep -q "wateq4f" docs/research/05-权威数据源与缓存可行性核验.md
-          grep -q "data-thirdparty" docs/design/05-工程结构与路径.md
-          grep -q "可选检索标签" docs/design/03-数据模型与反应规则Schema.md
-          grep -q "构建期固化" docs/adr/ADR-0010-权威数据供应链与缓存分层.md
-          # 旧口径不得回退：现行文档不得把 Burcat 当作可用源（史料/禁用说明除外，由 verify_auth_s2 精确核验）
-          echo "阶段二补充规划口径齐全"
-
-# ---- M1 骨架阶段待落地的产品级门禁（阶段二无产品代码，不造假门禁，见 design/05 第四节）----
-#   license-scan（依赖树白名单，复用 REUSE / scancode-toolkit / pip-licenses）
-#   lgpl-link-check（reaktoro-service 镜像动态链接 + 可替换 + 随附 LGPL-2.1 全文）
-#   schema-validate（ajv 校验 content/）/ rule-lint / golden-cases（数值零错）
-#   asset-attribution / build / e2e
+# ---- M1 骨架后按切片逐步接入的产品级门禁 ----
+#   license-scan（依赖树白名单）/ lgpl-link-check（reaktoro-service 镜像）
+#   schema-validate / rule-lint / golden-cases（数值零错）/ build / e2e / dual-platform

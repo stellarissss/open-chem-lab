@@ -1,6 +1,6 @@
 # 美术资产转换管线 · Asset Pipeline
 
-> 设计见 [docs/design/04-美术资产管线.md](../../docs/design/04-美术资产管线.md)、[ADR-0004](../../docs/adr/ADR-0004-美术资产来源与LPPL输出物.md)、[ADR-0007](../../docs/adr/ADR-0007-2D写实实验台与分子级3D.md)、[ADR-0009](../../docs/adr/ADR-0009-M0实测驱动的选型调整.md)。
+> 现行美术规范见 [01-Architecture.md](../../docs/01-Architecture.md) 第四节；历史设计细节见 `docs/归档/design/04-美术资产管线.md` 与 `docs/归档/adr/`。
 > **状态**：本阶段（M0）已完成**转换链实测**：原 `DVI → dvisvgm` 与 `dvisvgm --pdf` 双路径均失败，唯一可行路径为 **`lualatex → PDF → pdftocairo -svg → svgo`**（D5）。脚本骨架在 M1 落地为可批量运行版本；本目录当前为流程说明 + 示意脚本。
 > **主调**：出版级写实 2D。tikz-chemlab 编译输出物为**唯一主资产**；`@itkdm/open-lab-components` **仅作 UI / 缩略图**（D8，HTML fragment 库非 React）；**3D 只做分子 / 晶体 / 球棍模型**（3Dmol.js），程序化 3D 器材已降级为可选长线、不进 M1。
 
@@ -43,7 +43,7 @@ docker run --rm -v "$PWD/assets:/out" st-asset-pipeline bash build-tikz.sh
 python3 tools/asset-pipeline/check-attribution.py
 ```
 
-**M0 实测结论**（详见 [`docs/research/04-M0验证报告.md`](../../docs/research/04-M0验证报告.md) §4.3 / §2 验证项 5）：
+**M0 实测结论**（历史证据见 `docs/归档/research/04-M0验证报告.md` §4.3 / §2 验证项 5）：
 
 | 原命令 | 结果 |
 |---|---|

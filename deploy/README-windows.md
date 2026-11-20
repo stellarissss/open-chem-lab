@@ -1,7 +1,7 @@
 # Windows 侧最小部署 · 可执行补验清单
 
-> **状态**：Linux 侧已实测通过（Docker Compose 4 服务全 Healthy，见 `docs/research/04-M0验证报告.md` §2）；
-> **Windows 实机起服在本沙箱（Ubuntu）无法覆盖**，按 `docs/12` 第三节显式标「受限」，本清单交付用户在 Windows / WSL2 本机执行。
+> **状态**：Linux 侧已实测通过（Docker Compose 4 服务全 Healthy，历史证据见 `docs/归档/research/04-M0验证报告.md` §2）；
+> **Windows 实机起服在本沙箱（Ubuntu）无法覆盖**，按历史流程 `docs/归档/12-阶段二开发流程.md` 显式标「受限」，本清单交付用户在 Windows / WSL2 本机执行。
 > 依据：台账 9.1（Win + Linux 双平台兼容）、D6（单机自托管）、D2（reaktoro-service 独立微服务）、
 > [Microsoft Learn《Working across Windows and Linux file systems》](https://learn.microsoft.com/en-us/windows/wsl/filesystems) 一手核实（2026-11-15）。
 
@@ -81,9 +81,8 @@ Microsoft Learn《Working across Windows and Linux file systems》：
 
 ## 5. 回填
 
-执行后请把结果（逐项 PASS/FAIL + `docker compose ps` 输出 + 截图）回填到
-`docs/research/04-M0验证报告.md` §5.4「受限项补验」与决策台账，
-把「Windows 实机受限」更新为实测结论；**未执行前不得写成「通过」**（`docs/12` 硬纪律）。
+执行后请把结果（逐项 PASS/FAIL + `docker compose ps` 输出 + 截图）回填到 `docs/02-Roadmap.md`（当前进度），
+把「Windows 实机受限」更新为实测结论；**未执行前不得写成「通过」**。
 
 ---
 
