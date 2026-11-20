@@ -46,7 +46,7 @@
 | # | 薄切片 | 核心内容 | 状态 |
 |---|---|---|---|
 | 001 | **骨架搭建** | 前后端常驻 + Docker Compose 单机自托管；仓库骨架（schemas/content/packages/deploy）、CI 门禁接入 | ✅ 已完成（2026-11-20，实测通过，见 `specs/spec-001-骨架搭建.md`） |
-| 002 | 内容 schema | 可玩物质库 + 静态参数物化层（`schemas/` + `content/rules/`） | ⬅ **当前** |
+| 002 | 内容 schema | 可玩物质库 + 静态参数物化层（`schemas/` + `content/rules/`） | ⬅ **当前**；粗稿已就位（`specs/spec-002-内容schema与中和体系.md`，待开工补全） |
 | 003 | 单体系求解 | phreeqpython 主引擎 + 黄金用例（中和体系跑通、数值零错） | 待开始 |
 | 004 | 物种面板 | `solution_speciation` + 时间轴回放 | 待开始 |
 | 005 | 容器内现象 | WASM 渲染 + `st.phenomenon.v1` 现象指令 | 待开始 |
@@ -57,8 +57,8 @@
 
 ## 四、下一步（明确待办）
 
-1. **启动切片 002「内容 schema」**：可玩物质库 + 静态参数物化层（`schemas/` + `content/rules/`），先写 `specs/spec-002-*.md` 再执行 DocDD 闭环。
-2. 每完成一个切片：更新本文件状态列 + `AGENTS.md` 当前焦点 + 写轻量交接留痕。
+1. **启动切片 002「内容 schema」**：读粗稿 `specs/spec-002-内容schema与中和体系.md` → 就地补全为正式规格（含任务拆解、确认中和体系的具体物质清单/边界/数值签核）→ 走 DocDD 完整闭环。方向已铺好，无需从零起。
+2. 每完成一个切片：更新本文件状态列 + `AGENTS.md` 当前焦点 + 写轻量交接留痕，并按 `03-DocDD-Process.md` 2.3「回写即铺路」预写下一 spec 粗稿、在此指向。
 
 > 无技术阻塞、无待办阻塞项（截至 2026-11-20）。切片 001 的 Windows 实机部署仍待用户在 Windows/WSL2 本机按 `deploy/README-windows.md` 补测（沙箱为 Ubuntu，已静态核查）。
 
@@ -66,6 +66,6 @@
 
 ## 五、当前环境约束（开发前须知）
 
-- **远端同步**：本地与远端 `main` 已同步（`e0f4b8d`，经 `ghfast.top` 镜像推送）；后续交付同样经镜像推送。
+- **远端同步**：本地与远端 `main` 已同步（`5402422`，经 `ghfast.top` 镜像推送）；后续交付同样经镜像推送。
 - **Windows + Linux 双平台兼容**是硬约束：`.gitattributes` 强制 LF、路径小写 snake_case；Windows 实机清单见 `deploy/README-windows.md`。
 - **不提供断网可玩**：运行期可无外网，但本地服务器必须在线。

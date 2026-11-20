@@ -26,10 +26,11 @@
 
 ## 当前焦点
 
-- 阶段三 M1 迭代中：切片 001「骨架搭建」✅ 已完成并实测通过（2026-11-20）。下一步：切片 002「内容 schema」（可玩物质库 + 静态参数物化层），开工先写 `specs/spec-002-*.md`。
+- 阶段三 M1 迭代中：切片 001「骨架搭建」✅ 已完成并实测通过（2026-11-20）。下一步：切片 002「内容 schema」——粗稿已就位 `specs/spec-002-内容schema与中和体系.md`，开工时就地补全为正式规格再执行（链式闭环见 `03-DocDD-Process.md` 2.3）。
 - 产品骨架：pnpm monorepo（`@st/protocol` / `@st/gateway` / `@st/web-ui` / `solver-worker` / `reaktoro-service` 占位）+ Docker Compose 单机自托管。构建 `pnpm build`；起服 `docker compose -f deploy/docker-compose.minimal.yml up -d --build`；许可证门禁 `python3 tests/license-scan/scan.py`。
 
 ## 变更留痕（最近在上）
 
+- 2026-11-20：开发流程补上「链式闭环」——`03-DocDD-Process.md` 新增 2.3「回写即铺路」双轨机制（回写时预写下一 spec 粗稿 + 路线图指向），spec 两阶段就地演进（粗稿→正式）；据新流程写好 `spec-002-内容schema与中和体系` 粗稿（聚焦酸碱中和样例，具体物质/数值待开工确认）。
 - 2026-11-20：M1 切片 001「骨架搭建」完成——pnpm monorepo + protocol schema/类型生成 + Fastify gateway(health/WS) + React/Vite 壳页 + Python worker + reaktoro 占位 + Compose 四服务 + CI 雏形；全量构建/联调/license-scan 实测通过；Windows 实机待用户补测。
 - 2026-11-20：文档体系重构完成——台账/CHARTER/旧规划/ADR/design/research/CHANGELOG 归档；新建 `01-Architecture`（唯一真理源）/`02-Roadmap`/`03-DocDD` + `specs/spec-001`；AGENTS/README/CONTRIBUTING/CREDITS/模板/CI 全量对齐；现行文档零断链。
