@@ -78,11 +78,11 @@ python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
 
 | 文档 | 内容 |
 |---|---|
-| [AGENTS.md](AGENTS.md) | AI 第一站：现场指针、当前焦点、硬约束、变更留痕 |
+| [AGENTS.md](AGENTS.md) | AI 第一站：现场指针、当前焦点、硬约束 |
 | [docs/01-Architecture.md](docs/01-Architecture.md) | **唯一技术真理源**：产品定义、技术栈、数据模型、红线、验证原则 |
 | [docs/02-Roadmap.md](docs/02-Roadmap.md) | 当前进度、里程碑、M1 薄切片清单、下一步 |
 | [docs/03-DocDD-Process.md](docs/03-DocDD-Process.md) | 开发流程：任务闭环、spec 写法、无强制门禁、变更分级 |
-| [docs/specs/](docs/specs/) | 当前切片规格（`spec-001-骨架搭建.md`） |
+| [docs/specs/](docs/specs/) | 切片规格：已完成 spec + 下一切片粗稿 |
 | [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) | 开源依赖致谢、逐项许可证、LGPL 显著声明 |
 | [deploy/README-windows.md](deploy/README-windows.md) | Windows / WSL2 双平台部署清单 |
 | `docs/归档/` | 历史文档（决策台账、旧规划、ADR/design/research 原文）——**仅追溯，开发不读** |

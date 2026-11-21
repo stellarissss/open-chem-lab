@@ -175,7 +175,7 @@ open-chem-lab/
 │   └── ai-crosscheck/  # AI 独立对拍记录
 ├── packages/
 │   ├── protocol/       # TS：现象协议/存档/时间轴/类型(最底层，不依赖任何包)
-│   ├── solver/         # Python 3.11 动态定量求解
+│   ├── solver-worker/  # Python 3.11 动态定量求解（常驻 worker 进程）
 │   ├── reaktoro-service/ # 独立微服务(conda + UDS/protobuf)
 │   ├── scheduler/      # 自适应调度
 │   ├── speciation/  reaction-library/  phenomenon/  apparatus/
@@ -190,7 +190,9 @@ open-chem-lab/
 └── docs/                   # 本真理源 + Roadmap + DocDD + specs/ + 归档/
 ```
 
-**依赖规则**：`protocol` 最底层不依赖任何包；`solver`(Python) 与 `wasm-view`(Rust) 经协议 JSON 通信、互不 import；`web-ui` 不直连求解库、一律经 gateway；任何包不得引入 AGPL/GPLv2-only 依赖；`content/` 是数据、由 reaction-library 运行时加载、不被代码 import。
+**依赖规则**：`protocol` 最底层不依赖任何包；`solver-worker`(Python) 与 `wasm-view`(Rust) 经协议 JSON 通信、互不 import；`web-ui` 不直连求解库、一律经 gateway；任何包不得引入 AGPL/GPLv2-only 依赖；`content/` 是数据、由 reaction-library 运行时加载、不被代码 import。
+
+**包名以本节为准**：本目录树是目标态蓝图与现行实现的总和。实现时若需偏差（改名/新增/省略/调整），先询问用户并同步本节，**不得擅自偏离**——真理源与仓库现实的一致性靠这条规则保证，无需事后核对。
 
 **部署（单机自托管，Docker Compose）**：最小部署 = `web + gateway + solver-worker + postgres + reaktoro-service + 本地卷`；前后端常驻；reaktoro-service 经本机 UDS/回环通讯。双平台硬约束：`.gitattributes` 强制 LF、路径统一小写 snake_case、卷挂载/端口可配、容器非 root、TeX 转换全程在 Docker 内。运行期可无外网，但本地服务器必须在线（**不提供断网可玩**）。
 
