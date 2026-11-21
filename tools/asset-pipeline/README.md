@@ -1,8 +1,8 @@
 # 美术资产转换管线 · Asset Pipeline
 
 > 现行美术规范见 [01-Architecture.md](../../docs/01-Architecture.md) 第四节；历史设计细节见 `docs/归档/design/04-美术资产管线.md` 与 `docs/归档/adr/`。
-> **状态**：本阶段（M0）已完成**转换链实测**：原 `DVI → dvisvgm` 与 `dvisvgm --pdf` 双路径均失败，唯一可行路径为 **`lualatex → PDF → pdftocairo -svg → svgo`**（D5）。脚本骨架在 M1 落地为可批量运行版本；本目录当前为流程说明 + 示意脚本。
-> **主调**：出版级写实 2D。tikz-chemlab 编译输出物为**唯一主资产**；`@itkdm/open-lab-components` **仅作 UI / 缩略图**（D8，HTML fragment 库非 React）；**3D 只做分子 / 晶体 / 球棍模型**（3Dmol.js），程序化 3D 器材已降级为可选长线、不进 M1。
+> **状态**：转换链已实测——原 `DVI → dvisvgm` 与 `dvisvgm --pdf` 双路径均失败，唯一可行路径为 **`lualatex → PDF → pdftocairo -svg → svgo`**（实测证据见下文）。脚本骨架在 M1 落地为可批量运行版本；本目录当前为流程说明 + 示意脚本。
+> **主调**：出版级写实 2D。tikz-chemlab 编译输出物为**唯一主资产**；`@itkdm/open-lab-components` **仅作 UI / 缩略图**（HTML fragment 库非 React）；**3D 只做分子 / 晶体 / 球棍模型**（3Dmol.js），程序化 3D 器材已降级为可选长线、不进 M1。
 
 ## 目的
 
@@ -13,7 +13,7 @@
 | `tikz-chemlab`（LaTeX/TikZ，13 个器材宏） | LPPL-1.3c | `.tex` → **lualatex PDF → `pdftocairo -svg` → `svgo`** → 分层 SVG（**只转译编译输出物**）；实验台写实主资产 |
 | `@itkdm/open-lab-components`（210 组件 / 化学相关 35 个，**HTML fragment 库**） | MIT | 无需转换；CSS 变量注入或 Web Component 封装；**仅用于图鉴 / 资料卡 / 器材列表缩略图，不进写实主视图** |
 
-> **只转译编译产物、不 fork 源码**：这是本管线不可绕过的第一原则（LPPL 1.3c Clause 1 + ADR-0004）。
+> **只转译编译产物、不 fork 源码**：这是本管线不可绕过的第一原则（LPPL 1.3c Clause 1）。
 
 ## 目录（M1 落地为可批量运行版本）
 
@@ -26,9 +26,9 @@ tools/asset-pipeline/
 └── README.md             # 本文件：如何重跑、如何新增器材
 ```
 
-> 早期草案中的 `extract-profile.mjs`（从 SVG 采样轮廓 → `LatheGeometry` 3D 器材）**已随程序化 3D 器材降级为长线而移出主流程**；台账 6.3 规定 3D 只做分子级，不再需要器材 GLB 轮廓。若将来重启该长线，须单独提 ADR。
+> 早期草案中的 `extract-profile.mjs`（从 SVG 采样轮廓 → `LatheGeometry` 3D 器材）**已随程序化 3D 器材降级为长线而移出主流程**；架构规定（`docs/01-Architecture.md` 第二节）3D 只做分子级，不再需要器材 GLB 轮廓。若将来重启该长线，先询问用户裁决。
 
-## 关键流程与命令（M0 实测可行链，D5）
+## 关键流程与命令（M0 实测可行链）
 
 ```bash
 # 1. 构建镜像
@@ -55,8 +55,8 @@ python3 tools/asset-pipeline/check-attribution.py
 
 ## 硬约束（不可绕过）
 
-1. **宏包源码不入库、不随产品分发**：`.sty/.tex/Obj.tex` 只在构建期存在；`.gitignore` 已排除 `tools/asset-pipeline/build/` 与 TeX 中间产物。依据 LPPL-1.3c Clause 1（运行 Work 不受限制）+ ADR-0004。
-2. **若必须修改宏包源码**：按 LPPL Clause 6 改名 + 附变更日志 + 附完整未修改原件，且放独立 `upstream/` 目录，需新增 ADR。
+1. **宏包源码不入库、不随产品分发**：`.sty/.tex/Obj.tex` 只在构建期存在；`.gitignore` 已排除 `tools/asset-pipeline/build/` 与 TeX 中间产物。依据 LPPL-1.3c Clause 1（运行 Work 不受限制）。
+2. **若必须修改宏包源码**：按 LPPL Clause 6 改名 + 附变更日志 + 附完整未修改原件，且放独立 `upstream/` 目录，先询问用户裁决。
 3. **每个 SVG 入库前**在 `assets/attribution/ASSETS.csv` 登记署名（含 pst-labo 四作者与「仅使用编译输出物」说明）。
 4. **字体**：`pdftocairo -svg` 产物为纯路径、零 `<text>`，**无需** woff 嵌入或转曲；如未来上游产出 `<text>`，须转曲后方可入库。
 5. **动态化**：液位 / 颜色 / 倾斜用 `clipPath` + CSS 变量 + `transform`，不为每个状态生成一张 SVG。
@@ -71,8 +71,8 @@ python3 tools/asset-pipeline/check-attribution.py
 4. 跑 `schema-validate` + `asset-attribution` + 黄金用例。
 5. 写实风格一致性人工复核（与出版级主调不符者退回）。
 
-## M0 已销项 / 待补验
+## 历史实测结论与待办
 
-**已销项（M0 + 阶段二收尾补验）**：转换链保真度（D5）；液体层可拆性（21 个 clipPath + `liquidLevel1` 可控）；open-lab-components 组件形态与用途（D8，非 React、仅 UI / 缩略图）；3Dmol.js 许可证与 DOI（BSD-3 / `10.1093/bioinformatics/btu829`）；tikz-chemlab LPPL-1.3c；**Kenney 包内 LICENSE（F3）→ CC0 1.0**；**3Dmol.js 真实浏览器 WebGL 球棍渲染 → Xvfb + SwiftShader `hasGeometry=true`**（见 `04` §5.5–§5.6）。
+**已实测核实**：转换链保真度；液体层可拆性（21 个 clipPath + `liquidLevel1` 可控）；open-lab-components 组件形态与用途（非 React、仅 UI / 缩略图）；3Dmol.js 许可证与 DOI（BSD-3 / `10.1093/bioinformatics/btu829`）；tikz-chemlab LPPL-1.3c；**Kenney 包内 LICENSE → CC0 1.0**；**3Dmol.js 真实浏览器 WebGL 球棍渲染 → Xvfb + SwiftShader `hasGeometry=true`**（证据见 `docs/归档/research/04-M0验证报告.md` §5.5–§5.6）。
 
 **仍待办**：13 个宏全量批量生成与单文件体积（内容生产）；**Windows 实机** Docker 卷挂载与路径换行符一致性，按 [`deploy/README-windows.md`](../../deploy/README-windows.md) 在本机补跑并回填（静态规范核查已通过）。

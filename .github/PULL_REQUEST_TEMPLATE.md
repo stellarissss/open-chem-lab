@@ -13,7 +13,7 @@
 - [ ] 是否涉及**重大变更**？（产品定义 / 技术栈 / 许可证基线 / 里程碑验收口径 / 实验台范式 / 求解架构 / 美术主调 / 引入重组件 / 双平台约束 → 需先确认并同步 `01-Architecture.md`）
 - [ ] 是否引入**新依赖**？若是，确认许可证在白名单（MIT / BSD / Apache-2.0 / ISC / CC0 / CC-BY / **LGPL-2.1 / LGPL-3.0**），**不含 AGPL / GPLv2-only**；GPL-3.0 组件依选型决策不纳入主链，拟引入须先提 ADR
 - [ ] 若涉及 LGPL 库：确认为**动态链接 + 运行时可替换**，`NOTICE` / `CREDITS.md` 已含显著声明与许可证全文，允许逆向调试与修改版源码可得
-- [ ] 是否新增**美术资产**？若是，符合**出版级写实 2D 主调**（tikz-chemlab 输出物为主 / open-lab-components 为辅），已在 `assets/attribution/ASSETS.csv` 登记署名；未引入 tikz-chemlab 宏包源码（ADR-0004）
+- [ ] 是否新增**美术资产**？若是，符合**出版级写实 2D 主调**（tikz-chemlab 输出物为主 / open-lab-components 为辅），已在 `assets/attribution/ASSETS.csv` 登记署名；未引入 tikz-chemlab 宏包源码（LPPL 边界，见 `assets/attribution/README.md`）
 - [ ] 是否新增/修改**反应参数**？若是，为**真实物质与真实反应**，带 `source` / `confidence` / `applicability`（适用条件）/ 定量平衡或动力学参数，经 **AI 独立对拍 + 用户人工签核**，并补 `golden-cases` 断言；**不含虚构物质、自定义规则、MOD 或工坊内容**；未整段复制 ORD 描述文本
 - [ ] 若改动影响**数值**：已确认反应方向、产物、计量、守恒、平衡趋势、pH / 浓度数值准确（**数值零错红线**）；近似只用于视觉表现
 - [ ] 若改动涉及部署：已在 **Windows 与 Linux** 双平台考虑（CRLF/LF、路径大小写、卷挂载、端口占用）

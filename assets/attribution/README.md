@@ -1,7 +1,7 @@
 # 逐资产署名清单 · Asset Attribution
 
-本目录维护**每一个入库美术资产**的许可与署名记录，是合规硬要求（ADR-0004 / ADR-0005、`design/04`）。
-**《ST实验室》主视觉为出版级写实 2D**（台账 5.3 / 6.3）：tikz-chemlab 编译输出物为**唯一主资产**；`@itkdm/open-lab-components` 是 HTML fragment 库（非 React），依 **D8 仅作 UI 元素与缩略图**、不进实验台写实主视图；3D 只做分子 / 晶体 / 球棍模型。卡通风格资产不与写实主调混用。
+本目录维护**每一个入库美术资产**的许可与署名记录，是合规硬要求（视觉定义见 `docs/01-Architecture.md` 第二节）。
+**《ST实验室》主视觉为出版级写实 2D**：tikz-chemlab 编译输出物为**唯一主资产**；`@itkdm/open-lab-components` 是 HTML fragment 库（非 React），**仅作 UI 元素与缩略图**、不进实验台写实主视图；3D 只做分子 / 晶体 / 球棍模型。卡通风格资产不与写实主调混用。
 
 ## 文件
 
@@ -42,9 +42,9 @@ bioicon_flask,duerrsimon/bioicons (Servier),https://smart.servier.com/,Servier,C
 1. **tikz-chemlab / pst-labo**：必须同时署名 Aihua Wang 与 pst-labo 四位原作者；注明「**仅使用编译输出物**」，宏包源码不入库、不随产品分发（LPPL 1.3c Clause 1 运行不受限制、Clause 6 修改分发才受约束）。
 2. **bioicons**：平台 MIT **不等于**每个图标 MIT。必须逐个记录原始作者与许可（Servier CC-BY 3.0、DBCLS / TogoTV 等），不得整包当作 MIT。
 3. **LabIcons / BioArt**：CC-BY-4.0，About 页 + 图注可见，注明改动。
-4. **Kenney**：**F3 已销项，CC0 1.0**（官网 particle-pack 页标注 + 包内 `LICENSE.txt` 原文 + CC0 1.0 官方法典三级核实，见 `04-M0验证报告` §5.6），可入库、可商用、署名非强制；**只取通用音效与粒子贴图，卡通 2D/3D 器材不入库**（与写实主调冲突）。官网签名下载端点 403（会话/校验），包内 LICENSE 经公开第三方镜像转录核对。
-5. **open-lab-components**：`used_in` 必须为 `ui/thumbnail`；出现 `apparatus/*` 即视为违反 D8（该库简笔示意风与写实主调冲突）。
-6. **3Dmol.js**：BSD-3 声明（M0 已销项 F2）+ Bioinformatics 论文引用 DOI `10.1093/bioinformatics/btu829` 写进 About 页（本清单也记一条）。
+4. **Kenney**：**CC0 1.0**（官网 particle-pack 页标注 + 包内 `LICENSE.txt` 原文 + CC0 1.0 官方法典三级核实，见 `docs/归档/research/04-M0验证报告.md` §5.6），可入库、可商用、署名非强制；**只取通用音效与粒子贴图，卡通 2D/3D 器材不入库**（与写实主调冲突）。官网签名下载端点 403（会话/校验），包内 LICENSE 经公开第三方镜像转录核对。
+5. **open-lab-components**：`used_in` 必须为 `ui/thumbnail`；出现 `apparatus/*` 即视为违反写实主调约束（该库简笔示意风与写实主调冲突）。
+6. **3Dmol.js**：BSD-3 声明（已核实原文）+ Bioinformatics 论文引用 DOI `10.1093/bioinformatics/btu829` 写进 About 页（本清单也记一条）。
 7. **ORD 衍生规则**：CC-BY-SA-4.0 溯源标记，数据放**统一独立仓 `data-thirdparty/`** 的 `ord/` 子目录（主仓仅 submodule 引用）；不属美术资产，但同样受 CI 检查。
 8. **禁止入库**：许可不明、逐模型授权、AGPL / GPLv2-only 素材、卡通风格器材（与写实主调冲突）、任何商业产品（含 NB）的素材与界面设计。
 9. **star 数**：文档引用上游指标须标快照日期（阶段一 `2026-11-14`、阶段二 M0 `2026-11-15`）。

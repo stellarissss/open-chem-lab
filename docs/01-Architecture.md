@@ -213,7 +213,7 @@ open-chem-lab/
 
 - **不设强制门禁**：不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，完成后如实记录做了哪些验证。
 - **历史门禁是资产**：阶段二归档的 `verify_m0_s2.py`（41 断言）、`verify_auth_s2.py`（38 断言）及其 CI 接入是已证明不确定性消解的历史证据，保留不动、不追溯适用。
-- **产品级门禁在 M1 骨架后接入**：`license-scan`（白名单放行 LGPL-2.1/3.0，AGPL/GPLv2-only 直接失败）、`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
+- **产品级门禁随 M1 切片逐步接入**（`license-scan` 已在 CI）：`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
 
 ### 7.3 对外口径（不可拆分的三层）
 
