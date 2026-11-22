@@ -43,7 +43,6 @@
 - 体系边界：强弱搭配 6 种（HCl/HNO₃/NaOH/KOH 强酸碱 + 醋酸/氨水弱电解质）。
 - 数值来源：抓权威源 + 列清单签核（已签核通过，见 `content/ai-crosscheck/neutralization/`）。
 - 校验门禁：Python `jsonschema`；`ajv` 仅未来浏览器前端候选，不作全局唯一校验器。
-- 里程碑：M1 对齐文档切片 002，不改 `02-Roadmap.md` / `AGENTS.md` 的分期定义。
 
 ## 任务拆解
 
@@ -61,13 +60,3 @@
 ## 状态
 
 已完成。
-
-**本切片验证记录**（如实记录，见 `03-DocDD-Process.md` 第四节）：
-- 权威源数值：USGS PHREEQC `wateq4f.dat` / `minteq.dat` 下载校验 sha256，水解离 logK −14、NH₄⁺ logK −9.252 三源一致；乙酸 logK +4.760 取 `minteq.dat`（`wateq4f.dat` 缺定义）。用户已签核全部数值进事实层（2026-11-22）。
-- AI 对拍：25°C 解析解 0.1M 醋酸 pH=2.8829、0.1M 氨水 pH=11.1231、强酸/强碱中点 pH=7.00；记录见 `content/ai-crosscheck/neutralization/record.json`。
-- `pnpm build` 通过：7 个 schema → TS 类型生成成功，gateway/web-ui 编译通过。
-- `python3 tests/schema-validate/validate.py` 通过：10 个数据文件校验合规；负向测试确认 `ml_guess` 被拒、条件互斥/计量守恒护栏生效。
-- `python3 tests/golden-cases/run.py` 通过：6/6 条期望值经解析解独立复核。
-- `python3 tools/materialize-rules.py` 通过：物化 6 物质 + 4 规则，产物幂等（复跑 sha256 一致）。
-- `python3 tests/license-scan/scan.py` 通过：158 依赖无 AGPL/GPLv2-only（降级从 node_modules 读取，修复离线 store 索引问题）。
-- **未做（按切片边界）**：phreeqpython 动态求解调用（→ spec-003）；双平台实机 Windows 验证（本环境仅 Linux，Windows 按 `deploy/README-windows.md` 静态核查属切片 001 已完成项）。
