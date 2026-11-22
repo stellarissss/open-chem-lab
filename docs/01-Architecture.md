@@ -34,7 +34,7 @@
 | 化学库 | 严格真实库；规模基线 **1000 个完全仿真反应下限**（含弱/可逆/电离/水解），长线不封顶；凡进资料卡必须可玩 |
 | 内容组织 | 主线按「化学体系/玩法/器材」组织，覆盖全人类化学体系；课标/教材仅作**可选检索标签**，不设教学功能 |
 | 底线 | 开源 LGPL-3.0、可自托管、无会员墙；前后端缺一不可，**废弃断网可玩**；无破解/绕授权/逆向内容 |
-| 教学层 | 附加内容、后置长线（M4），不进 M1–M3 验收；教学由使用方教师承担 |
+| 教学层 | 附加内容、后置长线，不进前期阶段验收；教学由使用方教师承担 |
 | 对标 | 公开点名「对标并超越 NB实验室」，同时声明「独立开源实现、与其无关联无背书」；只用一级来源数据，禁用未证实宣传数字 |
 
 **科学边界（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。因此不做万能反应预测、不用 ML 猜产物；未命中返回「当前条件下无明显变化」并记入补体系日志。已制作的体系必须既好玩又科学、零科学性错误。
@@ -85,11 +85,11 @@ flowchart TB
 | 动态求解层 | 服务端 worker | 物种分布、平衡、pH/浓度/活度、电离/水解、热效应；隐藏反应真实发生 | 独立 worker，不占帧预算 |
 | 调度层 | 服务端 | 关注度分数、帧预算配额、事件唤醒、稳态冻结与缓存 | 16.7ms 帧预算 |
 | 表现层 | 浏览器 WASM/SVG | 容器内现象、写实 2D、分子级 3D、物种面板/时间轴 | 固定 60fps，与求解耗时彻底解耦 |
-| 教学层 | 长线 | 附加内容，后置 M4 | 不进 M1–M3 |
+| 教学层 | 长线 | 附加内容，后置长线 | 不进前期阶段验收 |
 
 **关键解耦**：求解器只认数值、不认渲染；WASM 只认现象 ID、不认分子；二者通过 `st.phenomenon.v1` 协议通信，渲染器与求解器可独立替换。
 
-**已废弃部件（勿留死代码）**：Service Worker、IndexedDB、离线规则包、PWA 离线、无限画布/落沙网格、双视图、Yjs 多人协作、复杂存档 diff、规则包工坊/自定义物质编辑器、程序化 3D 器材。
+**明确不采用的部件（勿留死代码）**：Service Worker、IndexedDB、离线规则包、PWA 离线、无限画布/落沙网格、双视图、Yjs 多人协作、复杂存档 diff、规则包工坊/自定义物质编辑器、程序化 3D 器材。
 
 ---
 
@@ -109,7 +109,7 @@ flowchart TB
 | 数据库 / 缓存 | PostgreSQL（可选 RDKit Cartridge）/ Redis | — |
 | 美术资产 | tikz-chemlab（写实主资产，输出物）、open-lab-components（仅 UI/缩略图）、LabIcons、bioicons | LPPL / MIT / CC-BY / CC0 |
 
-**求解职责二分**：phreeqpython 承担一般水溶液/电解质体系（绝大多数反应）；reaktoro-service 承担多相/固相/气相、高温高压、复杂体系平衡终态；燃烧/爆炸的**瞬态动力学**由 Cantera 负责。**主链是唯一事实源入口**，两服务不并行重复求解同一体系。数值步长由 SciPy LSODA/BDF 的局部误差 + `rtol`/`atol` 决定、内置刚性检测自动切 BDF↔Adams，**无硬编码时间阈值**（CVODES 后置 M1 可选加速）。
+**求解职责二分**：phreeqpython 承担一般水溶液/电解质体系（绝大多数反应）；reaktoro-service 承担多相/固相/气相、高温高压、复杂体系平衡终态；燃烧/爆炸的**瞬态动力学**由 Cantera 负责。**主链是唯一事实源入口**，两服务不并行重复求解同一体系。数值步长由 SciPy LSODA/BDF 的局部误差 + `rtol`/`atol` 决定、内置刚性检测自动切 BDF↔Adams，**无硬编码时间阈值**（CVODES 为可选加速）。
 
 **自适应调度**：关注度分数 = `视野内 + 刚被操作 + 有可见现象 + 时间轴聚焦`；高分高频高精度、低分降频/冻结/缓存；按 16.7ms 帧预算动态配额。验收：焦点内数值零错、帧率恒 ≥ 60fps、焦点外算力随关注度单调下降、新增体系无需改调度代码。
 
@@ -158,7 +158,7 @@ flowchart TB
 
 **准入判据**：①宽松许可可进 LGPL 主链 ②可自托管、可机读批量 ③带版本/快照日/可溯源 ④不引入商业数据库/不引入精度分级；官方声明 AS IS 的须对拍签核。每条快照记录 `endpoint / license / snapshot_date / sha256`。
 
-**缓存**：物化层构建期 O(1) 查表（免计算）；求解缓存用内容寻址键 `sha256(canonical(system) + canonical(conditions) + solver_ver + ruleset_ver)`，失效由数据快照/求解器/ruleset 三版本驱动，复用 `solve_cache`、**零新中间件**。实测主引擎单次 ≈0.21ms，缓存价值在免计算与可复现，不在提速。
+**缓存**：物化层构建期 O(1) 查表（免计算）；求解缓存用内容寻址键 `sha256(canonical(system) + canonical(conditions) + solver_ver + ruleset_ver)`，失效由数据快照/求解器/ruleset 三版本驱动，复用 `solve_cache`、**零新中间件**。缓存价值在免计算与可复现，不在提速。
 
 ---
 
@@ -194,7 +194,7 @@ open-chem-lab/
 
 **包名以本节为准**：本目录树是目标态蓝图与现行实现的总和。实现时若需偏差（改名/新增/省略/调整），先询问用户并同步本节，**不得擅自偏离**——真理源与仓库现实的一致性靠这条规则保证，无需事后核对。
 
-**部署（单机自托管，Docker Compose）**：最小部署 = `web + gateway + solver-worker + postgres + reaktoro-service + 本地卷`；前后端常驻；reaktoro-service 经本机 UDS/回环通讯。双平台硬约束：`.gitattributes` 强制 LF、路径统一小写 snake_case、卷挂载/端口可配、容器非 root、TeX 转换全程在 Docker 内。运行期可无外网，但本地服务器必须在线（**不提供断网可玩**）。
+**部署（单机自托管，Docker Compose）**：最小部署 = `web + gateway + solver-worker + postgres + 本地卷`；reaktoro-service 为可选占位服务（显式 `--profile reaktoro` 启用），经本机 UDS/回环通讯；前后端常驻。双平台硬约束：`.gitattributes` 强制 LF、路径统一小写 snake_case、卷挂载/端口可配、容器非 root、TeX 转换全程在 Docker 内。运行期可无外网，但本地服务器必须在线（**不提供断网可玩**）。
 
 ---
 
@@ -212,7 +212,7 @@ open-chem-lab/
 ### 7.2 验证原则（敏捷轻量）
 
 - **不设强制门禁**：不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，完成后如实记录做了哪些验证。
-- **产品级门禁随 M1 切片逐步接入**（`license-scan` 已在 CI）：`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
+- **产品级门禁随切片逐步接入**（`license-scan` 已在 CI）：`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
 
 ### 7.3 对外口径（不可拆分的三层）
 

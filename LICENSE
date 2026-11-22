@@ -25,11 +25,10 @@ Combined Works 时必须同时随附 GNU GPL 与 LGPL 两份许可证文本。
   CREDITS.md
   NOTICE
   assets/attribution/ASSETS.csv
-  docs/design/07-API契约与部署.md（许可证合规矩阵）
 
 库可替换性说明：本项目以动态链接、运行时可替换的方式接入 LGPL 库
 （当前为 Reaktoro，LGPL-2.1）。使用者可以为自用目的修改该库、替换为
 自行编译的版本，并为调试此类修改进行逆向工程；本项目随附相应许可证
-全文与获取修改版源码的信息，见 NOTICE 与 ADR-0005。
+全文与获取修改版源码的信息，见 NOTICE。
 
 本文件与仓库内的许可证分析为工程判断，非法律意见。

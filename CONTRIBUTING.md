@@ -31,7 +31,7 @@
 ### 验证与门禁（敏捷轻量，见 03）
 
 - 不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，完成后如实记录做了哪些验证。
-- 产品级门禁随 M1 切片逐步接入（`license-scan` 已在 CI）：`lgpl-link-check`、`schema-validate`、`rule-lint`、`golden-cases`（数值零错）、`asset-attribution`、`build`、`e2e`。
+- 产品级门禁随切片逐步接入（`license-scan` 已在 CI）：`lgpl-link-check`、`schema-validate`、`rule-lint`、`golden-cases`（数值零错）、`asset-attribution`、`build`、`e2e`。
 
 ### 内容（真实反应）贡献要求
 

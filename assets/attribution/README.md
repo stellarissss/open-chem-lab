@@ -7,7 +7,7 @@
 
 | 文件 | 用途 |
 |---|---|
-| `ASSETS.csv` | 主清单，每个资产一行（M0 起随资产入库逐条填充） |
+| `ASSETS.csv` | 主清单，每个资产一行（随资产入库逐条填充） |
 | `LICENSES/` | 各上游许可证全文副本（LPPL-1.3c、CC-BY-4.0、CC-BY-3.0、CC-BY-SA-4.0、MIT、ISC、BSD-3-Clause、CC0-1.0） |
 
 ## CSV 字段（固定，CI 校验）

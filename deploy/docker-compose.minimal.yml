@@ -1,4 +1,4 @@
-# ST Crucible 最小单机自托管编排（spec-001）
+# ST Crucible 最小单机自托管编排
 # 构建上下文为仓库根；从仓库根执行：
 #   docker compose -f deploy/docker-compose.minimal.yml up -d
 name: st-crucible
@@ -57,7 +57,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # 占位服务：默认不启动（profile），spec-003 之后接入真实 conda 镜像与 gRPC。
+  # 占位服务：默认不启动（profile），后续接入真实 conda 镜像与 gRPC。
   reaktoro-service:
     build:
       context: ..

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""依赖许可证白名单门禁（spec-001 雏形）。
+"""依赖许可证白名单门禁。
 
 红线（见 01-Architecture.md 第七节）：
 - 白名单：MIT / BSD / Apache-2.0 / ISC / CC0 / CC-BY / LGPL-2.1 / LGPL-3.0 / Unlicense / 0BSD / Python-2.0 等宽松许可

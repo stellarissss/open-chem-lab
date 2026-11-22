@@ -23,8 +23,7 @@ RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 COPY --from=build /app/pnpm-workspace.yaml /app/package.json /app/pnpm-lock.yaml ./
 COPY --from=build /app/packages/protocol ./packages/protocol
 COPY --from=build /app/packages/gateway ./packages/gateway
-# node_modules 来自 deps 阶段（已含运行时依赖）；devDeps 体积可接受于骨架阶段，
-# 后续切片可用 pnpm deploy 精细裁剪。
+# node_modules 来自 deps 阶段（已含运行时依赖）；devDeps 保留，按需可用 pnpm deploy 裁剪。
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages/gateway/node_modules ./packages/gateway/node_modules
 COPY --from=deps /app/packages/protocol/node_modules ./packages/protocol/node_modules

@@ -1,8 +1,8 @@
-"""常驻 worker 入口：定期心跳，等待后续切片接入求解循环。
+"""常驻 worker 入口：定期心跳，求解循环按切片接入。
 
 设计约束（见 01-Architecture.md）：
 - 求解在独立 worker，不占 16.7ms 帧预算。
-- 本骨架不做任何真实求解、不引入任何化学数据。
+- 当前不做真实求解、不引入化学数据。
 """
 import logging
 import os
@@ -25,7 +25,7 @@ def main() -> int:
     signal.signal(signal.SIGTERM, _stop)
     signal.signal(signal.SIGINT, _stop)
 
-    LOG.info("solver-worker 0.1.0 已启动（骨架，未接求解逻辑）")
+    LOG.info("solver-worker 0.1.0 已启动（未接求解逻辑）")
     tick = 0
     while _running:
         tick += 1

@@ -20,8 +20,8 @@ app.get("/api/v1/health", async () => ({
   uptime_ms: Date.now() - startedAt,
 }));
 
-// WS 握手骨架：仅建立连接 + echo，不承载任何求解逻辑（-> spec-003/005）。
-// 后续在此挂载鉴权、会话与 st.phenomenon.v1 指令下发。
+// WS 握手：仅建立连接 + echo，不承载求解逻辑。
+// 鉴权、会话与 st.phenomenon.v1 指令下发按切片接入。
 app.register(async (instance) => {
   instance.get("/ws", { websocket: true }, (socket) => {
     socket.send(

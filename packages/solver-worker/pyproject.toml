@@ -1,10 +1,9 @@
 [project]
 name = "st-solver-worker"
 version = "0.1.0"
-description = "动态定量求解 worker（骨架常驻进程；求解逻辑在 spec-003 接入）"
+description = "动态定量求解 worker（当前为常驻进程骨架，求解逻辑按切片接入）"
 requires-python = ">=3.11,<3.12"
-# 骨架阶段不引入重依赖。求解器（phreeqpython/scipy/chempy/cantera）在 spec-003
-# 按 content schema 与黄金用例接入时逐个锁定版本并加入此处，避免地基阶段背负无关复杂度。
+# 当前不引入重依赖；求解器（phreeqpython/scipy/chempy/cantera）按内容 schema 与黄金用例逐个锁定版本后加入。
 dependencies = []
 
 [project.scripts]

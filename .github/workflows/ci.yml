@@ -1,5 +1,5 @@
-# 产品级 CI 雏形（spec-001）：构建 + 依赖许可证门禁。
-# 文档合规门禁在 docs.yml。数值零错/golden-cases/schema-validate 随后续切片接入。
+# 构建 + 依赖许可证门禁；文档合规门禁在 docs.yml。
+# 数值零错/golden-cases/schema-validate 按切片接入。
 # 按 03-DocDD-Process.md：无强制门禁文化，CI 是最小充分证据，不是开发阻塞。
 name: ci
 

@@ -34,7 +34,7 @@ LICENSE, Version 3 (LGPL-3.0).
   - 使用者可为调试此类修改对该库进行逆向工程；
   - 本产品不限制上述替换，并在部署说明中给出替换入口；
   - 所用 LGPL 库的许可证全文、上游地址与修改版源码获取方式列于
-    CREDITS.md 与 docs/adr/ADR-0005-许可证边界与数据隔离.md；
+    CREDITS.md，许可证边界见 docs/01-Architecture.md 第七节；
   - 分发包含该库的可执行文件时，随附本 NOTICE、两份许可证全文及
     允许重新链接所需的信息。
 
@@ -43,7 +43,7 @@ LICENSE, Version 3 (LGPL-3.0).
     （reaktoro-service 独立微服务，conda-forge 分发；承担多相 / 固相 / 气相、
      高温高压、燃烧爆炸平衡终态与复杂体系；服务镜像内动态链接、运行时可替换）
   替换入口：替换服务镜像内动态链接的 libReaktoro 即可，主链无需重新编译；
-    详见 docs/adr/ADR-0005 与 ADR-0009。
+    详见 docs/01-Architecture.md 第四节与第七节。
 
 LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目共存。
 
@@ -63,12 +63,12 @@ LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目�
   ChemPy — BSD-2-Clause（动力学辅助 + AI 独立对拍）
   pyequion2 — BSD-3-Clause（活度 / 离子强度；真实仓库 pyequion/pyequion2）
   chemicals / thermo / CoolProp — MIT
-  SUNDIALS CVODE/CVODES — BSD-3-Clause（后置 M1 可选加速）
+  SUNDIALS CVODE/CVODES — BSD-3-Clause（可选加速）
   Reaktoro — LGPL-2.1（独立微服务，见第 2 节）
 
 表现与可视化
   React / Three.js / PixiJS / Vite / SmilesDrawer — MIT 等宽松许可
-  3Dmol.js — BSD-3-Clause（仓库 LICENSE 原文，M0 已销项 F2）
+  3Dmol.js — BSD-3-Clause（仓库 LICENSE 原文核实）
     官方要求引用其 Bioinformatics 论文：DOI 10.1093/bioinformatics/btu829
     （Crossref 核实，已写入 About 页与 ASSETS.csv）
   Lucide — ISC · Tabler Icons / Iconify — MIT
@@ -82,13 +82,13 @@ LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目�
   LabIcons — CC BY 4.0 — illustrations by Manon Zuurmond (CPM)
   bioicons — 平台 MIT，但每个图标各自 CC0 / MIT / CC BY（含 Servier
     CC BY 3.0、DBCLS/TogoTV）；逐图标署名见 ASSETS.csv
-  Kenney Assets — CC0 1.0（包内 LICENSE 尚未复核，F3 未销项；当前禁止入库）
+  Kenney Assets — CC0 1.0（官网标注 + 包内 LICENSE + CC0 官方法典三级核实，可入库；仅取通用音效与粒子贴图）
 
 数据
   PubChem (NIH/NLM) — 免费公开数据；PUG-REST ≤ 5 req/s
   Open Reaction Database (ord-data) — CC BY-SA 4.0 —
     https://github.com/open-reaction-database/ord-data
-    数据与衍生规则表存放于【独立公开仓库 data-ord】，保留署名与
+    数据与衍生规则表存放于统一独立仓 `data-thirdparty/ord/`，保留署名与
     ShareAlike 声明；主仓仅以 submodule 引用，仅抽取事实性反应式。
   ord-schema — Apache-2.0 · ORDerly — MIT
 
@@ -100,11 +100,10 @@ LGPL-2.1 与 GPLv3 兼容（FSF license-list），故可与 LGPL-3.0 主项目�
     在严格意义上不兼容，仅可合并独立模块），不引入任何形态。
   The Powder Toy — GPL-3.0 · PhET sims — GPL · H5P core — GPL-3.0
     —— 换用 LGPL-3.0 后在许可证层面与 GPLv3 兼容，但依据选型决策
-    【不纳入主链】，仅作只读设计参考。理由见 ADR-0001 / ADR-0005。
+    【不纳入主链】，仅作只读设计参考（见 docs/01-Architecture.md 第七节）。
   Chemistry Development Kit — LGPL-2.1 · Jmol/SwingJS — LGPL-2.1
     —— 仅作参考，未纳入选型。
-  Sandspiel — MIT —— 早期表现层原型源码实读对象；实验台范式确立后
-    无限画布落沙基座已废弃，不进入产品链路。
+  Sandspiel — MIT —— 不进入产品链路，仅作表现层设计参考。
 
 ===============================================================================
 5. 商标与对标说明

@@ -69,6 +69,6 @@ jobs:
           fail: true
         continue-on-error: true
 
-# ---- M1 骨架后按切片逐步接入的产品级门禁 ----
+# ---- 按切片逐步接入的产品级门禁 ----
 #   license-scan（依赖树白名单）/ lgpl-link-check（reaktoro-service 镜像）
 #   schema-validate / rule-lint / golden-cases（数值零错）/ build / e2e / dual-platform

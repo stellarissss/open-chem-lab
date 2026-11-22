@@ -17,7 +17,7 @@
 
 | 项目 | 许可证 | 指标（2026-11-14 快照） | 角色 | 用途 |
 |---|---|---|---|---|
-| [**phreeqpython / PHREEQC (USGS)**](https://github.com/Vitens/phreeqpython) | **Apache-2.0** | ★94 · 2026-11-15 快照 | **电解质 / 水溶液平衡主引擎** | pH、物种分布、活度、离子强度、**SI 饱和度指数**、沉淀 / 溶解（`desaturate`）、加料重算（`add`）、溶液混合运算（`s1*0.5+s2*0.5`）；直接依赖 **3 个**，官方用例 **9/9 PASS**、单次 <1ms |
+| [**phreeqpython / PHREEQC (USGS)**](https://github.com/Vitens/phreeqpython) | **Apache-2.0** | ★94 · 2026-11-14 快照 | **电解质 / 水溶液平衡主引擎** | pH、物种分布、活度、离子强度、**SI 饱和度指数**、沉淀 / 溶解（`desaturate`）、加料重算（`add`）、溶液混合运算（`s1*0.5+s2*0.5`）；直接依赖 **3 个**，官方用例 **9/9 PASS**、单次 <1ms |
 | [**SUNDIALS CVODE/CVODES**](https://github.com/LLNL/sundials) — LLNL | **BSD-3-Clause** | ★707 · 活跃 | 可选加速 | SciPy LSODA 已内置 Adams/BDF 自动刚性切换（262 次 / 1.48ms vs RK45 42500 次 / 259ms），主链采用 SciPy 以免编译成本；CVODES 保留为可选加速 |
 | [**SciPy**](https://github.com/scipy/scipy) | **BSD-3-Clause** | ★15,217 | **刚性积分主力** | `solve_ivp` 的 **LSODA / BDF**：内置 Adams↔BDF 自动刚性切换（262 次 / 1.48ms vs RK45 42500 次 / 259ms，约 175 倍）；不硬编码时间阈值；免编译，CVODES 为可选加速 |
 | [**Cantera**](https://github.com/Cantera/cantera) | **BSD-3-Clause**（`License.txt` 原文核实：标准三条款，含 Caltech / Sandia 政府权利声明） | ★885 | 直接集成 | 化学动力学、热力学与输运；原文确认可并入 LGPL-3.0 主链 |
@@ -81,7 +81,7 @@
 | [Zustand](https://github.com/pmndrs/zustand) | MIT | 客户端状态 |
 | [Lucide](https://github.com/lucide-icons/lucide) | ISC | UI 图标 |
 | [Tabler Icons](https://github.com/tabler/tabler-icons) / [Iconify](https://github.com/iconify/iconify) | MIT | UI 图标备选 |
-| [Three.js](https://github.com/mrdoob/three.js) / [React Three Fiber](https://github.com/pmndrs/react-three-fiber) | MIT | 仅分子级 3D；不进 M1 主链 |
+| [Three.js](https://github.com/mrdoob/three.js) / [React Three Fiber](https://github.com/pmndrs/react-three-fiber) | MIT | 仅分子级 3D；不进主链 |
 
 ## 7. 美术资产（重点 · 出版级写实）
 
@@ -93,9 +93,9 @@
 | [bioicons](https://github.com/duerrsimon/bioicons) — Simon Dürr | 平台 **MIT**；**单个图标各自 CC0/MIT/CC-BY** | ★1,795 | 资产（**逐个核验许可**） | **平台 MIT 不等于每个图标 MIT**；来源含 Servier（CC-BY 3.0）、DBCLS / TogoTV。必须建逐图标署名清单 |
 | [Kenney Assets](https://kenney.nl/assets) — Kenney | **CC0 1.0**（官网 particle-pack 页标注 + 包内 `LICENSE.txt` 原文 + CC0 1.0 官方法典三级核实） | — | 资产（可入库） | 通用 UI / 音效 / 粒子贴图；CC0 可商用、署名非强制，与 LGPL-3.0 主链无冲突。**卡通风格不与出版级写实主调混用**，仅取通用音效与粒子贴图 |
 
-## 8. 教学标准与集成（**整体后置长线，不进 M1–M3**）
+## 8. 教学标准与集成（**整体后置长线**）
 
-> 教学功能由使用方教师承担，教学层后置到 M4，不纳入 M1–M3 验收。
+> 教学功能由使用方教师承担，教学层后置长线，不纳入前期阶段验收（见 `docs/01-Architecture.md`）。
 
 | 项目 | 许可证 | 角色 | 说明 |
 |---|---|---|---|
@@ -119,7 +119,6 @@
 ## 10. 数据/方法来源（对标与调研）
 
 - NB实验室功能对标资料来自其 [官网](https://www.nobook.com/index.html)、[价格页](https://www.nobook.com/price.html)、[NB化学实验资源页](https://hx.nobook.com/index.html)、应用商店官方描述与百科词条。**只采信一级来源**，推广稿中的「几万种物质」「免费版 20%」等未证实表述一律不采信。**本项目不复用其任何代码、素材、商标或界面设计**。
-- 检索方法：多引擎聚合（必应中国 / 百度 / 360 / 搜狗）+ GitHub REST API 精确核实 + 官方 README / LICENSE 原文二次核实。
 
 ## 11. 构建与诊断工具（不并入产品构建产物）
 

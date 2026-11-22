@@ -4,4 +4,4 @@ asset_id,source_project,source_url,author,license,modified,attribution_text,used
 # open-lab-components 为 HTML fragment 库（非 React），仅作 UI/缩略图，used_in 必须标 ui/thumbnail，禁止 apparatus/*；3D 只做分子。
 # license 取值必须在白名单内：MIT / BSD-3-Clause / Apache-2.0 / ISC / CC0-1.0 / CC-BY-4.0 / CC-BY-3.0 / LPPL-1.3c (generated output only)
 # 禁止：AGPL / GPLv2-only 素材、许可不明或逐模型授权资源、卡通风格器材、商业产品素材。
-# 详见 assets/attribution/README.md 与 docs/design/04-美术资产管线.md。
+# 详见 assets/attribution/README.md 与 docs/01-Architecture.md 第四节、tools/asset-pipeline/README.md。

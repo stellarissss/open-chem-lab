@@ -22,7 +22,7 @@ export default function App() {
       </header>
       <main className="stage">
         <section className="bench" aria-label="实验台">
-          <p className="bench__hint">实验台骨架 · 器材与求解将在后续切片接入</p>
+          <p className="bench__hint">实验台 · 器材与求解暂未接入</p>
         </section>
         <aside className="inspector" aria-label="状态面板">
           <h2>系统状态</h2>
