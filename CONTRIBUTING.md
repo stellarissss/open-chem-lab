@@ -11,8 +11,6 @@
 4. [docs/specs/](docs/specs/) — 当前切片规格
 5. [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) — 许可证基线与 LGPL 显著声明
 
-> 历史决策过程、旧规划、调研证据、ADR/design 原文已移入 `docs/归档/`，仅供追溯，不作现行依据。
-
 ## 当前最需要的贡献
 
 | 类型 | 说明 |
@@ -33,8 +31,7 @@
 ### 验证与门禁（敏捷轻量，见 03）
 
 - 不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，完成后如实记录做了哪些验证。
-- 产品级门禁在 M1 骨架搭建后逐步接入：`license-scan`（白名单放行 LGPL-2.1/3.0，AGPL/GPLv2-only 直接失败）、`lgpl-link-check`、`schema-validate`、`rule-lint`、`golden-cases`（数值零错）、`asset-attribution`、`build`、`e2e`。
-- 阶段二归档的两组门禁脚本是历史证据资产，保留不动、不追溯适用。
+- 产品级门禁随 M1 切片逐步接入（`license-scan` 已在 CI）：`lgpl-link-check`、`schema-validate`、`rule-lint`、`golden-cases`（数值零错）、`asset-attribution`、`build`、`e2e`。
 
 ### 内容（真实反应）贡献要求
 

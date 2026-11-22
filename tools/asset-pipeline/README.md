@@ -1,6 +1,6 @@
 # 美术资产转换管线 · Asset Pipeline
 
-> 现行美术规范见 [01-Architecture.md](../../docs/01-Architecture.md) 第四节；历史设计细节见 `docs/归档/design/04-美术资产管线.md` 与 `docs/归档/adr/`。
+> 现行美术规范见 [01-Architecture.md](../../docs/01-Architecture.md) 第四节。
 > **状态**：转换链已实测——原 `DVI → dvisvgm` 与 `dvisvgm --pdf` 双路径均失败，唯一可行路径为 **`lualatex → PDF → pdftocairo -svg → svgo`**（实测证据见下文）。脚本骨架在 M1 落地为可批量运行版本；本目录当前为流程说明 + 示意脚本。
 > **主调**：出版级写实 2D。tikz-chemlab 编译输出物为**唯一主资产**；`@itkdm/open-lab-components` **仅作 UI / 缩略图**（HTML fragment 库非 React）；**3D 只做分子 / 晶体 / 球棍模型**（3Dmol.js），程序化 3D 器材已降级为可选长线、不进 M1。
 
@@ -28,7 +28,7 @@ tools/asset-pipeline/
 
 > 早期草案中的 `extract-profile.mjs`（从 SVG 采样轮廓 → `LatheGeometry` 3D 器材）**已随程序化 3D 器材降级为长线而移出主流程**；架构规定（`docs/01-Architecture.md` 第二节）3D 只做分子级，不再需要器材 GLB 轮廓。若将来重启该长线，先询问用户裁决。
 
-## 关键流程与命令（M0 实测可行链）
+## 关键流程与命令（实测可行链）
 
 ```bash
 # 1. 构建镜像
@@ -43,7 +43,7 @@ docker run --rm -v "$PWD/assets:/out" st-asset-pipeline bash build-tikz.sh
 python3 tools/asset-pipeline/check-attribution.py
 ```
 
-**M0 实测结论**（历史证据见 `docs/归档/research/04-M0验证报告.md` §4.3 / §2 验证项 5）：
+**实测结论**：
 
 | 原命令 | 结果 |
 |---|---|
@@ -73,6 +73,6 @@ python3 tools/asset-pipeline/check-attribution.py
 
 ## 历史实测结论与待办
 
-**已实测核实**：转换链保真度；液体层可拆性（21 个 clipPath + `liquidLevel1` 可控）；open-lab-components 组件形态与用途（非 React、仅 UI / 缩略图）；3Dmol.js 许可证与 DOI（BSD-3 / `10.1093/bioinformatics/btu829`）；tikz-chemlab LPPL-1.3c；**Kenney 包内 LICENSE → CC0 1.0**；**3Dmol.js 真实浏览器 WebGL 球棍渲染 → Xvfb + SwiftShader `hasGeometry=true`**（证据见 `docs/归档/research/04-M0验证报告.md` §5.5–§5.6）。
+**已实测核实**：转换链保真度；液体层可拆性（21 个 clipPath + `liquidLevel1` 可控）；open-lab-components 组件形态与用途（非 React、仅 UI / 缩略图）；3Dmol.js 许可证与 DOI（BSD-3 / `10.1093/bioinformatics/btu829`）；tikz-chemlab LPPL-1.3c；**Kenney 包内 LICENSE → CC0 1.0**；**3Dmol.js 真实浏览器 WebGL 球棍渲染 → Xvfb + SwiftShader `hasGeometry=true`**。
 
 **仍待办**：13 个宏全量批量生成与单文件体积（内容生产）；**Windows 实机** Docker 卷挂载与路径换行符一致性，按 [`deploy/README-windows.md`](../../deploy/README-windows.md) 在本机补跑并回填（静态规范核查已通过）。

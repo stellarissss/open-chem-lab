@@ -1,6 +1,5 @@
 # 文档与合规 CI（轻量）
 # 校验现行文档结构、LGPL-3.0 交付与静态合规红线。
-# 阶段二历史门禁脚本已归档（docs/归档/research/data/），属历史证据资产，不作现行运行门禁。
 name: docs-and-compliance
 
 on:

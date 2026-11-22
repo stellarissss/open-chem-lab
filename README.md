@@ -70,8 +70,6 @@ python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
 
 > 当前骨架**无任何真实化学体系或求解逻辑**——那是从切片 002/003 起逐片接入的内容。AI/开发者入口按 `AGENTS.md` → `docs/02-Roadmap.md` → `docs/01-Architecture.md` → `docs/03-DocDD-Process.md` → `docs/specs/` 顺序。
 
-阶段一/二的实测脚本、原始 JSON 与门禁（`verify_m0_s2.py` 41 断言、`verify_auth_s2.py` 38 断言）作为**历史证据资产**保留在 `docs/归档/research/data/`，证明技术不确定性已消解；它们基于归档前目录结构，**不作现行运行门禁**（见 `docs/03-DocDD-Process.md` 第四节）。
-
 ---
 
 ## 文档导航
@@ -85,7 +83,6 @@ python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
 | [docs/specs/](docs/specs/) | 切片规格：已完成 spec + 下一切片粗稿 |
 | [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) | 开源依赖致谢、逐项许可证、LGPL 显著声明 |
 | [deploy/README-windows.md](deploy/README-windows.md) | Windows / WSL2 双平台部署清单 |
-| `docs/归档/` | 历史文档（决策台账、旧规划、ADR/design/research 原文）——**仅追溯，开发不读** |
 
 ---
 

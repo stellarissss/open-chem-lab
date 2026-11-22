@@ -1,7 +1,7 @@
 # 01 · 架构（唯一技术真理源）
 
 > 本文件是本项目**唯一现行技术与产品真理源**：所有开发所需的定义、技术栈、红线、数据结构、边界与验证原则都在此自包含。
-> 开发时只需读本文件 + `02-Roadmap.md`（进度）+ `03-DocDD-Process.md`（流程）+ `specs/`（当前切片）。历史规划、决策过程、调研证据已移入 `docs/归档/`，**不作现行依据**、开发时不读。
+> 开发时只需读本文件 + `02-Roadmap.md`（进度）+ `03-DocDD-Process.md`（流程）+ `specs/`（当前切片）。
 > 变更本文件的产品定义、技术栈或红线属重大变更：先说明动机与影响，同步相关文件（敏捷轻量，不套企业审批）。
 
 ---
@@ -158,7 +158,7 @@ flowchart TB
 
 **准入判据**：①宽松许可可进 LGPL 主链 ②可自托管、可机读批量 ③带版本/快照日/可溯源 ④不引入商业数据库/不引入精度分级；官方声明 AS IS 的须对拍签核。每条快照记录 `endpoint / license / snapshot_date / sha256`。
 
-**缓存**：物化层构建期 O(1) 查表（免计算）；求解缓存用内容寻址键 `sha256(canonical(system) + canonical(conditions) + solver_ver + ruleset_ver)`，失效由数据快照/求解器/ruleset 三版本驱动，复用 `solve_cache`、**零新中间件**。M0 实测主引擎单次 ≈0.21ms，缓存价值在免计算与可复现，不在提速。
+**缓存**：物化层构建期 O(1) 查表（免计算）；求解缓存用内容寻址键 `sha256(canonical(system) + canonical(conditions) + solver_ver + ruleset_ver)`，失效由数据快照/求解器/ruleset 三版本驱动，复用 `solve_cache`、**零新中间件**。实测主引擎单次 ≈0.21ms，缓存价值在免计算与可复现，不在提速。
 
 ---
 
@@ -187,7 +187,7 @@ open-chem-lab/
 ├── assets/                 # 资产产物 + attribution/
 ├── deploy/                 # docker-compose / Dockerfile / .env.example / README-windows.md
 ├── tests/                  # e2e / golden-cases / license-scan / lgpl-link-check
-└── docs/                   # 本真理源 + Roadmap + DocDD + specs/ + 归档/
+└── docs/                   # 本真理源 + Roadmap + DocDD + specs/
 ```
 
 **依赖规则**：`protocol` 最底层不依赖任何包；`solver-worker`(Python) 与 `wasm-view`(Rust) 经协议 JSON 通信、互不 import；`web-ui` 不直连求解库、一律经 gateway；任何包不得引入 AGPL/GPLv2-only 依赖；`content/` 是数据、由 reaction-library 运行时加载、不被代码 import。
@@ -212,7 +212,6 @@ open-chem-lab/
 ### 7.2 验证原则（敏捷轻量）
 
 - **不设强制门禁**：不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，完成后如实记录做了哪些验证。
-- **历史门禁是资产**：阶段二归档的 `verify_m0_s2.py`（41 断言）、`verify_auth_s2.py`（38 断言）及其 CI 接入是已证明不确定性消解的历史证据，保留不动、不追溯适用。
 - **产品级门禁随 M1 切片逐步接入**（`license-scan` 已在 CI）：`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
 
 ### 7.3 对外口径（不可拆分的三层）

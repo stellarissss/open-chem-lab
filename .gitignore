@@ -5,8 +5,6 @@ build/
 target/
 pkg/
 *.wasm
-# 例外：归档的 M0 WASM 编译产物是「历史实测证据」，不是构建中间物，须入库供归档门禁校验
-!docs/归档/research/data/m0/*.wasm
 .pnpm-store/
 .turbo/
 .vite/

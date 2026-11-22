@@ -1,7 +1,7 @@
 # Windows 侧最小部署 · 可执行补验清单
 
-> **状态**：Linux 侧已实测通过（Docker Compose 4 服务全 Healthy，历史证据见 `docs/归档/research/04-M0验证报告.md` §2）；
-> **Windows 实机起服在本沙箱（Ubuntu）无法覆盖**，按历史流程 `docs/归档/12-阶段二开发流程.md` 显式标「受限」，本清单交付用户在 Windows / WSL2 本机执行。
+> **状态**：Linux 侧已实测通过（Docker Compose 4 服务全 Healthy）；
+> **Windows 实机起服在本沙箱（Ubuntu）无法覆盖**，本清单标注为受限项，交付用户在 Windows / WSL2 本机执行。
 > 依据：Win + Linux 双平台兼容与单机自托管硬约束（`docs/01-Architecture.md` 第二节/第六节）、reaktoro-service 独立微服务形态、
 > [Microsoft Learn《Working across Windows and Linux file systems》](https://learn.microsoft.com/en-us/windows/wsl/filesystems) 一手核实（2026-11-15）。
 
@@ -9,7 +9,7 @@
 
 ## 0. 为什么需要这份清单
 
-阶段二质量闸门把「双平台」定义为 **Linux 实测 + Windows 静态规范核查**；无法实机覆盖的部分必须显式标注并给出补验方案，不得写成「通过」。
+质量闸门把「双平台」定义为 **Linux 实测 + Windows 静态规范核查**；无法实机覆盖的部分必须显式标注并给出补验方案，不得写成「通过」。
 静态核查（本沙箱已完成）：
 
 | 检查 | 结果 |
