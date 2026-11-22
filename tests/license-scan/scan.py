@@ -16,6 +16,7 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
+from pathlib import Path
 
 # 宽松 / 兼容 LGPL-3.0 主链的许可（规范化小写比较）
 ALLOW = {
@@ -40,17 +41,49 @@ def normalize(lic: str) -> str:
     return s
 
 
+def from_lockfile(root: Path) -> dict[str, list[str]]:
+    """降级路径：从 node_modules 的 package.json 读取许可证。
+
+    离线部署（setup.sh 用 bundle store 安装）会让默认 store 缺索引，
+    `pnpm licenses list` 失败。node_modules 是实际安装结果，直接读其
+    package.json 的 license 字段更贴近运行事实，且零网络依赖。
+    """
+    by_license: dict[str, list[str]] = defaultdict(list)
+    nm = root / "node_modules"
+    if not nm.is_dir():
+        return by_license
+    for pkg_json in nm.rglob("package.json"):
+        # 跳过嵌套过深与 .pnpm 内部重复项由 rglob 去重语义处理
+        try:
+            obj = json.loads(pkg_json.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        name = obj.get("name") or pkg_json.parent.name
+        lic = obj.get("license") or "unknown"
+        if isinstance(lic, dict):
+            lic = lic.get("type", "unknown")
+        by_license[str(lic)].append({"name": str(name)})
+    return by_license
+
+
 def main() -> int:
+    root = Path(__file__).resolve().parents[2]
+    out = None
     try:
         out = subprocess.run(
             ["pnpm", "licenses", "list", "--json"],
-            capture_output=True, text=True, check=True,
+            capture_output=True, text=True, check=True, cwd=root,
         ).stdout
     except (FileNotFoundError, subprocess.CalledProcessError) as exc:
-        print(f"[license-scan] 无法获取依赖许可证：{exc}", file=sys.stderr)
-        return 2
+        print(f"[license-scan] pnpm licenses 不可用（{exc}），降级从 node_modules 读取", file=sys.stderr)
 
-    data = json.loads(out)
+    if out:
+        data = json.loads(out)
+    else:
+        data = from_lockfile(root)
+        if not data:
+            print("[license-scan] 无法获取依赖许可证：pnpm licenses 失败且 node_modules 为空", file=sys.stderr)
+            return 2
     by_license: dict[str, list[str]] = defaultdict(list)
     for lic, entries in data.items():
         for e in entries:

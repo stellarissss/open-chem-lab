@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/compound.v1.schema.json",
+  "title": "Compound",
+  "description": "可玩物质卡：凡入库必须可玩。数据分 fact（计量/物性，零错签核）/ presentation（颜色/外观，可标来源夸张）/ safety（GHS 危害，严谨签核）三层。护栏字段保证来源/置信度/对拍/签核完整，非 verified 不进可玩层。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "compound_id", "names", "formula", "data_class", "source", "confidence", "review", "playable"],
+  "properties": {
+    "schema_version": { "const": "st.compound.v1" },
+    "compound_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9_]+$",
+      "description": "物质唯一 ID，小写 snake_case（双平台硬约束，见 01 第六节）"
+    },
+    "names": { "$ref": "#/$defs/BilingualName" },
+    "formula": {
+      "type": "string",
+      "minLength": 1,
+      "description": "化学式（如 HCl / CH3COOH / NH3·H2O），唯一标识化学身份"
+    },
+    "cas_number": {
+      "type": ["string", "null"],
+      "description": "CAS 登记号，可选但推荐（构建期从 PubChem 快照取）"
+    },
+    "data_class": {
+      "type": "string",
+      "enum": ["fact", "presentation", "safety"],
+      "description": "该卡主数据类型：fact 零错 / presentation 可标来源夸张 / safety 严谨签核"
+    },
+    "properties": { "$ref": "#/$defs/CompoundProperties" },
+    "safety": { "$ref": "#/$defs/Safety" },
+    "presentation": { "$ref": "#/$defs/Presentation" },
+    "source": { "$ref": "#/$defs/Source" },
+    "confidence": { "$ref": "#/$defs/Confidence" },
+    "review": { "$ref": "#/$defs/Review" },
+    "rule_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "参数变更版本号；变更须递增而非原地覆盖，支持回滚"
+    },
+    "playable": {
+      "type": "boolean",
+      "const": true,
+      "description": "凡入库物质必须可玩（01 第二节）；非 verified 不得置 true"
+    }
+  },
+  "$defs": {
+    "BilingualName": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": { "type": "string", "minLength": 1, "description": "中文名" },
+        "en": { "type": "string", "minLength": 1, "description": "英文名" },
+        "common": { "type": "string", "description": "常用别名（如醋酸/乙酸）" }
+      }
+    },
+    "CompoundProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "物性事实（fact 层），须零错签核；字段按需要扩展，禁止凭记忆写数值",
+      "properties": {
+        "molar_mass_g_mol": { "type": "number", "exclusiveMinimum": 0, "description": "摩尔质量 g/mol" },
+        "density_g_ml": { "type": "number", "exclusiveMinimum": 0, "description": "密度 g/mL（标注温度条件）" },
+        "pka": { "type": "number", "description": "酸解离常数 pKa（25°C，仅弱酸填）" },
+        "pkb": { "type": "number", "description": "碱解离常数 pKb（25°C，仅弱碱填）" },
+        "pka_note": { "type": "string", "description": "pKa 说明（强电解质为何不填有限值等）" },
+        "pkb_note": { "type": "string", "description": "pKb 说明" },
+        "pka_source": { "type": "string", "description": "pKa 来源追溯（权威数据库反应行）" },
+        "pkb_source": { "type": "string", "description": "pKb 来源追溯" },
+        "weak_acid": { "type": "boolean", "description": "是否弱酸" },
+        "weak_base": { "type": "boolean", "description": "是否弱碱" },
+        "strong_electrolyte": { "type": "boolean", "description": "是否强电解质（完全解离，不设有限 pKa/Kb）" },
+        "solubility": { "type": "string", "description": "溶解性描述或定量值（带条件）" },
+        "reference_temp_K": { "type": "number", "default": 298.15, "description": "物性参考温度 K，默认 298.15（25°C）" }
+      }
+    },
+    "Safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GHS 危害（safety 层），严谨签核，驱动错误操作后果",
+      "properties": {
+        "ghs_codes": {
+          "type": "array",
+          "description": "GHS 危险公示码（如 H302）/ 象形图代码",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "signal_word": { "type": "string", "enum": ["danger", "warning", "none"], "description": "警示词" },
+        "hazard_notes": { "type": "string", "description": "危害说明（如腐蚀性、遇水放热）" },
+        "source": { "$ref": "#/$defs/Source" }
+      }
+    },
+    "Presentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "外观表现（presentation 层），可夸张但必须标来源，不受零错红线约束",
+      "properties": {
+        "appearance": { "type": "string", "description": "外观描述（如无色透明液体）" },
+        "solution_color": { "type": "string", "description": "溶液颜色（表现层显示值）" },
+        "notes": { "type": "string" }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "description": "来源链：kind + ref 必填；权威衍生需带 version/snapshot_date/sha256",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["authoritative_db", "official_doc", "literature", "cameo_fact", "computed"],
+          "description": "来源类别；cameo_fact 为隔离仓事实性结论，computed 为对拍推导"
+        },
+        "ref": { "type": "string", "minLength": 1, "description": "来源标识（数据库名/文档/URL/DOI）" },
+        "endpoint": { "type": ["string", "null"], "description": "取数 endpoint（构建期快照来源）" },
+        "license": { "type": ["string", "null"], "description": "数据许可（CC-BY-SA 衍生须标）" },
+        "version": { "type": ["string", "null"], "description": "数据源版本" },
+        "snapshot_date": { "type": ["string", "null"], "description": "快照日期 ISO-8601" },
+        "sha256": { "type": ["string", "null"], "description": "快照 sha256，保证可追溯与可回滚" }
+      }
+    },
+    "Confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["verified", "extracted", "crosschecked", "ml_guess"],
+          "description": "verified=用户签核进可玩层；extracted=候选池；crosschecked=AI 对拍；ml_guess=禁用（门禁拒绝）"
+        },
+        "note": { "type": "string", "description": "置信度说明" }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["signed_off", "pending", "rejected"],
+          "description": "签核状态；仅 signed_off 允许 playable=true"
+        },
+        "reviewer": { "type": ["string", "null"], "description": "签核人（用户）" },
+        "date": { "type": ["string", "null"], "description": "签核日期 ISO-8601" },
+        "ai_crosscheck": {
+          "type": ["string", "null"],
+          "description": "AI 独立对拍记录路径（指向 content/ai-crosscheck/）"
+        }
+      }
+    }
+  }
+}

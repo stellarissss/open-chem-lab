@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/solution_speciation.v1.schema.json",
+  "title": "SolutionSpeciation",
+  "description": "每容器隐藏化学态：不可见反应也真实发生。物种分布 + pH + 离子强度 + 平衡 + 隐藏反应。由求解层（spec-003+）产出，本切片只定义契约。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "speciation_id", "container_id", "species", "ph", "ionic_strength", "ruleset_version"],
+  "properties": {
+    "schema_version": { "const": "st.solution_speciation.v1" },
+    "speciation_id": { "type": "string", "minLength": 1, "description": "快照唯一 ID，供幂等与回放" },
+    "container_id": { "type": "string", "minLength": 1, "description": "对应实验台容器摆位 ID" },
+    "species": {
+      "type": "array",
+      "description": "物种分布（浓度/活度/摩尔分数）",
+      "items": { "$ref": "#/$defs/SpeciesConcentration" }
+    },
+    "ph": { "type": "number", "description": "pH 值（求解结果）" },
+    "ionic_strength": { "type": "number", "minimum": 0, "description": "离子强度 mol/L" },
+    "pe": { "type": "number", "description": "氧化还原电位 pe（可选）" },
+    "temperature_K": { "type": "number", "exclusiveMinimum": 0, "default": 298.15 },
+    "equilibria": {
+      "type": "array",
+      "description": "生效平衡引用（指向 reaction_rule ID）",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "hidden_reactions": {
+      "type": "array",
+      "description": "隐藏反应（不可见但真实发生，引用 reaction_rule ID）",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "ruleset_version": { "type": "string", "minLength": 1, "description": "求解所用规则集版本，保证可复现" },
+    "timestamp_ms": { "type": "integer", "minimum": 0, "description": "相对仿真起点毫秒（时间轴对齐）" },
+    "source": { "$ref": "#/$defs/Source" }
+  },
+  "$defs": {
+    "SpeciesConcentration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["species_id", "concentration_mol_L"],
+      "properties": {
+        "species_id": { "type": "string", "minLength": 1, "description": "物种 ID（如 H+ / OH- / CH3COO-）" },
+        "concentration_mol_L": { "type": "number", "minimum": 0, "description": "摩尔浓度 mol/L" },
+        "activity": { "type": "number", "description": "活度（可选，求解器给出）" },
+        "mole_fraction": { "type": "number", "minimum": 0, "maximum": 1, "description": "摩尔分数（可选）" }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["solver", "authoritative_db", "computed"] },
+        "ref": { "type": "string", "minLength": 1, "description": "求解器/数据源标识" },
+        "version": { "type": ["string", "null"] },
+        "snapshot_date": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

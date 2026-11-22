@@ -26,6 +26,24 @@ jobs:
       - name: 全量构建（protocol 类型生成 + gateway/web-ui 编译）
         run: pnpm build
 
+  content-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 安装 jsonschema
+        run: pip install jsonschema==4.26.0
+      - name: 内容层 schema 校验与事实层护栏
+        run: python3 tests/schema-validate/validate.py
+      - name: 中和体系黄金用例数值零错复核
+        run: python3 tests/golden-cases/run.py
+      - name: 物化链产物一致性（幂等）
+        run: |
+          python3 tools/materialize-rules.py
+          git diff --exit-code content/materialized/ruleset.json
+
   license-scan:
     runs-on: ubuntu-latest
     steps:

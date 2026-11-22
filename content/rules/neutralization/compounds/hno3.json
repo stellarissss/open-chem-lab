@@ -1,0 +1,60 @@
+{
+  "schema_version": "st.compound.v1",
+  "compound_id": "hno3",
+  "names": {
+    "zh": "硝酸",
+    "en": "nitric acid"
+  },
+  "formula": "HNO3",
+  "cas_number": "7697-37-2",
+  "data_class": "fact",
+  "properties": {
+    "strong_electrolyte": true,
+    "pka_note": "强酸完全解离，不设有限 pKa",
+    "molar_mass_g_mol": 63.01,
+    "reference_temp_K": 298.15
+  },
+  "safety": {
+    "ghs_codes": [
+      "H272",
+      "H314"
+    ],
+    "signal_word": "danger",
+    "hazard_notes": "强腐蚀、强氧化，遇有机物易燃",
+    "source": {
+      "kind": "authoritative_db",
+      "ref": "PubChem PUG-REST CID hno3",
+      "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug_view",
+      "license": "PubChem data",
+      "version": null,
+      "snapshot_date": "2026-11-22",
+      "sha256": null
+    }
+  },
+  "presentation": {
+    "appearance": "无色至淡黄色透明液体",
+    "solution_color": "无色（浓硝酸因分解呈黄）",
+    "notes": "浓硝酸见光分解出 NO2"
+  },
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
+    "endpoint": null,
+    "license": "public domain",
+    "version": "2016/2024",
+    "snapshot_date": "2026-11-22",
+    "sha256": "15a0ad8ae92fc8f52182377802be26352b0ac00ba46c37f02f3bba98e98abbf6"
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-22; USGS PHREEQC authoritative"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-22",
+    "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+  },
+  "rule_revision": 1,
+  "playable": true
+}

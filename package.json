@@ -12,6 +12,9 @@
   "scripts": {
     "build": "pnpm -r --filter './packages/**' build",
     "build:types": "pnpm --filter @st/protocol build:types",
+    "validate:content": "python3 tests/schema-validate/validate.py",
+    "validate:golden": "python3 tests/golden-cases/run.py",
+    "materialize": "python3 tools/materialize-rules.py",
     "dev": "pnpm -r --parallel --filter './packages/**' dev",
     "typecheck": "pnpm -r --filter './packages/**' typecheck",
     "clean": "pnpm -r --filter './packages/**' clean",

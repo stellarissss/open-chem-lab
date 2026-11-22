@@ -1,0 +1,61 @@
+{
+  "schema_version": "st.compound.v1",
+  "compound_id": "acetic_acid",
+  "names": {
+    "zh": "乙酸（醋酸）",
+    "en": "acetic acid"
+  },
+  "formula": "CH3COOH",
+  "cas_number": "64-19-7",
+  "data_class": "fact",
+  "properties": {
+    "weak_acid": true,
+    "pka": 4.76,
+    "molar_mass_g_mol": 60.05,
+    "reference_temp_K": 298.15,
+    "pka_source": "minteq.dat: Acetate- + H+ = HAcetate log_k 4.760"
+  },
+  "safety": {
+    "ghs_codes": [
+      "H226",
+      "H314"
+    ],
+    "signal_word": "danger",
+    "hazard_notes": "冰醋酸腐蚀、易燃；稀醋酸刺激性",
+    "source": {
+      "kind": "authoritative_db",
+      "ref": "PubChem PUG-REST CID acid",
+      "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug_view",
+      "license": "PubChem data",
+      "version": null,
+      "snapshot_date": "2026-11-22",
+      "sha256": null
+    }
+  },
+  "presentation": {
+    "appearance": "无色透明液体，有刺激性酸味",
+    "solution_color": "无色",
+    "notes": "食醋主要酸性成分（稀溶液）"
+  },
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
+    "endpoint": null,
+    "license": "public domain",
+    "version": "2016/2024",
+    "snapshot_date": "2026-11-22",
+    "sha256": "15a0ad8ae92fc8f52182377802be26352b0ac00ba46c37f02f3bba98e98abbf6"
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-22; USGS PHREEQC authoritative"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-22",
+    "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+  },
+  "rule_revision": 1,
+  "playable": true
+}

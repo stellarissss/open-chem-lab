@@ -1,0 +1,77 @@
+// GENERATED from schemas/solution_speciation.v1.schema.json — DO NOT EDIT. Run pnpm build:types.
+
+/**
+ * 每容器隐藏化学态：不可见反应也真实发生。物种分布 + pH + 离子强度 + 平衡 + 隐藏反应。由求解层（spec-003+）产出，本切片只定义契约。
+ */
+export interface SolutionSpeciation {
+  schema_version: "st.solution_speciation.v1";
+  /**
+   * 快照唯一 ID，供幂等与回放
+   */
+  speciation_id: string;
+  /**
+   * 对应实验台容器摆位 ID
+   */
+  container_id: string;
+  /**
+   * 物种分布（浓度/活度/摩尔分数）
+   */
+  species: SpeciesConcentration[];
+  /**
+   * pH 值（求解结果）
+   */
+  ph: number;
+  /**
+   * 离子强度 mol/L
+   */
+  ionic_strength: number;
+  /**
+   * 氧化还原电位 pe（可选）
+   */
+  pe?: number;
+  temperature_K?: number;
+  /**
+   * 生效平衡引用（指向 reaction_rule ID）
+   */
+  equilibria?: string[];
+  /**
+   * 隐藏反应（不可见但真实发生，引用 reaction_rule ID）
+   */
+  hidden_reactions?: string[];
+  /**
+   * 求解所用规则集版本，保证可复现
+   */
+  ruleset_version: string;
+  /**
+   * 相对仿真起点毫秒（时间轴对齐）
+   */
+  timestamp_ms?: number;
+  source?: Source;
+}
+export interface SpeciesConcentration {
+  /**
+   * 物种 ID（如 H+ / OH- / CH3COO-）
+   */
+  species_id: string;
+  /**
+   * 摩尔浓度 mol/L
+   */
+  concentration_mol_L: number;
+  /**
+   * 活度（可选，求解器给出）
+   */
+  activity?: number;
+  /**
+   * 摩尔分数（可选）
+   */
+  mole_fraction?: number;
+}
+export interface Source {
+  kind: "solver" | "authoritative_db" | "computed";
+  /**
+   * 求解器/数据源标识
+   */
+  ref: string;
+  version?: string | null;
+  snapshot_date?: string | null;
+}

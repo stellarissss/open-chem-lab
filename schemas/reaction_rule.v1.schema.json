@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/reaction_rule.v1.schema.json",
+  "title": "ReactionRule",
+  "description": "条件化真实反应（核心事实层）。定量 equilibrium/kinetics/thermo + 适用条件 applicability + 数值护栏 numerics + 现象 effects + 来源/置信度/对拍/签核 完整。计量守恒、条件互斥（同一反应物集合+条件不得有两条 verified）、applicability 必填、ml_guess 禁用。参数变更走 rule_revision 禁原地覆盖。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "rule_id", "reaction", "applicability", "data_class", "source", "confidence", "ai_crosscheck", "review", "rule_revision"],
+  "properties": {
+    "schema_version": { "const": "st.reaction_rule.v1" },
+    "rule_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9_]+$",
+      "description": "规则唯一 ID，小写 snake_case"
+    },
+    "system": {
+      "type": "string",
+      "description": "所属化学体系（如 neutralization），对应 content/rules/ 子目录名"
+    },
+    "reaction": { "$ref": "#/$defs/Reaction" },
+    "equilibrium": { "$ref": "#/$defs/Equilibrium" },
+    "kinetics": { "$ref": "#/$defs/Kinetics" },
+    "thermo": { "$ref": "#/$defs/Thermo" },
+    "applicability": { "$ref": "#/$defs/Applicability" },
+    "numerics": { "$ref": "#/$defs/Numerics" },
+    "effects": {
+      "type": "array",
+      "description": "关联现象 ID（指向 phenomenon 注册表，表现层按 ID 渲染，不进化学事实层）",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "data_class": {
+      "type": "string",
+      "enum": ["fact", "presentation", "safety"],
+      "description": "反应规则主数据类型；数值规则须为 fact"
+    },
+    "source": { "$ref": "#/$defs/Source" },
+    "confidence": { "$ref": "#/$defs/Confidence" },
+    "ai_crosscheck": { "$ref": "#/$defs/AiCrosscheck" },
+    "review": { "$ref": "#/$defs/Review" },
+    "rule_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "规则修订号，参数变更须递增而非原地覆盖，支持回滚"
+    }
+  },
+  "$defs": {
+    "Reaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reactants", "products"],
+      "description": "反应计量。reactants/products 均为 species 计量映射，供计量守恒校验（RDKit/CI）",
+      "properties": {
+        "equation": { "type": "string", "description": "人类可读反应式（如 H+ + OH- = H2O）" },
+        "reactants": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "number", "exclusiveMinimum": 0 },
+          "description": "反应物 -> 计量系数（正数）"
+        },
+        "products": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "number", "exclusiveMinimum": 0 },
+          "description": "产物 -> 计量系数（正数）"
+        },
+        "net_charge_reactants": { "type": "integer", "description": "反应物净电荷，供电荷守恒校验" },
+        "net_charge_products": { "type": "integer", "description": "产物净电荷，供电荷守恒校验" }
+      }
+    },
+    "Equilibrium": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "平衡定量（至少提供 log_k 或 delta_g_kj 之一用于平衡求解）",
+      "properties": {
+        "log_k_25C": { "type": "number", "description": "25°C 平衡常数 log10 K" },
+        "delta_g_kj_mol": { "type": "number", "description": "标准吉布斯自由能变 kJ/mol" },
+        "delta_h_kj_mol": { "type": "number", "description": "标准焓变 kJ/mol" },
+        "analytic_expression": {
+          "type": "array",
+          "description": "PHREEQC -analytic/-analytical 温度系数 A1..A6（如有）",
+          "items": { "type": "number" }
+        },
+        "analytic_note": { "type": "string", "description": "温度系数说明（随求解层接入）" },
+        "temperature_K": { "type": "number", "default": 298.15, "description": "常数参考温度 K" }
+      }
+    },
+    "Kinetics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "动力学定量（可选；中和等快反应用平衡描述，慢反应填此节）",
+      "properties": {
+        "rate_law": { "type": "string", "description": "速率方程表达式" },
+        "a_arrhenius": { "type": "number", "description": "Arrhenius 指前因子" },
+        "ea_kj_mol": { "type": "number", "description": "活化能 kJ/mol" },
+        "rate_constant_25C": { "type": "number", "description": "25°C 速率常数" },
+        "fast_equilibrium": { "type": "boolean", "default": false, "description": "true=瞬时平衡，无需动力学积分（中和反应）" },
+        "note": { "type": "string", "description": "动力学说明" }
+      }
+    },
+    "Thermo": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "热效应（驱动温度变化现象，数值进 fact 层）",
+      "properties": {
+        "delta_h_kj_mol": { "type": "number", "description": "反应焓变 kJ/mol（放热为负）" },
+        "exothermic": { "type": "boolean", "description": "是否放热" },
+        "notes": { "type": "string" }
+      }
+    },
+    "Applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conditions"],
+      "description": "适用条件（必填）。条件互斥护栏：同一反应物集合 + 条件组合不得有两条 verified 规则",
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "description": "适用条件列表（如 aqueous_25C、ph_range）",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "ph_range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "适用 pH 区间 [min, max]",
+          "items": { "type": "number" }
+        },
+        "temp_range_K": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "适用温度区间 [min, max] K",
+          "items": { "type": "number" }
+        },
+        "excludes": { "type": "array", "description": "排除条件", "items": { "type": "string" } }
+      }
+    },
+    "Numerics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "数值护栏：rtol/atol 由求解器决定，此处只标注数值稳定性约束，禁硬编码时间阈值（01 第四节）",
+      "properties": {
+        "rtol": { "type": "number", "exclusiveMinimum": 0, "description": "相对容差" },
+        "atol": { "type": "number", "exclusiveMinimum": 0, "description": "绝对容差" },
+        "stiff": { "type": "boolean", "description": "是否刚性（提示 LSODA/BDF 切换）" },
+        "note": { "type": "string", "description": "数值护栏说明" },
+        "notes": { "type": "string" }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["authoritative_db", "official_doc", "literature", "cameo_fact", "computed", "ord_derived"] },
+        "ref": { "type": "string", "minLength": 1 },
+        "endpoint": { "type": ["string", "null"] },
+        "license": { "type": ["string", "null"], "description": "ord_derived 须标 CC-BY-SA 溯源" },
+        "version": { "type": ["string", "null"] },
+        "snapshot_date": { "type": ["string", "null"] },
+        "sha256": { "type": ["string", "null"] }
+      }
+    },
+    "Confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": { "type": "string", "enum": ["verified", "extracted", "crosschecked", "ml_guess"], "description": "ml_guess 门禁拒绝" },
+        "note": { "type": "string" }
+      }
+    },
+    "AiCrosscheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "description": "AI 独立对拍记录（权威源→对拍→签核链的一环）",
+      "properties": {
+        "method": { "type": "string", "description": "对拍方法（如 analytic_25C / chempy / phreeqpython）" },
+        "record_path": { "type": ["string", "null"], "description": "对拍记录文件路径" },
+        "expected_values": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "对拍期望值（如 pH、浓度），键由体系定义"
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["signed_off", "pending", "rejected"] },
+        "reviewer": { "type": ["string", "null"] },
+        "date": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

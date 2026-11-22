@@ -1,0 +1,129 @@
+{
+  "record_id": "neutralization-crosscheck-001",
+  "system": "neutralization",
+  "date": "2026-11-22",
+  "method": "authoritative-source + analytic-solution crosscheck",
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-22",
+    "note": "用户签核全部候选数值进事实层"
+  },
+  "authoritative_sources": [
+    {
+      "name": "USGS PHREEQC wateq4f.dat",
+      "role": "水解离 / 铵根解离主源（公共领域）",
+      "endpoint": "https://raw.githubusercontent.com/usgs-coupled/phreeqc3/master/database/wateq4f.dat",
+      "license": "public domain",
+      "snapshot_date": "2026-11-22",
+      "sha256": "15a0ad8ae92fc8f52182377802be26352b0ac00ba46c37f02f3bba98e98abbf6",
+      "snapshot_file": "wateq4f.dat.snapshot",
+      "header": "4032 lines, 106804 bytes, md5=b01313c8049bbc106fe5ce9b15afa3e2"
+    },
+    {
+      "name": "USGS PHREEQC minteq.dat",
+      "role": "乙酸解离常数值来源（wateq4f.dat 缺乙酸定义）",
+      "endpoint": "https://raw.githubusercontent.com/usgs-coupled/phreeqc3/master/database/minteq.dat",
+      "license": "public domain",
+      "snapshot_date": "2026-11-22",
+      "sha256": "0858232d8126f95cda1c8edbb2e50fa4c06055a1bcbb1aed154cc89cf61d168d",
+      "snapshot_file": "minteq.dat.snapshot",
+      "header": "5650 lines, 159592 bytes, md5=4c6f21f3073c15690f089901794039db"
+    },
+    {
+      "name": "phreeqc.dat (phreeqpython bundled)",
+      "role": "三源交叉验证（离线内置）",
+      "ref": "phreeqpython/database/phreeqc.dat",
+      "license": "public domain"
+    },
+    {
+      "name": "PubChem PUG-REST",
+      "role": "safety 层 GHS 分类（构建期离线快照）",
+      "endpoint": "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{cid}/JSON?heading=GHS%20Classification",
+      "license": "PubChem data",
+      "snapshot_date": "2026-11-22",
+      "cids": {
+        "hcl": 313,
+        "naoh": 14798,
+        "acetic_acid": 176,
+        "hno3": 944,
+        "koh": 14797,
+        "ammonia": 222
+      }
+    }
+  ],
+  "extracted_constants": [
+    {
+      "species": "H2O",
+      "reaction": "H2O = OH- + H+",
+      "log_k_25C": -14.0,
+      "sources": {
+        "wateq4f.dat": -14.0,
+        "minteq.dat": -13.998,
+        "phreeqc.dat": "analytic_expression"
+      },
+      "consistency": "三源一致（差值 0.002 在活度模型容差内）",
+      "signed_value": -14.0
+    },
+    {
+      "species": "NH4+",
+      "reaction": "NH4+ = NH3 + H+",
+      "log_k_25C": -9.252,
+      "sources": {
+        "wateq4f.dat": -9.252,
+        "minteq.dat": -9.252,
+        "phreeqc.dat": -9.252
+      },
+      "consistency": "三源完全相同",
+      "signed_value": -9.252
+    },
+    {
+      "species": "acetic acid",
+      "reaction": "Acetate- + H+ = HAcetate",
+      "log_k_25C": 4.76,
+      "sources": {
+        "minteq.dat": 4.76
+      },
+      "consistency": "单源（wateq4f.dat 未定义乙酸）；解析解对拍支持",
+      "note": "HAc = H+ + Ac- 的 log_k = -4.760，pKa = 4.760",
+      "signed_value": -4.76
+    }
+  ],
+  "analytic_crosschecks": [
+    {
+      "case": "0.1 M 强酸（HCl）",
+      "expectation": "完全解离，[H+]=0.1 mol/L",
+      "computed_ph": 1.0,
+      "formula": "pH = -log10(0.1)"
+    },
+    {
+      "case": "0.1 M 强碱（NaOH）",
+      "expectation": "完全解离，[OH-]=0.1 mol/L",
+      "computed_ph": 13.0,
+      "formula": "pOH = 1, pH = 14 - 1"
+    },
+    {
+      "case": "0.1 M 醋酸（弱酸）",
+      "expectation": "Ka = 10^-4.760；[H+] = (-Ka + sqrt(Ka^2 + 4*Ka*C))/2",
+      "computed_ph": 2.8829,
+      "formula": "一元弱酸精确解"
+    },
+    {
+      "case": "0.1 M 氨水（弱碱）",
+      "expectation": "pKb = 14 - 9.252 = 4.748；Kb = 10^-4.748；[OH-] = (-Kb + sqrt(Kb^2 + 4*Kb*C))/2",
+      "computed_ph": 11.1231,
+      "formula": "一元弱碱精确解"
+    },
+    {
+      "case": "等浓度强酸强碱恰好中和",
+      "expectation": "H+ + OH- = H2O，化学计量点中性",
+      "computed_ph": 7.0,
+      "formula": "25°C 中性点 pKw/2"
+    }
+  ],
+  "notes": [
+    "强酸（HCl/HNO3）与强碱（NaOH/KOH）在水中完全解离，不设有限 pKa/Kb，避免写入无意义数值。",
+    "phreeqpython 动态求解调用属 spec-003 范围，本切片不做；对拍采用解析解。",
+    "safety 层 GHS 代码来自 PubChem 构建期快照，只抽事实性结论，标签来源见各物质卡。"
+  ]
+}

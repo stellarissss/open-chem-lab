@@ -1,0 +1,69 @@
+{
+  "schema_version": "st.reaction_rule.v1",
+  "rule_id": "ammonia_dissociation",
+  "system": "neutralization",
+  "reaction": {
+    "equation": "NH3 + H2O = NH4+ + OH-",
+    "reactants": {
+      "NH3": 1,
+      "H2O": 1
+    },
+    "products": {
+      "NH4+": 1,
+      "OH-": 1
+    },
+    "net_charge_reactants": 0,
+    "net_charge_products": 0
+  },
+  "equilibrium": {
+    "log_k_25C": -4.748,
+    "temperature_K": 298.15,
+    "analytic_note": "取 25°C 常数；温度系数随 spec-003 求解层接入"
+  },
+  "kinetics": {
+    "fast_equilibrium": true,
+    "note": "酸碱中和为瞬时平衡，无需动力学积分（01 第四节无硬编码时间阈值）"
+  },
+  "applicability": {
+    "conditions": [
+      "aqueous",
+      "25C"
+    ],
+    "temp_range_K": [
+      298.15,
+      298.15
+    ]
+  },
+  "numerics": {
+    "rtol": 1e-06,
+    "atol": 1e-09,
+    "note": "由求解器局部误差决定，非硬编码时间阈值"
+  },
+  "effects": [
+    "color_change"
+  ],
+  "data_class": "fact",
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "USGS PHREEQC wateq4f.dat / minteq.dat",
+    "license": "public domain",
+    "version": "2016/2024",
+    "snapshot_date": "2026-11-22",
+    "sha256": "15a0ad8ae92fc8f52182377802be26352b0ac00ba46c37f02f3bba98e98abbf6"
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-22"
+  },
+  "ai_crosscheck": {
+    "method": "analytic_25C",
+    "record_path": "content/ai-crosscheck/neutralization/record.json",
+    "note": "解析解对拍 + 用户签核"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-22"
+  },
+  "rule_revision": 1
+}

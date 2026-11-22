@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/apparatus.v1.schema.json",
+  "title": "Apparatus",
+  "description": "实验台器材：参数单一事实源，驱动 2D SVG/容量/物理约束。路径与 ID 小写 snake_case（01 第六节双平台硬约束）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "apparatus_id", "names", "type", "source", "confidence", "review"],
+  "properties": {
+    "schema_version": { "const": "st.apparatus.v1" },
+    "apparatus_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9_]+$",
+      "description": "器材唯一 ID，小写 snake_case"
+    },
+    "names": { "$ref": "#/$defs/BilingualName" },
+    "type": {
+      "type": "string",
+      "enum": ["beaker", "flask", "test_tube", "burette", "pipette", "graduated_cylinder", "dropper", "stirrer", "hot_plate", "burner", "stand", "tube", "other"],
+      "description": "器材类别（最小集，长线扩类别须升 schema_version）"
+    },
+    "capacity_mL": { "type": "number", "exclusiveMinimum": 0, "description": "容量 mL，驱动物理容量约束" },
+    "graduations": {
+      "type": "array",
+      "description": "刻度线（mL 值，升序）",
+      "items": { "type": "number", "minimum": 0 }
+    },
+    "max_temp_K": { "type": "number", "exclusiveMinimum": 0, "description": "耐受最高温度 K" },
+    "sealable": { "type": "boolean", "default": false, "description": "是否可密封（密闭加热后果的前提）" },
+    "asset": {
+      "type": "string",
+      "minLength": 1,
+      "description": "写实 2D 资产引用（tikz-chemlab 输出物路径，见 01 第四节）"
+    },
+    "physics": { "$ref": "#/$defs/Physics" },
+    "source": { "$ref": "#/$defs/Source" },
+    "confidence": { "$ref": "#/$defs/Confidence" },
+    "review": { "$ref": "#/$defs/Review" },
+    "rule_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "参数变更版本号，变更须递增"
+    }
+  },
+  "$defs": {
+    "BilingualName": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "Physics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "物理约束（驱动错误操作后果与现象，近似只作用于表现/时间尺度，不进化学事实层）",
+      "properties": {
+        "wall_thickness_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "thermal_shock_sensitive": { "type": "boolean", "description": "是否耐热骤变（炸裂后果前提）" },
+        "max_pressure_kPa": { "type": "number", "exclusiveMinimum": 0, "description": "最大耐压（密闭后果）" },
+        "notes": { "type": "string" }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["authoritative_db", "official_doc", "literature", "cameo_fact", "computed", "asset_spec"] },
+        "ref": { "type": "string", "minLength": 1 },
+        "endpoint": { "type": ["string", "null"] },
+        "license": { "type": ["string", "null"] },
+        "version": { "type": ["string", "null"] },
+        "snapshot_date": { "type": ["string", "null"] },
+        "sha256": { "type": ["string", "null"] }
+      }
+    },
+    "Confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": { "type": "string", "enum": ["verified", "extracted", "crosschecked", "ml_guess"] },
+        "note": { "type": "string" }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["signed_off", "pending", "rejected"] },
+        "reviewer": { "type": ["string", "null"] },
+        "date": { "type": ["string", "null"] },
+        "ai_crosscheck": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

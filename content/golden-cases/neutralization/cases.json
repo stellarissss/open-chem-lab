@@ -1,0 +1,45 @@
+{
+  "schema_version": "st.golden_cases.v1",
+  "system": "neutralization",
+  "ruleset_version": "neutralization-r1",
+  "source": "content/ai-crosscheck/neutralization/record.json",
+  "description": "中和体系数值零错黄金用例。本切片固化期望值，求解逻辑属 spec-003；用例供后续求解层对拍，断言数值零错。",
+  "cases": [
+    {
+      "case_id": "strong_acid_0.1M_ph",
+      "setup": {"compound": "hcl", "concentration_mol_L": 0.1},
+      "expect": {"ph": 1.0, "tolerance": 0.01},
+      "rule": "完全解离：pH = -log10(0.1)"
+    },
+    {
+      "case_id": "strong_base_0.1M_ph",
+      "setup": {"compound": "naoh", "concentration_mol_L": 0.1},
+      "expect": {"ph": 13.0, "tolerance": 0.01},
+      "rule": "完全解离：pOH = 1, pH = 14 - 1"
+    },
+    {
+      "case_id": "weak_acetic_0.1M_ph",
+      "setup": {"compound": "acetic_acid", "concentration_mol_L": 0.1},
+      "expect": {"ph": 2.8829, "tolerance": 0.01},
+      "rule": "一元弱酸精确解 Ka=10^-4.760"
+    },
+    {
+      "case_id": "weak_ammonia_0.1M_ph",
+      "setup": {"compound": "ammonia", "concentration_mol_L": 0.1},
+      "expect": {"ph": 11.1231, "tolerance": 0.01},
+      "rule": "一元弱碱精确解 Kb=10^-4.748"
+    },
+    {
+      "case_id": "strong_acid_base_equivalence_ph",
+      "setup": {"compound_a": "hcl", "compound_b": "naoh", "concentration_mol_L": 0.1, "equal_volume": true},
+      "expect": {"ph": 7.0, "tolerance": 0.01, "charge_balance": true, "mass_balance": true},
+      "rule": "H+ + OH- = H2O，25°C 化学计量点中性，电荷/质量守恒"
+    },
+    {
+      "case_id": "weak_acid_strong_base_equivalence_ph_gt_7",
+      "setup": {"compound_a": "acetic_acid", "compound_b": "naoh", "concentration_mol_L": 0.1, "equal_volume": true},
+      "expect": {"ph_gt": 7.0},
+      "rule": "弱酸强碱恰好中和生成 CH3COO- 水解，计量点 pH>7（只断言趋势，精确值待 spec-003 求解层）"
+    }
+  ]
+}

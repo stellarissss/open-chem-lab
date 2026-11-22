@@ -1,0 +1,60 @@
+{
+  "schema_version": "st.compound.v1",
+  "compound_id": "koh",
+  "names": {
+    "zh": "氢氧化钾",
+    "en": "potassium hydroxide"
+  },
+  "formula": "KOH",
+  "cas_number": "1310-58-3",
+  "data_class": "fact",
+  "properties": {
+    "strong_electrolyte": true,
+    "pka_note": "强碱完全解离，不设有限 pKb",
+    "molar_mass_g_mol": 56.11,
+    "reference_temp_K": 298.15
+  },
+  "safety": {
+    "ghs_codes": [
+      "H290",
+      "H314"
+    ],
+    "signal_word": "danger",
+    "hazard_notes": "强腐蚀性，溶解放热",
+    "source": {
+      "kind": "authoritative_db",
+      "ref": "PubChem PUG-REST CID koh",
+      "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug_view",
+      "license": "PubChem data",
+      "version": null,
+      "snapshot_date": "2026-11-22",
+      "sha256": null
+    }
+  },
+  "presentation": {
+    "appearance": "白色固体，水溶液无色透明",
+    "solution_color": "无色",
+    "notes": "俗称苛性钾"
+  },
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
+    "endpoint": null,
+    "license": "public domain",
+    "version": "2016/2024",
+    "snapshot_date": "2026-11-22",
+    "sha256": "15a0ad8ae92fc8f52182377802be26352b0ac00ba46c37f02f3bba98e98abbf6"
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-22; USGS PHREEQC authoritative"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-22",
+    "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+  },
+  "rule_revision": 1,
+  "playable": true
+}
