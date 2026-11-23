@@ -37,7 +37,7 @@
 | 教学层 | 附加内容、后置长线，不进前期阶段验收；教学由使用方教师承担 |
 | 对标 | 公开点名「对标并超越 NB实验室」，同时声明「独立开源实现、与其无关联无背书」；只用一级来源数据，禁用未证实宣传数字 |
 
-**科学边界（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。因此不做万能反应预测、不用 ML 猜产物；未命中返回「当前条件下无明显变化」并记入补体系日志。已制作的体系必须既好玩又科学、零科学性错误。
+**科学边界与求解出口（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。求解通过 `st.solution_speciation.v1` 的 `outcome` 如实返回三种状态：覆盖范围内给出定量解（`solved`）；条件在事实层覆盖范围外给出「当前条件下无明显变化」（`no_significant_change`，合法结论）；数值不收敛或活度模型超出适用域给出标注置信度的降级提示（`degraded`）。三种出口各自对应真实计算状态，均进入补体系日志。已制作的体系必须既好玩又科学、零科学性错误。
 
 ---
 
@@ -89,6 +89,8 @@ flowchart TB
 
 **关键解耦**：求解器只认数值、不认渲染；WASM 只认现象 ID、不认分子；二者通过 `st.phenomenon.v1` 协议通信，渲染器与求解器可独立替换。
 
+**现象由状态派生（涌现可玩的关键）**：一切现象由 `solution_speciation` 的客观状态经 `st.phenomenon.v1` 的 `trigger`（可观测状态触发器）派生——pH 驱动指示剂按 Henderson–Hasselbalch 连续混色、温度驱动沸腾/放热现象、物种浓度积驱动析出。事实层只提供物性参数（指示剂 pKa 与两形态色、Ksp、反应焓），表现层按状态实时计算现象，手写规则与物种网络涌现的反应在此一视同仁：倒入什么、求解算出什么状态，就看到什么现象。指示剂变色区间由其 pKa±1 派生，随求解 pH 渐变而非阈值跳变。
+
 **明确不采用的部件（勿留死代码）**：Service Worker、IndexedDB、离线规则包、PWA 离线、无限画布/落沙网格、双视图、Yjs 多人协作、复杂存档 diff、规则包工坊/自定义物质编辑器、程序化 3D 器材。
 
 ---
@@ -128,12 +130,12 @@ flowchart TB
 | `reaction_rule` | 条件化真实反应（核心） | `equilibrium`/`kinetics`/`thermo`(定量)、`applicability`、`numerics`、`effects`、`source`/`confidence`/`ai_crosscheck`、`data_class` |
 | `solution_speciation` | 每容器隐藏化学态（不可见反应也真实发生） | `species[]`、`ph`、`ionic_strength`、`equilibria`、`hidden_reactions` |
 | `speciation_timeline` | 关键快照时间轴 | `keyframes[]`、`curves`、`ruleset_version` |
-| `phenomenon` | 12 类现象注册表 | `type`、`关联物理量` |
+| `phenomenon` | 12 类现象注册表（`st.phenomenon.v1` 指令） | `type`、`trigger`（可观测状态触发器）、`关联物理量` |
 | `save` | 轻量存档（无网格/RLE/Yjs） | `apparatus[]`、`substances[]`、`timeline_ref`、`ruleset_version` |
 
 **三类数据分层**：`fact`（计量/热力学/动力学，零错签核）、`presentation`（颜色/焰色/外观，可夸张但标来源，不受零错红线）、`safety`（GHS/危害，严谨签核，驱动错误操作后果）。
 
-**正确性护栏（CI 必跑）**：计量守恒（RDKit）、条件互斥（同一反应物集合+条件不得有两条 verified 规则）、置信度闸门（非 verified 不进沙盒、ml_guess 禁）、来源/对拍/签核完整性、黄金用例集（中和/制氧/置换/沉淀/电解/弱酸电离/水解/缓冲/络合等逐条断言）、`applicability` 必填、ORD 衍生规则带 CC-BY-SA 溯源。参数变更走 `rule_revision`、禁原地覆盖、可回滚。
+**正确性护栏（CI 必跑）**：计量守恒（元素原子数 + 电荷双核算，构建期轻量解析简式）、条件互斥（同一反应物集合+条件不得有两条 verified 规则，作用域限于表现/安全效果层条目，不约束平衡网络的重叠物种反应）、置信度闸门（非 verified 不进沙盒、ml_guess 禁）、来源/对拍/签核完整性、黄金用例集（中和/制氧/置换/沉淀/电解/弱酸电离/水解/缓冲/络合等逐条断言）、`applicability` 必填、ORD 衍生规则带 CC-BY-SA 溯源。参数变更走 `rule_revision`、禁原地覆盖、可回滚。
 
 ### 5.2 权威数据供应链（构建期固化，运行时零网络依赖）
 
@@ -147,7 +149,7 @@ flowchart TB
 
 | 数据域 | 具体源 | 准入 |
 |---|---|---|
-| 水溶液 logK（主源） | USGS PHREEQC `wateq4f_PWN.dat` / `pitzer.dat`（公共领域） | 物化层主源 |
+| 水溶液 logK（主源） | USGS PHREEQC `wateq4f_PWN.dat`（稀区，Davies/延展 Debye–Hückel，本期）/ `pitzer.dat`（浓区与高离子强度，长线启用）（公共领域） | 物化层主源；按离子强度选用对应活度模型 |
 | 金属络合稳定常数 | NIST SRD46 SQL.zip（官方标 known errors、已停更） | 待签核候选，禁直通 |
 | 燃烧/高温热化学 | NIST–JANAF SRD13 | 候选（替代红线库 Burcat） |
 | 动力学 Arrhenius | NIST Kinetics SRD17 / Solution SRD40 | 候选 → Cantera |
@@ -155,6 +157,8 @@ flowchart TB
 | 物性/GHS | PubChem PUG-REST（≤5 req/s） | 构建期离线快照 |
 | 错误操作后果 | CAMEO 反应基团/相容性图 | 只抽事实性结论、隔离仓 |
 | 高精度热化学 | ATcT v1 API（受限） | 留复跑路径 |
+
+**数值真理源与派生**：权威源 `.dat` 快照是热力学数值（logK/ΔH）的唯一数值真理源；`compound`/`reaction_rule` 的 JSON 卡是从快照派生的精校层（携带适用条件、来源、置信度与表现层参数），由 `tools/materialize-rules.py` 构建期物化为运行时 ruleset。二者以 `source.sha256` 与 `ruleset_version` 对齐，避免双真理源。签核粒度为**体系级**：某体系的黄金用例集全绿且数值回指权威源快照，即该体系签核通过；新增数值沿用同一机制，无需逐数值人工重复裁决。
 
 **准入判据**：①宽松许可可进 LGPL 主链 ②可自托管、可机读批量 ③带版本/快照日/可溯源 ④不引入商业数据库/不引入精度分级；官方声明 AS IS 的须对拍签核。每条快照记录 `endpoint / license / snapshot_date / sha256`。
 
@@ -211,7 +215,7 @@ open-chem-lab/
 
 ### 7.2 验证原则（敏捷轻量）
 
-- **不设强制门禁**：不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，完成后如实记录做了哪些验证。
+- **不设强制门禁**：不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，验证结果由测试产物与 git log 承载。
 - **产品级门禁随切片逐步接入**（`license-scan` 已在 CI）：`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
 
 ### 7.3 对外口径（不可拆分的三层）

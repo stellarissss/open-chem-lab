@@ -16,6 +16,17 @@
       "items": { "$ref": "#/$defs/SpeciesConcentration" }
     },
     "ph": { "type": "number", "description": "pH 值（求解结果）" },
+    "outcome": {
+      "$ref": "#/$defs/SolveOutcome",
+      "default": "solved",
+      "description": "求解出口语义：区分已求解、条件外无变化与诚实降级，避免把数值失败表述为科学结论"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "降级出口的置信度（outcome=degraded 时给出），表现层据此提示"
+    },
     "ionic_strength": { "type": "number", "minimum": 0, "description": "离子强度 mol/L" },
     "pe": { "type": "number", "description": "氧化还原电位 pe（可选）" },
     "temperature_K": { "type": "number", "exclusiveMinimum": 0, "default": 298.15 },
@@ -34,6 +45,11 @@
     "source": { "$ref": "#/$defs/Source" }
   },
   "$defs": {
+    "SolveOutcome": {
+      "type": "string",
+      "description": "求解出口三态：solved=正常求解；no_significant_change=条件在覆盖范围外、当前条件下无明显变化（合法结论）；degraded=数值不收敛或活度模型超适用域，诚实降级并给置信度",
+      "enum": ["solved", "no_significant_change", "degraded"]
+    },
     "SpeciesConcentration": {
       "type": "object",
       "additionalProperties": false,

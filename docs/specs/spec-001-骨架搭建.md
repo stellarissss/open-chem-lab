@@ -30,7 +30,6 @@
 4. **双平台**：Linux 实跑一次通过；Windows（WSL2/Docker Desktop）按 `deploy/README-windows.md` 逐项静态核查通过（实机若受限须标注）。
 5. 全仓无 CRLF、路径小写 snake_case、无明文凭证入库。
 6. `license-scan` / `docs-and-compliance` 门禁通过；无 AGPL / GPLv2-only 依赖。
-7. 完成后如实记录做了哪些验证、哪些受限（不设强制门禁，见 `03-DocDD-Process.md` 第四节）。
 
 ## 技术要点
 

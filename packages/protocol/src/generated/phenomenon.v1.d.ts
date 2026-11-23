@@ -50,4 +50,30 @@ export interface PhenomenonDirective {
   physics?: {
     [k: string]: unknown;
   };
+  trigger?: StateTrigger;
+}
+/**
+ * 可观测状态触发器：现象由 solution_speciation 的客观状态派生，手写规则与涌现反应共用同一触发机制
+ */
+export interface StateTrigger {
+  /**
+   * 触发所用的可观测量：ph / temperature_K / species_concentration / ionic_strength / indicator_ratio 等
+   */
+  observable: "ph" | "temperature_K" | "species_concentration" | "ionic_strength" | "indicator_ratio" | "time_ms";
+  /**
+   * 取数来源：solution_speciation（求解输出）或 apparatus（器材状态）
+   */
+  source: "solution_speciation" | "apparatus";
+  /**
+   * observable=species_concentration 时指定的物种 ID
+   */
+  species_id?: string;
+  /**
+   * 可选触发条件说明（如跨阈值、区间、单调变化），表现层据此决定 intensity 与时长
+   */
+  condition?: string;
+  /**
+   * 状态→强度的派生规则标识（如 henderson_hasselbalch / threshold_cross / delta），表现层按标识实现
+   */
+  derivation?: string;
 }

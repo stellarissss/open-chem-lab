@@ -46,9 +46,39 @@
       "type": "object",
       "description": "关联物理量快照（仅表现所需，如温度/体积，均为显示值）",
       "additionalProperties": true
+    },
+    "trigger": {
+      "$ref": "#/$defs/StateTrigger",
+      "description": "可观测状态触发器：现象由 solution_speciation 的客观状态派生，手写规则与涌现反应共用同一触发机制"
     }
   },
   "$defs": {
+    "StateTrigger": {
+      "type": "object",
+      "description": "可观测状态触发器：以求解输出的客观状态量为因、现象为果。表现层据此把手写规则与涌现反应一视同仁地映射为指令，实现『倒什么、算出什么、就看到什么』。",
+      "required": ["observable", "source"],
+      "properties": {
+        "observable": {
+          "type": "string",
+          "description": "触发所用的可观测量：ph / temperature_K / species_concentration / ionic_strength / indicator_ratio 等",
+          "enum": ["ph", "temperature_K", "species_concentration", "ionic_strength", "indicator_ratio", "time_ms"]
+        },
+        "source": {
+          "type": "string",
+          "description": "取数来源：solution_speciation（求解输出）或 apparatus（器材状态）",
+          "enum": ["solution_speciation", "apparatus"]
+        },
+        "species_id": { "type": "string", "description": "observable=species_concentration 时指定的物种 ID" },
+        "condition": {
+          "type": "string",
+          "description": "可选触发条件说明（如跨阈值、区间、单调变化），表现层据此决定 intensity 与时长"
+        },
+        "derivation": {
+          "type": "string",
+          "description": "状态→强度的派生规则标识（如 henderson_hasselbalch / threshold_cross / delta），表现层按标识实现"
+        }
+      }
+    },
     "PhenomenonType": {
       "type": "string",
       "description": "表现层现象类别。当前为最小集，长线扩到 12 类须升 schema_version。",

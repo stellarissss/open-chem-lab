@@ -22,6 +22,10 @@ export interface SaveGame {
    * 关联的时间轴快照引用；null 表示尚未产生时间轴
    */
   timeline_ref?: string | null;
+  /**
+   * 来源存档 ID：从历史快照继续探索时，记录所分叉的存档。搭载差量 substances/apparatus，避免『只改一个变量』要从头全手动重做；null 表示全新实验
+   */
+  fork_from_save_id?: string | null;
   created_at: string;
 }
 export interface ApparatusPlacement {

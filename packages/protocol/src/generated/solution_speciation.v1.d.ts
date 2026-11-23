@@ -22,6 +22,14 @@ export interface SolutionSpeciation {
    */
   ph: number;
   /**
+   * 求解出口语义：区分已求解、条件外无变化与诚实降级，避免把数值失败表述为科学结论
+   */
+  outcome?: "solved" | "no_significant_change" | "degraded";
+  /**
+   * 降级出口的置信度（outcome=degraded 时给出），表现层据此提示
+   */
+  confidence?: number;
+  /**
    * 离子强度 mol/L
    */
   ionic_strength: number;

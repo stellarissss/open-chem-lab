@@ -18,8 +18,9 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 try:
@@ -90,6 +91,46 @@ def guard_compound(data: dict, path: Path) -> None:
         fail(f"护栏拒绝 {path.name}: rule_revision 须 >=1")
 
 
+ELEMENT_RE = re.compile(r"([A-Z][a-z]?)(\d*)")
+
+
+def parse_formula(formula: str) -> Counter:
+    """把简式解析为元素计数（如 CH3COOH -> C2 H4 O2, NH3·H2O -> N1 H5 O1）。
+
+    支持点号水合物、括号按最外层展开不了的简单式；解析不了的返回空计数并由调用方跳过。
+    这是计量守恒的元素计数校验，避免引入 RDKit 重依赖。
+    """
+    counts: Counter = Counter()
+    # 点号分段（水合物/加合物），逐段解析后累加
+    for part in formula.split("·"):
+        for elem, num in ELEMENT_RE.findall(part):
+            counts[elem] += int(num) if num else 1
+    return counts
+
+
+def element_balance(rxn: dict) -> tuple[Counter, Counter] | None:
+    """从 reaction 的 reactants/products 计数映射 + 可选 formula 映射算元素守恒。
+
+    reactants/products 的键是物种 ID；若物种 ID 本身是化学式（如 H+ / OH- / H2O），
+    去掉电荷上标后解析。带下标数字的键按化学式处理；纯自定义 ID 无法解析则返回 None。
+    """
+    def side(mapping: dict) -> Counter | None:
+        total: Counter = Counter()
+        for species, coeff in mapping.items():
+            base = species.split("+")[0].split("-")[0].strip()
+            parsed = parse_formula(base)
+            if not parsed:
+                return None
+            for elem, count in parsed.items():
+                total[elem] += count * coeff
+        return total
+
+    left, right = side(rxn.get("reactants", {})), side(rxn.get("products", {}))
+    if left is None or right is None:
+        return None
+    return left, right
+
+
 def guard_rule(data: dict, path: Path, seen: dict) -> None:
     conf = data.get("confidence", {}).get("level")
     review = data.get("review", {}).get("status")
@@ -104,6 +145,16 @@ def guard_rule(data: dict, path: Path, seen: dict) -> None:
     ncr, ncp = rxn.get("net_charge_reactants"), rxn.get("net_charge_products")
     if ncr is not None and ncp is not None and ncr != ncp:
         fail(f"计量守恒失败 {path.name}: 净电荷 {ncr} != {ncp}")
+
+    # 元素守恒：反应前后各元素原子数相等（轻量解析，不依赖 RDKit）
+    balance = element_balance(rxn)
+    if balance is not None:
+        left, right = balance
+        if left != right:
+            fail(
+                f"元素守恒失败 {path.name}: "
+                f"反应物 {dict(left)} != 产物 {dict(right)}"
+            )
 
     if conf == "verified":
         key = (

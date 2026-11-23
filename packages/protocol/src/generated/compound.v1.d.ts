@@ -171,7 +171,29 @@ export interface Presentation {
    * 溶液颜色（表现层显示值）
    */
   solution_color?: string;
+  indicator?: Indicator;
   notes?: string;
+}
+/**
+ * 指示剂响应：表现层按求解 pH 用 Henderson–Hasselbalch 连续混色，现象由状态派生而非逐反应手写
+ */
+export interface Indicator {
+  /**
+   * 指示剂酸解离常数 pKa（25°C），fact 层零错签核
+   */
+  pka: number;
+  /**
+   * 酸式色（pH < pKa−1 时的显示颜色，如 red / colorless）
+   */
+  acid_color: string;
+  /**
+   * 碱式色（pH > pKa+1 时的显示颜色，如 yellow / pink）
+   */
+  base_color: string;
+  /**
+   * 来源与观测说明
+   */
+  note?: string;
 }
 export interface Confidence {
   /**

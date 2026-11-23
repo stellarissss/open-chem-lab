@@ -309,6 +309,54 @@
     },
     {
       "schema_version": "st.compound.v1",
+      "compound_id": "methyl_orange",
+      "names": {
+        "zh": "甲基橙",
+        "en": "methyl orange",
+        "common": "甲基橙指示剂"
+      },
+      "formula": "C14H14N3NaO3S",
+      "cas_number": "547-58-0",
+      "data_class": "fact",
+      "properties": {
+        "pka": 3.46,
+        "pka_note": "酸碱指示剂 pKa（25°C，水溶液）。变色范围 3.1–4.4；多源一致（BenchChem 3.47、Edgepedia/MCAT 3.46、中科大 3.45）。",
+        "pka_source": "BenchChem 指示剂性能指南 pKa=3.47；Edgepedia pKa=3.46；中科大化学实验中心 pKHIn=3.45。本卡取 3.46。"
+      },
+      "presentation": {
+        "appearance": "橙黄色粉末；水溶液作指示剂",
+        "solution_color": "橙黄（碱式）",
+        "indicator": {
+          "pka": 3.46,
+          "acid_color": "red",
+          "base_color": "yellow",
+          "note": "变色范围 pH 3.1–4.4：低于 3.1 红色，高于 4.4 黄色；中间按 Henderson–Hasselbalch 连续混色。来源：Bates(1964)、中科大指示剂表、Edgepedia。"
+        }
+      },
+      "source": {
+        "kind": "literature",
+        "ref": "中科大化学实验教学中心《常用酸碱指示剂》 + BenchChem 指示剂性能指南 + Bates, R.G. (1964)",
+        "endpoint": "https://cec.ustc.edu.cn/2010/0610/c30146a543097/page.htm",
+        "license": null,
+        "version": null,
+        "snapshot_date": "2026-11-23",
+        "sha256": null
+      },
+      "confidence": {
+        "level": "verified",
+        "note": "user signed off 2026-11-23; pKa 多源一致（3.45–3.47），变色范围 3.1–4.4"
+      },
+      "review": {
+        "status": "signed_off",
+        "reviewer": "stellarisssa (user)",
+        "date": "2026-11-23",
+        "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+      },
+      "rule_revision": 1,
+      "playable": true
+    },
+    {
+      "schema_version": "st.compound.v1",
       "compound_id": "naoh",
       "names": {
         "zh": "氢氧化钠",
@@ -362,6 +410,54 @@
         "status": "signed_off",
         "reviewer": "stellarisssa (user)",
         "date": "2026-11-22",
+        "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+      },
+      "rule_revision": 1,
+      "playable": true
+    },
+    {
+      "schema_version": "st.compound.v1",
+      "compound_id": "phenolphthalein",
+      "names": {
+        "zh": "酚酞",
+        "en": "phenolphthalein",
+        "common": "酚酞指示剂"
+      },
+      "formula": "C20H14O4",
+      "cas_number": "77-09-8",
+      "data_class": "fact",
+      "properties": {
+        "pka": 9.1,
+        "pka_note": "酸碱指示剂 pKa（25°C，水溶液）。变色范围 8.2–10.0 与 pKa 自洽；不同离子强度/温度下 pKa 略有移动。",
+        "pka_source": "中国科学技术大学化学实验教学中心《常用酸碱指示剂》表 pKHIn=9.1（8.0–10.0）；BenchChem/Edgepedia 报 9.4（8.2–10.0）；本卡取与变色区间中点自洽的 9.1。"
+      },
+      "presentation": {
+        "appearance": "无色晶体；乙醇溶液作指示剂",
+        "solution_color": "无色（酸式）",
+        "indicator": {
+          "pka": 9.1,
+          "acid_color": "colorless",
+          "base_color": "pink",
+          "note": "变色范围 pH 8.2–10.0：低于 8.2 无色，高于 10.0 粉红；中间按 Henderson–Hasselbalch 连续混色。强碱 pH>12 褪为无色（超出本切片范围）。来源：中科大化学实验中心指示剂表、Bates(1964)。"
+        }
+      },
+      "source": {
+        "kind": "literature",
+        "ref": "中科大化学实验教学中心《常用酸碱指示剂》 + Bates, R.G. (1964) Determination of pH",
+        "endpoint": "https://cec.ustc.edu.cn/2010/0610/c30146a543097/page.htm",
+        "license": null,
+        "version": null,
+        "snapshot_date": "2026-11-23",
+        "sha256": null
+      },
+      "confidence": {
+        "level": "verified",
+        "note": "user signed off 2026-11-23; 变色范围多源一致（中科大/Bates/BenchChem/Edgepedia）"
+      },
+      "review": {
+        "status": "signed_off",
+        "reviewer": "stellarisssa (user)",
+        "date": "2026-11-23",
         "ai_crosscheck": "content/ai-crosscheck/neutralization/"
       },
       "rule_revision": 1,
@@ -646,5 +742,5 @@
       "rule_revision": 1
     }
   ],
-  "ruleset_sha256": "33d062289672e3d4d69f893b1730164b89350c9cb5e17baa356bca7c18fe0959"
+  "ruleset_sha256": "caf0dba1f06542280d9b3aaaffe328a0e9ed34b45374d4488fdd444f21eb8812"
 }

@@ -26,7 +26,6 @@
 2. 中和体系样例数据通过 schema 校验；字段完整（source/confidence/applicability 必填），非 verified 不进可玩层，`ml_guess` 被门禁拒绝。
 3. 数值经 USGS PHREEQC 权威源 + 解析解对拍 + 用户签核 + 黄金用例才进事实层；计量守恒、条件互斥经核对，数值零错。签核记录见 `content/ai-crosscheck/neutralization/`。
 4. 物化层构建期固化、运行时零网络依赖；参数变更走 `rule_revision`、可回滚。
-5. 如实记录做了哪些验证、哪些受限（见 `03-DocDD-Process.md` 第四节）。
 
 ## 技术要点
 

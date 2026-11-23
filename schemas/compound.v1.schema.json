@@ -100,7 +100,23 @@
       "properties": {
         "appearance": { "type": "string", "description": "外观描述（如无色透明液体）" },
         "solution_color": { "type": "string", "description": "溶液颜色（表现层显示值）" },
+        "indicator": {
+          "$ref": "#/$defs/Indicator",
+          "description": "指示剂响应：表现层按求解 pH 用 Henderson–Hasselbalch 连续混色，现象由状态派生而非逐反应手写"
+        },
         "notes": { "type": "string" }
+      }
+    },
+    "Indicator": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "酸碱指示剂的可观测响应。pKa 属 fact 层物性须零错签核；两形态颜色属 presentation 层。变色区间由 pKa±1 派生，不单独手写。",
+      "required": ["pka", "acid_color", "base_color"],
+      "properties": {
+        "pka": { "type": "number", "description": "指示剂酸解离常数 pKa（25°C），fact 层零错签核" },
+        "acid_color": { "type": "string", "description": "酸式色（pH < pKa−1 时的显示颜色，如 red / colorless）" },
+        "base_color": { "type": "string", "description": "碱式色（pH > pKa+1 时的显示颜色，如 yellow / pink）" },
+        "note": { "type": "string", "description": "来源与观测说明" }
       }
     },
     "Source": {

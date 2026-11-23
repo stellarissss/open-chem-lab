@@ -1,0 +1,48 @@
+{
+  "schema_version": "st.compound.v1",
+  "compound_id": "methyl_orange",
+  "names": {
+    "zh": "甲基橙",
+    "en": "methyl orange",
+    "common": "甲基橙指示剂"
+  },
+  "formula": "C14H14N3NaO3S",
+  "cas_number": "547-58-0",
+  "data_class": "fact",
+  "properties": {
+    "pka": 3.46,
+    "pka_note": "酸碱指示剂 pKa（25°C，水溶液）。变色范围 3.1–4.4；多源一致（BenchChem 3.47、Edgepedia/MCAT 3.46、中科大 3.45）。",
+    "pka_source": "BenchChem 指示剂性能指南 pKa=3.47；Edgepedia pKa=3.46；中科大化学实验中心 pKHIn=3.45。本卡取 3.46。"
+  },
+  "presentation": {
+    "appearance": "橙黄色粉末；水溶液作指示剂",
+    "solution_color": "橙黄（碱式）",
+    "indicator": {
+      "pka": 3.46,
+      "acid_color": "red",
+      "base_color": "yellow",
+      "note": "变色范围 pH 3.1–4.4：低于 3.1 红色，高于 4.4 黄色；中间按 Henderson–Hasselbalch 连续混色。来源：Bates(1964)、中科大指示剂表、Edgepedia。"
+    }
+  },
+  "source": {
+    "kind": "literature",
+    "ref": "中科大化学实验教学中心《常用酸碱指示剂》 + BenchChem 指示剂性能指南 + Bates, R.G. (1964)",
+    "endpoint": "https://cec.ustc.edu.cn/2010/0610/c30146a543097/page.htm",
+    "license": null,
+    "version": null,
+    "snapshot_date": "2026-11-23",
+    "sha256": null
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-23; pKa 多源一致（3.45–3.47），变色范围 3.1–4.4"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-23",
+    "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+  },
+  "rule_revision": 1,
+  "playable": true
+}

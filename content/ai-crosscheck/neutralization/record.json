@@ -87,6 +87,38 @@
       "consistency": "单源（wateq4f.dat 未定义乙酸）；解析解对拍支持",
       "note": "HAc = H+ + Ac- 的 log_k = -4.760，pKa = 4.760",
       "signed_value": -4.76
+    },
+    {
+      "species": "phenolphthalein (indicator)",
+      "reaction": "HIn = H+ + In-",
+      "pka_25C": 9.1,
+      "sources": {
+        "中国科学技术大学化学实验教学中心《常用酸碱指示剂》": 9.1,
+        "BenchChem 指示剂性能指南": 9.4,
+        "Edgepedia/Bates(1964)": 9.4
+      },
+      "transition_range_ph": [
+        8.2,
+        10.0
+      ],
+      "consistency": "变色范围 8.2–10.0 多源一致；pKa 随离子强度/温度略移，取与区间中点自洽的 9.1",
+      "signed_value": 9.1
+    },
+    {
+      "species": "methyl_orange (indicator)",
+      "reaction": "HIn = H+ + In-",
+      "pka_25C": 3.46,
+      "sources": {
+        "BenchChem 指示剂性能指南": 3.47,
+        "Edgepedia": 3.46,
+        "中国科学技术大学化学实验教学中心《常用酸碱指示剂》": 3.45
+      },
+      "transition_range_ph": [
+        3.1,
+        4.4
+      ],
+      "consistency": "pKa 三源一致（3.45–3.47），变色范围 3.1–4.4",
+      "signed_value": 3.46
     }
   ],
   "analytic_crosschecks": [
@@ -124,6 +156,7 @@
   "notes": [
     "强酸（HCl/HNO3）与强碱（NaOH/KOH）在水中完全解离，不设有限 pKa/Kb，避免写入无意义数值。",
     "phreeqpython 动态求解调用属 spec-003 范围，本切片不做；对拍采用解析解。",
-    "safety 层 GHS 代码来自 PubChem 构建期快照，只抽事实性结论，标签来源见各物质卡。"
+    "safety 层 GHS 代码来自 PubChem 构建期快照，只抽事实性结论，标签来源见各物质卡。",
+    "指示剂（酚酞/甲基橙）pKa 取自中科大化学实验中心指示剂表与 Bates(1964)，多源交叉一致；变色区间由 pKa±1 派生，表现层按 Henderson–Hasselbalch 连续混色，供 spec-003 涌现现象基座使用。"
   ]
 }
