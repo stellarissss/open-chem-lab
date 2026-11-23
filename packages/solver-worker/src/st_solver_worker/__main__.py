@@ -1,9 +1,10 @@
-"""常驻 worker 入口：定期心跳，求解循环按切片接入。
+"""常驻 worker 入口：默认心跳；--http 启动本地求解 HTTP 端点。
 
 设计约束（见 01-Architecture.md）：
 - 求解在独立 worker，不占 16.7ms 帧预算。
-- 当前不做真实求解、不引入化学数据。
+- spec-003 起接中和体系求解；HTTP 仅回环、不接 gateway（保持解耦）。
 """
+import argparse
 import logging
 import os
 import signal
@@ -21,16 +22,25 @@ def _stop(_signum: int, _frame: object) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="ST solver-worker")
+    parser.add_argument("--http", action="store_true", help="启动本地 HTTP 求解端点")
+    parser.add_argument("--port", type=int, default=8765, help="HTTP 端口（默认 8765）")
+    args, _ = parser.parse_known_args()
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+    if args.http:
+        from .server import serve
+        serve(port=args.port)
+        return 0
+
     signal.signal(signal.SIGTERM, _stop)
     signal.signal(signal.SIGINT, _stop)
-
-    LOG.info("solver-worker 0.1.0 已启动（未接求解逻辑）")
+    LOG.info("solver-worker 0.2.0 已启动（HTTP 求解端点用 --http 开启）")
     tick = 0
     while _running:
         tick += 1
         LOG.info("heartbeat #%d", tick)
-        # 等待可被信号中断，保证 SIGTERM 快速退出（Compose 优雅停机）。
         for _ in range(int(TICK_SECONDS * 10)):
             if not _running:
                 break

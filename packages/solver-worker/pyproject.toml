@@ -1,10 +1,14 @@
 [project]
 name = "st-solver-worker"
-version = "0.1.0"
-description = "动态定量求解 worker（当前为常驻进程骨架，求解逻辑按切片接入）"
+version = "0.2.0"
+description = "动态定量求解 worker（中和体系：phreeqpython 主引擎 + 活度域 + chempy 对拍）"
 requires-python = ">=3.11,<3.12"
-# 当前不引入重依赖；求解器（phreeqpython/scipy/chempy/cantera）按内容 schema 与黄金用例逐个锁定版本后加入。
-dependencies = []
+# spec-003 锁定求解链依赖；版本与环境包 solver-venv 一致（离线可还原，零外网下载）。
+# cantera/pyequion2/reaktoro 等重依赖按后续切片接入，不在本切片范围。
+dependencies = [
+  "phreeqpython>=1.6.0",
+  "chempy>=0.10.2",
+]
 
 [project.scripts]
 st-solver-worker = "st_solver_worker.__main__:main"
