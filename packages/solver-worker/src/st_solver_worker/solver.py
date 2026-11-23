@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -39,7 +40,11 @@ _ELEMENT_OF: dict[str, str] = {
 
 
 def _repo_root() -> Path:
-    # src/st_solver_worker/solver.py → 上溯到仓库根
+    # 容器部署时仓库根为 /app（Dockerfile 把 content/ 与 src/ 平级放置），
+    # 本地开发时从 src/st_solver_worker/solver.py 上溯四层到仓库根。
+    override = os.environ.get("ST_REPO_ROOT")
+    if override:
+        return Path(override).resolve()
     return Path(__file__).resolve().parents[4]
 
 

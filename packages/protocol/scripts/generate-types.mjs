@@ -8,7 +8,10 @@ import path from "node:path";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
 const schemasDir = path.join(repoRoot, "schemas");
+// 同时写入两处：src/generated 供源码 typecheck，dist/generated 供消费者引用。
+// dist/index.d.ts 以 ./generated/*.js 导出类型，缺第二处会让所有下游退化为 any（契约失真）。
 const outDir = path.join(here, "../src/generated");
+const distOutDir = path.join(here, "../dist/generated");
 
 const SCHEMAS = [
   ["phenomenon.v1.schema.json", "PhenomenonV1"],
@@ -21,6 +24,7 @@ const SCHEMAS = [
 ];
 
 await mkdir(outDir, { recursive: true });
+await mkdir(distOutDir, { recursive: true });
 
 for (const [file, declareName] of SCHEMAS) {
   const schemaPath = path.join(schemasDir, file);
@@ -32,5 +36,6 @@ for (const [file, declareName] of SCHEMAS) {
   });
   const outName = file.replace(/\.schema\.json$/, ".d.ts");
   await writeFile(path.join(outDir, outName), ts, "utf8");
+  await writeFile(path.join(distOutDir, outName), ts, "utf8");
   console.log(`generated: ${outName}`);
 }

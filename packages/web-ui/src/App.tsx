@@ -1,9 +1,33 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useHealth } from "./health";
+import SpeciesPanel from "./SpeciesPanel";
+import Timeline from "./Timeline";
+import { fromSnapshot, SYSTEM_LABELS, useLab } from "./lab";
 import "./style.css";
+
+/** 最小直接求解入口：演示 gateway 物种读取接口，配比走已签核中和体系。 */
+const PRESETS = [
+  { label: "0.1M HCl", substances: [{ compound_id: "hcl", concentration_mol_L: 0.1, volume_L: 1.0 }] },
+  {
+    label: "等体积中和",
+    substances: [
+      { compound_id: "hcl", concentration_mol_L: 0.1, volume_L: 0.5 },
+      { compound_id: "naoh", concentration_mol_L: 0.1, volume_L: 0.5 },
+    ],
+  },
+  {
+    label: "弱酸+强碱",
+    substances: [
+      { compound_id: "acetic_acid", concentration_mol_L: 0.1, volume_L: 0.5 },
+      { compound_id: "naoh", concentration_mol_L: 0.1, volume_L: 0.5 },
+    ],
+  },
+];
 
 export default function App() {
   const { status, version, protocol, uptimeMs, checkedAt, refresh } = useHealth();
+  const { system, timeline, frameIndex, live, error, loading, loadTimeline, solveLive, clearLive } = useLab();
+  const [preset, setPreset] = useState(1);
 
   useEffect(() => {
     void refresh();
@@ -11,19 +35,34 @@ export default function App() {
     return () => window.clearInterval(id);
   }, [refresh]);
 
-  const label =
-    status === "ok" ? "后端已连接" : status === "error" ? "后端不可用" : "检测中…";
+  useEffect(() => {
+    void loadTimeline(system);
+  }, [loadTimeline, system]);
+
+  const frame = timeline?.keyframes[frameIndex];
+  const panelData = live ?? (frame ? fromSnapshot(frame.speciation, frame.container_id) : null);
+
+  const label = status === "ok" ? "后端已连接" : status === "error" ? "后端不可用" : "检测中…";
 
   return (
     <div className="shell">
       <header className="topbar">
-        <span className="brand">ST Crucible</span>
+        <span className="brand">ST Crucible · 物种面板</span>
         <span className={`badge badge--${status}`}>● {label}</span>
       </header>
+
       <main className="stage">
-        <section className="bench" aria-label="实验台">
-          <p className="bench__hint">实验台 · 器材与求解暂未接入</p>
-        </section>
+        <div className="stage__left">
+          <Timeline timeline={timeline} />
+          <SpeciesPanel
+            data={panelData}
+            systemLabel={live ? "单容器求解" : SYSTEM_LABELS[system]}
+            loading={loading}
+            error={error}
+            timestamp={panelData?.timestampMs ?? null}
+          />
+        </div>
+
         <aside className="inspector" aria-label="状态面板">
           <h2>系统状态</h2>
           <dl>
@@ -32,10 +71,23 @@ export default function App() {
             <dt>运行时长</dt><dd>{uptimeMs == null ? "—" : `${(uptimeMs / 1000).toFixed(0)}s`}</dd>
             <dt>最近检测</dt><dd>{checkedAt == null ? "—" : new Date(checkedAt).toLocaleTimeString()}</dd>
           </dl>
+
+          <h2>单容器求解</h2>
+          <p className="muted tiny">经 gateway 求解，不直连求解库。</p>
+          <select value={preset} onChange={(e) => setPreset(Number(e.target.value))} aria-label="预设配比">
+            {PRESETS.map((p, i) => <option key={p.label} value={i}>{p.label}</option>)}
+          </select>
+          <div className="inspector__actions">
+            <button type="button" onClick={() => void solveLive(PRESETS[preset]?.substances ?? [])} disabled={loading}>
+              求解
+            </button>
+            <button type="button" onClick={clearLive} disabled={!live}>回到回放</button>
+          </div>
         </aside>
       </main>
+
       <footer className="footer">
-        现实操作勿模仿 · 数值零错红线 · LGPL-3.0
+        现实操作勿模仿 · 数值零错红线 · LGPL-3.0 · 时间轴为仿真相对刻度
       </footer>
     </div>
   );

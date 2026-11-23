@@ -8,6 +8,7 @@
     POST /solve                  → st.solution_speciation.v1
     POST /solve/phenomena        → [st.phenomenon.v1]
     POST /solve/heat             → 错误操作后果（浓酸入水放热）
+    POST /solve/timeline         → st.timeline.v1（滴定关键帧 + pH 曲线）
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
-from . import phenomena, solver
+from . import phenomena, solver, timeline
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -61,6 +62,15 @@ class Handler(BaseHTTPRequestHandler):
                     payload.get("compound_ids", []),
                     substances=payload.get("substances"),
                 ))
+            elif self.path == "/solve/timeline":
+                ratios = payload.get("ratios")
+                spec, solve_calls = timeline.build_timeline(
+                    system=payload.get("system", "strong"),
+                    ratios=tuple(ratios) if ratios else None,
+                    container_id=payload.get("container_id", "titration-beaker"),
+                )
+                # 求解调用计数随响应返回，供缓存复用实证（关键帧数 == solve_calls）。
+                self._send(200, {"timeline": spec, "solve_calls": solve_calls})
             else:
                 self._send(404, {"error": "not found"})
         except Exception as exc:  # 诚实降级，不把内部异常当科学结论

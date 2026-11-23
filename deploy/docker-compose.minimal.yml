@@ -12,6 +12,8 @@ services:
       PORT: 3001
       HOST: 0.0.0.0
       SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+      # 物种面板经 gateway 读取求解，不直连 solver（01 第六节依赖规则）。
+      SOLVER_URL: http://solver-worker:8765
     # 仅回环发布，避免直接暴露到公网（单机自托管）。
     ports:
       - "${GATEWAY_PORT:-127.0.0.1:3001}:3001"
@@ -37,6 +39,8 @@ services:
       dockerfile: packages/solver-worker/Dockerfile
     environment:
       HEARTBEAT_SECONDS: ${HEARTBEAT_SECONDS:-5}
+      # 容器内仓库根为 /app，content/ 与 src/ 平级（见 solver-worker Dockerfile）。
+      ST_REPO_ROOT: /app
     depends_on:
       gateway:
         condition: service_healthy

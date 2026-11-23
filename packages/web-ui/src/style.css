@@ -19,17 +19,60 @@ body { margin: 0; background: #f4f1ea; color: #23201b; }
 .badge--error { background: #7a3b3b; }
 .badge--unknown { background: #5a5a4a; }
 
-.stage { flex: 1; display: grid; grid-template-columns: 1fr 260px; gap: 16px; padding: 20px; }
-.bench {
-  background: #fffdf8; border: 1px solid #d8d0c0; border-radius: 12px;
-  display: grid; place-items: center; min-height: 360px;
+.stage { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; padding: 20px; }
+.stage__left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.panel, .inspector {
+  background: #fffdf8; border: 1px solid #d8d0c0; border-radius: 12px; padding: 16px;
 }
-.bench__hint { color: #8a8272; }
-.inspector { background: #fffdf8; border: 1px solid #d8d0c0; border-radius: 12px; padding: 16px; }
-.inspector h2 { margin: 0 0 12px; font-size: 16px; }
-.inspector dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; margin: 0; font-size: 13px; }
+.panel__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.panel h2, .inspector h2 { margin: 0 0 12px; font-size: 16px; }
+.panel__head h2 { margin-bottom: 4px; }
+.panel h3 { margin: 18px 0 8px; font-size: 14px; }
+.muted { color: #8a8272; font-size: 13px; margin: 4px 0; }
+.tiny { font-size: 11px; }
+.error-text { color: #7a3b3b; }
+.mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; }
+.num { font-variant-numeric: tabular-nums; text-align: right; }
+
+.outcome { font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.outcome--solved { background: #2f6b4f; color: #fff; }
+.outcome--no_significant_change { background: #6b653f; color: #fff; }
+.outcome--degraded { background: #8a5a2b; color: #fff; }
+
+.notice { font-size: 12px; background: #f0eee4; border-left: 3px solid #8a8272; padding: 8px 10px; margin: 10px 0; }
+.notice--warn { border-left-color: #b8860b; background: #fbf3df; }
+
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 12px 0; }
+.metric { background: #f7f4ec; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+.metric span { color: #8a8272; font-size: 11px; }
+.metric strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+.metric small { color: #8a8272; font-size: 10px; }
+
+.species-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.species-table th, .species-table td { padding: 7px 8px; border-bottom: 1px solid #e5dfd2; text-align: left; }
+.species-table th { color: #8a8272; font-weight: 600; font-size: 11px; }
+.species-table td.num { font-variant-numeric: tabular-nums; }
+
+.chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: #eae6da; border-radius: 6px; padding: 4px 8px; }
+.trace { list-style: none; padding: 0; margin: 0; font-size: 12px; }
+.trace li { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid #e5dfd2; flex-wrap: wrap; }
+
+.system-tabs { display: flex; gap: 8px; margin: 8px 0; }
+.tab { border: 1px solid #d8d0c0; background: #fffdf8; color: #23201b; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+.tab--active { background: #1d2b25; color: #f4f1ea; border-color: #1d2b25; }
+.ph-curve { width: 100%; height: 96px; background: #f7f4ec; border-radius: 8px; }
+.scrubber { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.scrubber input[type="range"] { flex: 1; accent-color: #2f6b4f; }
+
+button { border: 1px solid #1d2b25; background: #1d2b25; color: #f4f1ea; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+select { width: 100%; padding: 6px 8px; border: 1px solid #d8d0c0; border-radius: 8px; background: #fffdf8; font-size: 12px; }
+.inspector dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; margin: 0 0 18px; font-size: 13px; }
 .inspector dt { color: #8a8272; }
 .inspector dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.inspector h2:not(:first-child) { margin-top: 18px; }
+.inspector__actions { display: flex; gap: 8px; margin-top: 10px; }
 
 .footer { padding: 10px 20px; font-size: 12px; color: #8a8272; text-align: center; }
 
