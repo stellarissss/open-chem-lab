@@ -54,10 +54,15 @@ jobs:
       - name: 按 lock 安装求解链（离线可复现版本）
         working-directory: packages/solver-worker
         run: uv sync --frozen
+      - name: 证据自证门禁（声称的对拍工具须真调用、期望值须标独立来源）
+        run: python3 tests/evidence-check/check.py
+
       - name: 中和体系求解链数值零错复核（活度口径对拍 + chempy + 出口三态 + SLA）
         run: |
           PYTHONPATH=packages/solver-worker/src \
-          packages/solver-worker/.venv/bin/python tests/golden-cases/run.py
+          packages/solver-worker/.venv/bin/python tests/golden-cases/run.py | tee /tmp/golden.log
+          grep -q '\[EVIDENCE chempy=' /tmp/golden.log || {
+            echo "::error::对拍声称用 chempy，但运行输出无真实调用指纹"; exit 1; }
 
   license-scan:
     runs-on: ubuntu-latest

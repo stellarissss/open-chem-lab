@@ -17,14 +17,25 @@ from typing import Any
 from .solver import load_ruleset
 
 
-def _indicator_cards(ruleset: dict[str, Any]) -> list[dict[str, Any]]:
+def _indicator_cards(ruleset: dict[str, Any],
+                     added_ids: set[str] | None = None) -> list[dict[str, Any]]:
+    """只返回实际加入体系的指示剂卡（倒什么看什么）。
+
+    added_ids=None 表示求解输出未提供 indicators 字段——此时不派生任何指示剂，
+    避免对空体系或无指示剂溶液凭空产生变色（违反事实零错与涌现可玩性）。
+    """
+    if not added_ids:
+        return []
     cards: list[dict[str, Any]] = []
     for compound in ruleset.get("compounds", []):
+        cid = compound["compound_id"]
+        if cid not in added_ids:
+            continue
         indicator = (compound.get("presentation") or {}).get("indicator")
         if not indicator:
             continue
         cards.append({
-            "compound_id": compound["compound_id"],
+            "compound_id": cid,
             "pka": float(indicator["pka"]),
             "acid_color": indicator["acid_color"],
             "base_color": indicator["base_color"],
@@ -45,8 +56,9 @@ def indicator_directives(speciation: dict[str, Any], timestamp_ms: int = 0,
     ph = float(speciation["ph"])
     container_id = speciation["container_id"]
     directives: list[dict[str, Any]] = []
+    added_ids = set(speciation.get("indicators") or [])
 
-    for idx, card in enumerate(_indicator_cards(ruleset)):
+    for idx, card in enumerate(_indicator_cards(ruleset, added_ids)):
         pka = card["pka"]
         ratio = 10 ** (ph - pka)          # [In-]/[HIn]
         fraction_base = ratio / (1.0 + ratio)

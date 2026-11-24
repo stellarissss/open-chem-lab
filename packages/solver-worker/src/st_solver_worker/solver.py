@@ -34,9 +34,10 @@ _ELEMENT_OF: dict[str, str] = {
     "koh": "K",
     "acetic_acid": "Acetate",
     "ammonia": "NH3",
-    "methyl_orange": "MO",  # 指示剂按痕量处理，不主导平衡
-    "phenolphthalein": "Phph",
 }
+# 指示剂 compound_id：痕量探针，不参与平衡求解（权威源 .dat 未定义其平衡），
+# 只记录到 indicators 供现象派生；倒什么看什么，且不以伪元素破坏求解收敛。
+_INDICATOR_IDS = {"methyl_orange", "phenolphthalein"}
 
 
 def _repo_root() -> Path:
@@ -114,21 +115,37 @@ def solve(system: dict[str, Any], ruleset: dict[str, Any] | None = None,
         return _empty_outcome(container_id, ruleset_version, "no_significant_change",
                               reason="empty system")
 
-    # 仅接受已签核可玩物质；未知物质按"覆盖外"诚实出口
+    # 仅接受已签核可玩物质；未知物质按"覆盖外"诚实出口。
+    # 指示剂虽无平衡元素，但属已签核可玩探针，允许通过（只进 indicators）。
     playable = {c["compound_id"] for c in ruleset.get("compounds", []) if c.get("playable")}
     for sub in substances:
         cid = sub.get("compound_id")
-        if cid not in playable or cid not in _ELEMENT_OF:
+        if cid not in playable or (cid not in _ELEMENT_OF and cid not in _INDICATOR_IDS):
             return _empty_outcome(container_id, ruleset_version, "no_significant_change",
                                   reason=f"out-of-coverage: {cid}")
 
-    # 汇总元素 mmol（多物质混合，体积按各自 volume_L 折算到 1L 基准）
+    # 实际加入的指示剂（痕量探针，供现象派生：只对加入的指示剂派生变色，倒什么看什么）
+    indicators = [s["compound_id"] for s in substances
+                  if s["compound_id"] in _INDICATOR_IDS]
+
+    # 汇总元素 mmol，并归一到 phreeqpython 的固定 1kg 水基准。
+    # pH 是强度量，只取决于浓度 = 总物质的量 / 总体积，与绝对体积无关。
+    # 先按各自体积折算实际物质的量（mmol），再除以总体积得到「1L 基准的 mmol」：
+    #   total_mmol / total_volume_L == Σ(conc_i × vol_i) / Σ(vol_i) × 1000
+    # 缺此归一会让 0.1M×2L 被当成 0.2M（pH 从 1.08 错到 0.80），违反事实零错。
+    # 指示剂是被动探针，不贡献体积基准也不参与平衡。
+    reactive = [s for s in substances if s["compound_id"] not in _INDICATOR_IDS]
+    total_volume_L = sum(float(s.get("volume_L", 1.0)) for s in reactive)
+    if total_volume_L <= 0:
+        return _empty_outcome(container_id, ruleset_version, "degraded",
+                              confidence=0.2, reason="non-positive reactive volume")
     totals: dict[str, float] = {}
-    for sub in substances:
+    for sub in reactive:
         element = _ELEMENT_OF[sub["compound_id"]]
         conc = float(sub.get("concentration_mol_L", 0.1))
         vol = float(sub.get("volume_L", 1.0))
-        totals[element] = totals.get(element, 0.0) + conc * vol * _MMOL_PER_MOL_L
+        total_mmol = conc * vol * _MMOL_PER_MOL_L
+        totals[element] = totals.get(element, 0.0) + total_mmol / total_volume_L
 
     try:
         pp = make_phreeq(root)
@@ -173,6 +190,7 @@ def solve(system: dict[str, Any], ruleset: dict[str, Any] | None = None,
         "equilibria": [r["rule_id"] for r in ruleset.get("reaction_rules", [])
                        if r.get("system") == "neutralization"],
         "hidden_reactions": ["water_dissociation"],
+        "indicators": indicators,
         "ruleset_version": ruleset_version,
         "source": {
             "kind": "solver",
@@ -190,7 +208,7 @@ def solve(system: dict[str, Any], ruleset: dict[str, Any] | None = None,
 _STRONG_ACID_ELEMENTS = {"Cl", "NO3"}
 _STRONG_BASE_ELEMENTS = {"Na", "K"}
 _WATER_CP = 4.184  # J/(g·K)
-_WATER_MASS_G = 1000.0  # 1L 水 ≈ 1000 g
+_WATER_DENSITY_G_PER_L = 1000.0  # 1L 水 ≈ 1000 g（稀溶液近似）
 
 
 def neutralization_heat(substances: list[dict[str, Any]],
@@ -199,6 +217,8 @@ def neutralization_heat(substances: list[dict[str, Any]],
 
     ΔT = |ΔH| × n_neutralized / (m_water × cp)
     n_neutralized = min(强酸 H+ mmol, 强碱 OH- mmol) / 1000
+    m_water = 混合后总体积 × 水密度（1L≈1000g）——固定 1000g 会把 1L+1L 的
+    温升高估一倍，违反事实零错，故按实际总体积折算。
     """
     ruleset = ruleset or load_ruleset()
     acid_mmol = sum(
@@ -218,12 +238,18 @@ def neutralization_heat(substances: list[dict[str, Any]],
     if rule is None:
         return {"outcome": "degraded", "reason": "missing strong_acid_strong_base rule"}
     dh = float(rule["equilibrium"].get("delta_h_kj_mol", -55.84))  # kJ/mol
-    delta_T = abs(dh) * 1000 * n_mol / (_WATER_MASS_G * _WATER_CP)
+    # 指示剂为痕量探针，不计入水量（与 solve() 口径一致）
+    reactive = [s for s in substances if s.get("compound_id") not in _INDICATOR_IDS]
+    total_volume_L = sum(float(s.get("volume_L", 1.0)) for s in reactive)
+    water_mass_g = max(total_volume_L, 1.0) * _WATER_DENSITY_G_PER_L
+    delta_T = abs(dh) * 1000 * n_mol / (water_mass_g * _WATER_CP)
     return {
         "outcome": "solved",
         "reaction": "H+ + OH- = H2O",
         "delta_h_kj_mol": dh,
         "moles": round(n_mol, 6),
+        "total_volume_L": round(total_volume_L, 4),
+        "water_mass_g": round(water_mass_g, 4),
         "delta_T_K": round(delta_T, 4),
         "final_temperature_K": round(298.15 + delta_T, 4),
         "hazard": "强酸入水放热：须酸入水、缓慢搅拌，绝热条件下可致沸腾飞溅",

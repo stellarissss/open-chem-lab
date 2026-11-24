@@ -52,7 +52,7 @@
 5. 更新 `packages/protocol/scripts/generate-types.mjs` 与 `src/index.ts`，纳入 4 个新 schema 并生成类型。
 6. 落 `content/rules/neutralization/`：6 种物质卡 + 中和反应规则（强弱搭配，fact/presentation/safety 三层）。
 7. 落 `content/golden-cases/neutralization/`：黄金用例期望值（pH、守恒、计量）。
-8. 落 `content/ai-crosscheck/neutralization/`：权威源快照 + 对拍记录（已完成快照落盘）。
+8. 落 `content/ai-crosscheck/neutralization/`：权威源快照 + 解析解对拍记录，附 endpoint/license/snapshot_date/sha256。
 9. 写 Python `jsonschema` 校验门禁脚本，接入 `package.json` 脚本与 CI。
 10. 跑验收逐项核对，回写三样产出物。
 

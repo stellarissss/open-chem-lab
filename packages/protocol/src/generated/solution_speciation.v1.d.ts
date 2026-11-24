@@ -47,6 +47,14 @@ export interface SolutionSpeciation {
    */
   hidden_reactions?: string[];
   /**
+   * 本体系实际加入的指示剂 compound_id 列表；仅对这些指示剂派生变色现象（倒什么看什么）
+   */
+  indicators?: string[];
+  /**
+   * 错误操作后果的物理提示（如放热飞溅），供表现层与面板显示
+   */
+  physics_note?: string;
+  /**
    * 求解所用规则集版本，保证可复现
    */
   ruleset_version: string;

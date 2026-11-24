@@ -32,7 +32,7 @@
 
 遵循 `01-Architecture.md`：
 - 第三节「现象由状态派生」与 `st.phenomenon.v1` 协议：`trigger` 可观测量、`derivation` 派生规则、intensity 为归一化表现强度（可夸张、不进事实层）。
-- 第四节技术栈：wasm-pack + wasm-bindgen 预编译二进制（环境包已还原）；表现层 React + PixiJS；`wasm32-unknown-unknown` target 按需 `rustup target add`。
+- 第四节技术栈：wasm-pack + wasm-bindgen（Rust→WASM 现象渲染）；表现层 React + PixiJS；`wasm32-unknown-unknown` target 按需 `rustup target add`。
 - 第五节数据模型：`phenomenon` 十二类现象注册表、`apparatus` 器材参数单一事实源、`compound` 可玩物质卡；近似只作用于视觉/时间尺度，不进化学事实层。
 - 第六节依赖规则：`wasm-view` 与 `solver-worker` 经协议 JSON 通信、互不 import；`web-ui` 一律经 gateway；包/模块命名以本节为准，需偏差先询问。
 - 复用切片 004 产物：gateway WS phenomenon 订阅通道、phenomenon 端点、时间轴关键帧的现象派生；切片 003 的 `phenomena.derive()` 输出。

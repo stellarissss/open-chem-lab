@@ -8,12 +8,18 @@
   "database": "minteq.dat.snapshot",
   "database_sha256": "0858232d8126f95cda1c8edbb2e50fa4c06055a1bcbb1aed154cc89cf61d168d",
   "chempy_tolerance_ph": 0.01,
+  "evidence": {
+    "principle": "每条期望标注来源；引擎自身快照（authority_snapshot）由签核链与独立对拍守护，独立来源（independent_crosscheck/analytic）自证其数。",
+    "crosscheck_tools": [
+      {"name": "chempy", "api": "EqSystem.root", "covers": ["weak_acetic_0.1M_ph", "weak_ammonia_0.1M_ph"]}
+    ]
+  },
   "cases": [
     {
       "case_id": "strong_acid_0.1M_ph",
       "setup": {"compound": "hcl", "concentration_mol_L": 0.1},
       "solve_input": {"substances": [{"compound_id": "hcl", "concentration_mol_L": 0.1, "volume_L": 1.0}]},
-      "expect": {"ph": 1.0830, "tolerance": 0.01},
+      "expect": {"ph": 1.0830, "tolerance": 0.01, "source": "authority_snapshot"},
       "ideal_expect": {"ph": 1.0, "rule": "完全解离：pH = -log10(0.1)"},
       "rule": "权威源 minteq.dat 活度模型；H+ 活度系数 < 1，pH 高于理想浓度解"
     },
@@ -21,7 +27,7 @@
       "case_id": "strong_base_0.1M_ph",
       "setup": {"compound": "naoh", "concentration_mol_L": 0.1},
       "solve_input": {"substances": [{"compound_id": "naoh", "concentration_mol_L": 0.1, "volume_L": 1.0}]},
-      "expect": {"ph": 12.8823, "tolerance": 0.01},
+      "expect": {"ph": 12.8823, "tolerance": 0.01, "source": "authority_snapshot"},
       "ideal_expect": {"ph": 13.0, "rule": "完全解离：pOH = 1, pH = 14 - 1"},
       "rule": "权威源 minteq.dat 活度模型；OH- 活度系数 < 1，pH 低于理想浓度解"
     },
@@ -29,7 +35,7 @@
       "case_id": "weak_acetic_0.1M_ph",
       "setup": {"compound": "acetic_acid", "concentration_mol_L": 0.1},
       "solve_input": {"substances": [{"compound_id": "acetic_acid", "concentration_mol_L": 0.1, "volume_L": 1.0}]},
-      "expect": {"ph": 2.8823, "tolerance": 0.01},
+      "expect": {"ph": 2.8823, "tolerance": 0.01, "source": "independent_crosscheck"},
       "ideal_expect": {"ph": 2.8829, "rule": "一元弱酸精确解 Ka=10^-4.760"},
       "rule": "稀区 I≈0.0014，活度≈浓度，与解析解一致"
     },
@@ -37,7 +43,7 @@
       "case_id": "weak_ammonia_0.1M_ph",
       "setup": {"compound": "ammonia", "concentration_mol_L": 0.1},
       "solve_input": {"substances": [{"compound_id": "ammonia", "concentration_mol_L": 0.1, "volume_L": 1.0}]},
-      "expect": {"ph": 11.1187, "tolerance": 0.01},
+      "expect": {"ph": 11.1187, "tolerance": 0.01, "source": "independent_crosscheck"},
       "ideal_expect": {"ph": 11.1231, "rule": "一元弱碱精确解 Kb=10^-4.748"},
       "rule": "稀区 I≈0.0014，活度≈浓度，与解析解一致"
     },
@@ -45,7 +51,7 @@
       "case_id": "strong_acid_base_equivalence_ph",
       "setup": {"compound_a": "hcl", "compound_b": "naoh", "concentration_mol_L": 0.1, "equal_volume": true},
       "solve_input": {"substances": [{"compound_id": "hcl", "concentration_mol_L": 0.1, "volume_L": 0.5}, {"compound_id": "naoh", "concentration_mol_L": 0.1, "volume_L": 0.5}]},
-      "expect": {"ph": 6.9892, "tolerance": 0.01},
+      "expect": {"ph": 6.9892, "tolerance": 0.01, "source": "authority_snapshot"},
       "ideal_expect": {"ph": 7.0, "rule": "H+ + OH- = H2O，25°C 化学计量点中性"},
       "rule": "等体积中和，活度口径近中性；电荷/质量守恒由 solver 断言",
       "assert": {"charge_balance": true, "mass_balance": true}
@@ -54,7 +60,7 @@
       "case_id": "weak_acid_strong_base_equivalence_ph_gt_7",
       "setup": {"compound_a": "acetic_acid", "compound_b": "naoh", "concentration_mol_L": 0.1, "equal_volume": true},
       "solve_input": {"substances": [{"compound_id": "acetic_acid", "concentration_mol_L": 0.1, "volume_L": 0.5}, {"compound_id": "naoh", "concentration_mol_L": 0.1, "volume_L": 0.5}]},
-      "expect": {"ph_gt": 7.0},
+      "expect": {"ph_gt": 7.0, "source": "analytic"},
       "ideal_expect": {"ph_gt": 7.0, "rule": "弱酸强碱恰好中和生成 CH3COO- 水解，计量点 pH>7"},
       "rule": "弱酸强碱计量点生成 CH3COO- 水解，pH>7（只断言趋势）"
     }
@@ -64,8 +70,8 @@
       "case_id": "strong_acid_dilution_heat",
       "description": "错误操作后果：浓酸入水放热。复用 strong_acid_strong_base 规则 delta_h=-55.84 kJ/mol。",
       "solve_input": {"substances": [{"compound_id": "hcl", "concentration_mol_L": 0.1, "volume_L": 1.0}, {"compound_id": "naoh", "concentration_mol_L": 0.1, "volume_L": 1.0}]},
-      "expect": {"delta_T_K_approx": 1.33, "tolerance": 0.2, "final_temp_gt_K": 298.15},
-      "rule": "ΔT = |ΔH|·n/(m·cp)；1L 0.1M 强酸强碱中和放热约 1.33K，零风险重现飞溅风险"
+      "expect": {"delta_T_K_approx": 0.667, "tolerance": 0.05, "final_temp_gt_K": 298.15, "source": "analytic"},
+      "rule": "ΔT = |ΔH|·n/(m·cp)；1L+1L 共 2L 水、n=0.1mol，绝热温升约 0.67K（按混合后总体积折算水量），零风险重现放热方向"
     }
   ]
 }

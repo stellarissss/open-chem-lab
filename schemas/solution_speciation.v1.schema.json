@@ -40,6 +40,15 @@
       "description": "隐藏反应（不可见但真实发生，引用 reaction_rule ID）",
       "items": { "type": "string", "minLength": 1 }
     },
+    "indicators": {
+      "type": "array",
+      "description": "本体系实际加入的指示剂 compound_id 列表；仅对这些指示剂派生变色现象（倒什么看什么）",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "physics_note": {
+      "type": "string",
+      "description": "错误操作后果的物理提示（如放热飞溅），供表现层与面板显示"
+    },
     "ruleset_version": { "type": "string", "minLength": 1, "description": "求解所用规则集版本，保证可复现" },
     "timestamp_ms": { "type": "integer", "minimum": 0, "description": "相对仿真起点毫秒（时间轴对齐）" },
     "source": { "$ref": "#/$defs/Source" }

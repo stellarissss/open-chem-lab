@@ -59,6 +59,9 @@ jobs:
           head -1 assets/attribution/ASSETS.csv | grep -q 'asset_id,source_project'
           echo "署名清单表头正确"
 
+      - name: 文档纯净检查（单一状态 + 无过程痕迹 + 正向规格）
+        run: python3 tools/doc-hygiene-check.py
+
       - name: 现行文档内部链接检查
         uses: lycheeverse/lychee-action@v2
         with:
