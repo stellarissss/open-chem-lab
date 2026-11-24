@@ -128,7 +128,7 @@ flowchart TB
 | `compound` | 可玩物质卡（凡入库必须可玩） | `names`(中英双语)、`formula`、`properties`、`safety`、`playable:true`、`source`、`confidence`、`review` |
 | `apparatus` | 实验台器材（参数单一事实源，驱动 2D SVG/容量/物理约束） | `capacity_mL`、`graduations`、`max_temp_K`、`sealable`、`asset`、`physics` |
 | `reaction_rule` | 条件化真实反应（核心） | `equilibrium`/`kinetics`/`thermo`(定量)、`applicability`、`numerics`、`effects`、`source`/`confidence`/`ai_crosscheck`、`data_class` |
-| `solution_speciation` | 每容器隐藏化学态（不可见反应也真实发生） | `species[]`、`ph`、`ionic_strength`、`equilibria`、`hidden_reactions` |
+| `solution_speciation` | 每容器隐藏化学态（不可见反应也真实发生） | `species[]`、`ph`、`ionic_strength`、`temperature_K`、`equilibria`、`hidden_reactions`、`outcome`（三态出口）、`confidence`、`indicators`（实际加入的指示剂，供现象派生）、`physics_note` |
 | `speciation_timeline` | 关键快照时间轴 | `keyframes[]`、`curves`、`ruleset_version` |
 | `phenomenon` | 12 类现象注册表（`st.phenomenon.v1` 指令） | `type`、`trigger`（可观测状态触发器）、`关联物理量` |
 | `save` | 轻量存档（无网格/RLE/Yjs） | `apparatus[]`、`substances[]`、`timeline_ref`、`ruleset_version` |
@@ -149,7 +149,7 @@ flowchart TB
 
 | 数据域 | 具体源 | 准入 |
 |---|---|---|
-| 水溶液 logK（主源） | USGS PHREEQC `wateq4f_PWN.dat`（稀区，Davies/延展 Debye–Hückel，本期）/ `pitzer.dat`（浓区与高离子强度，长线启用）（公共领域） | 物化层主源；按离子强度选用对应活度模型 |
+| 水溶液 logK（主源） | USGS PHREEQC `wateq4f.dat` / `minteq.dat`（稀区，Davies/延展 Debye–Hückel，本期）/ `pitzer.dat`（浓区与高离子强度，长线启用）（公共领域） | 物化层主源；按离子强度选用对应活度模型。本期中和体系以 `minteq.dat.snapshot` 为求解主库（含乙酸解离，`wateq4f.dat.snapshot` 并存签核），二者均为 `.dat` 权威源离线快照 |
 | 金属络合稳定常数 | NIST SRD46 SQL.zip（官方标 known errors、已停更） | 待签核候选，禁直通 |
 | 燃烧/高温热化学 | NIST–JANAF SRD13 | 候选（替代红线库 Burcat） |
 | 动力学 Arrhenius | NIST Kinetics SRD17 / Solution SRD40 | 候选 → Cantera |
@@ -163,6 +163,16 @@ flowchart TB
 **准入判据**：①宽松许可可进 LGPL 主链 ②可自托管、可机读批量 ③带版本/快照日/可溯源 ④不引入商业数据库/不引入精度分级；官方声明 AS IS 的须对拍签核。每条快照记录 `endpoint / license / snapshot_date / sha256`。
 
 **缓存**：物化层构建期 O(1) 查表（免计算）；求解缓存用内容寻址键 `sha256(canonical(system) + canonical(conditions) + solver_ver + ruleset_ver)`，失效由数据快照/求解器/ruleset 三版本驱动，复用 `solve_cache`、**零新中间件**。缓存价值在免计算与可复现，不在提速。
+
+### 5.3 求解口径与状态派生（已裁决的实现决策）
+
+以下决策已由切片 003 落地并经用户裁决，是现行口径，开发须遵循：
+
+- **体积归一（pH 是强度量）**：溶液 pH 只取决于浓度（总物质的量 ÷ 总体积），与绝对体积无关。求解按各物质体积折算实际摩尔数后归一到 phreeqpython 的固定 1 kg 水基准；缺此归一会把「0.1 M × 2 L」错算成 0.2 M。固化为不变量断言（体积无关性、浓度十倍 pH 降一）。
+- **指示剂为痕量探针**：指示剂（酚酞/甲基橙）是被动探针，不参与稀区平衡求解（权威源 `.dat` 未定义其平衡）；求解输出 `indicators` 记录实际加入的指示剂，现象层只对其派生变色——倒什么看什么，且不以伪元素破坏求解收敛。变色按 Henderson–Hasselbalch 随 pH 连续混色，不设阈值跳变。
+- **热效应按混合总质量**：绝热温升 `ΔT = Q /(m_total · cp)` 按混合后总质量折算（固定 1000 g 会把 1 L+1 L 的温升高估一倍）。
+- **浓硫酸稀释与飞溅分层**：稀释焓 ΔH = -95.28 kJ/mol（液相生成焓差 `-909.27 - (-813.99)`，工程通用值 -95 交叉印证），签核入 `sulfuric_acid_dilution` 规则。**事实层**：ΔH 是状态函数、与加入方向无关，故浓硫酸入水与水入浓酸的整体温升相同；**安全层**：飞溅由可观测的加入顺序派生——水入浓酸时水密度小浮于酸面、界面薄层闪沸裹挟酸液飞溅，酸入水时酸沉底、热量分散不飞溅；飞溅强度是表现层近似，不进化学事实层。浓硫酸属浓区体系，不进稀区平衡求解，长线由 `pitzer.dat` 承担。
+- **活度域出口**：稀区（I < 0.5 mol/L）用 Davies/延展 Debye–Hückel 给出定量解；越界或不收敛走 `outcome: degraded` 附置信度；覆盖范围外走 `no_significant_change`（合法结论）。浓区数值由长线 `pitzer.dat` 承担。
 
 ---
 
@@ -188,9 +198,11 @@ open-chem-lab/
 │   ├── gateway/        # Fastify REST+WS
 │   └── save/  data-pipeline/  shared/  (teaching/ 长线)
 ├── tools/asset-pipeline/   # 美术资产转换
+├── tools/materialize-rules.py      # 构建期物化 content/rules → content/materialized
+├── tools/doc-hygiene-check.py      # 文档纯净门禁（单一状态 + 无过程痕迹 + 正向规格）
 ├── assets/                 # 资产产物 + attribution/
 ├── deploy/                 # docker-compose / Dockerfile / .env.example / README-windows.md
-├── tests/                  # e2e / golden-cases / license-scan / lgpl-link-check
+├── tests/                  # e2e(部署可达) / golden-cases / schema-validate / evidence-check / license-scan / lgpl-link-check
 └── docs/                   # 本真理源 + Roadmap + DocDD + specs/
 ```
 
@@ -215,8 +227,9 @@ open-chem-lab/
 
 ### 7.2 验证原则（敏捷轻量）
 
-- **不设强制门禁**：不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，验证结果由测试产物与 git log 承载。
-- **产品级门禁随切片逐步接入**（`license-scan` 已在 CI）：`lgpl-link-check`、`golden-cases`（数值零错）、`rule-lint`、`schema-validate`、`asset-attribution`、`build`、`e2e`、`dual-platform`。
+- **任务内按需验证、产品级门禁由 CI 统一守门**：单个任务收尾只跑与该任务相关的最小充分证据，不要求每个任务跑全套；质量由「数值零错红线 + CI 强制门禁 + 用户随时可打断」保障，验证结果由测试产物与 git log 承载。
+- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线。随切片继续接入：`lgpl-link-check`、`rule-lint`、`asset-attribution`、`e2e`（部署可达已落地）、`dual-platform`。
+- **证据自证**：凡验收声称用某工具独立对拍，须在代码中真实调用、运行时打印版本与调用指纹、CI 校验一致；黄金用例期望标注来源（独立对拍/权威源快照/解析式）并锚定权威源哈希；关键量纲不变量（体积无关性、浓度十倍 pH 降一）固化为断言（流程见 `03-DocDD-Process.md` 第四节）。
 
 ### 7.3 对外口径（不可拆分的三层）
 

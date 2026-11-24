@@ -462,6 +462,67 @@
       },
       "rule_revision": 1,
       "playable": true
+    },
+    {
+      "schema_version": "st.compound.v1",
+      "compound_id": "sulfuric_acid_conc",
+      "names": {
+        "zh": "浓硫酸",
+        "en": "concentrated sulfuric acid"
+      },
+      "formula": "H2SO4",
+      "cas_number": "7664-93-9",
+      "data_class": "fact",
+      "properties": {
+        "molar_mass_g_mol": 98.079,
+        "density_g_ml": 1.84,
+        "strong_electrolyte": true,
+        "pka_note": "浓硫酸（约 98% 质量分数，约 18.4 mol/L）为浓区体系，活度远超稀区 Davies 适用域；水溶液平衡由长线 pitzer.dat 承担，本卡只供稀释热效应与危害操作计算，不进稀区平衡求解。无限稀释积分热 -95.28 kJ/mol（见 sulfuric_acid_dilution 规则）。",
+        "reference_temp_K": 298.15
+      },
+      "safety": {
+        "ghs_codes": [
+          "H290",
+          "H314"
+        ],
+        "signal_word": "danger",
+        "hazard_notes": "强腐蚀性、强吸水性。稀释须将酸沿壁缓慢加入大量水并搅拌（酸入水）；若将水倒入浓硫酸，水因密度小浮于酸面，界面薄层吸收稀释热瞬间超过沸点而暴沸飞溅（flash boiling），裹挟酸液造成灼伤。两种方向总放热量相同（稀释焓为状态函数），差别在热量分布的界面局部性。",
+        "source": {
+          "kind": "authoritative_db",
+          "ref": "PubChem CID 7664-93-9; NIST-JANAF Chase 1998 (gas); Aspen Plus V14 液相生成焓",
+          "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug_view",
+          "license": "PubChem data / NIST public domain",
+          "version": null,
+          "snapshot_date": "2026-11-24",
+          "sha256": null
+        }
+      },
+      "presentation": {
+        "appearance": "无色油状黏稠液体（浓硫酸）",
+        "solution_color": "无色",
+        "notes": "密度约 1.84 g/mL，远大于水，故酸沉底、水浮面——决定稀释方向的危害差异。"
+      },
+      "source": {
+        "kind": "authoritative_db",
+        "ref": "NIST-JANAF (Chase 1998); Aspen Plus V14 物性库液相生成焓",
+        "endpoint": "webbook.nist.gov/cgi/cbook.cgi?ID=C7664939",
+        "license": "public domain (NIST)",
+        "version": "JANAF 4th ed. / Aspen V14",
+        "snapshot_date": "2026-11-24",
+        "sha256": null
+      },
+      "confidence": {
+        "level": "verified",
+        "note": "user signed off 2026-11-24；稀释焓按液相生成焓差 -909.27-(-813.99)=-95.28 kJ/mol，工程通用值 -95 kJ/mol 交叉印证"
+      },
+      "review": {
+        "status": "signed_off",
+        "reviewer": "stellarisssa (user)",
+        "date": "2026-11-24",
+        "ai_crosscheck": "content/ai-crosscheck/neutralization/record.json"
+      },
+      "rule_revision": 1,
+      "playable": true
     }
   ],
   "reaction_rules": [
@@ -674,6 +735,76 @@
     },
     {
       "schema_version": "st.reaction_rule.v1",
+      "rule_id": "sulfuric_acid_dilution",
+      "system": "neutralization",
+      "reaction": {
+        "equation": "H2SO4 = 2H+ + SO4-2",
+        "reactants": {
+          "H2SO4": 1
+        },
+        "products": {
+          "H+": 2,
+          "SO4-2": 1
+        },
+        "net_charge_reactants": 0,
+        "net_charge_products": 0
+      },
+      "equilibrium": {
+        "delta_h_kj_mol": -95.28,
+        "temperature_K": 298.15,
+        "analytic_note": "无限稀释积分热：液相 H2SO4 生成焓 -813.99 与无限稀释态 -909.27 kJ/mol 之差 = -95.28 kJ/mol；工程通用值 -95 kJ/mol。浓硫酸稀释放热远大于强酸强碱中和热（-55.84），是错误操作后果的物理根源。log_k 不用于本规则（浓区非稀区平衡，仅取焓变做热效应）。"
+      },
+      "kinetics": {
+        "fast_equilibrium": true,
+        "note": "稀释与解离瞬时完成；飞溅由界面局部闪沸（传热/密度分层）派生，属表现层现象，不进化学事实层。"
+      },
+      "applicability": {
+        "conditions": [
+          "aqueous",
+          "concentrated_acid_dilution",
+          "25C"
+        ],
+        "temp_range_K": [
+          298.15,
+          373.15
+        ]
+      },
+      "numerics": {
+        "rtol": 1e-06,
+        "atol": 1e-09,
+        "note": "绝热温升为热量守恒闭式计算，无刚性积分。"
+      },
+      "effects": [
+        "temperature_change",
+        "splash"
+      ],
+      "data_class": "fact",
+      "source": {
+        "kind": "authoritative_db",
+        "ref": "NIST-JANAF Chase 1998; Aspen Plus V14 液相生成焓（无限稀释 -909.27 / 液相 -813.99 kJ/mol）",
+        "license": "public domain (NIST)",
+        "version": "JANAF 4th ed. / Aspen V14",
+        "snapshot_date": "2026-11-24",
+        "sha256": null
+      },
+      "confidence": {
+        "level": "verified",
+        "note": "user signed off 2026-11-24；生成焓差推导 + 工程通用值 -95 kJ/mol 交叉印证"
+      },
+      "ai_crosscheck": {
+        "method": "enthalpy_of_formation_difference",
+        "record_path": "content/ai-crosscheck/neutralization/record.json",
+        "note": "-909.27-(-813.99)=-95.28 kJ/mol；多源一致（Aspen/NIST/工程手册）"
+      },
+      "review": {
+        "status": "signed_off",
+        "reviewer": "stellarisssa (user)",
+        "date": "2026-11-24"
+      },
+      "rule_revision": 1
+    },
+    {
+      "schema_version": "st.reaction_rule.v1",
       "rule_id": "water_dissociation",
       "system": "neutralization",
       "reaction": {
@@ -742,5 +873,5 @@
       "rule_revision": 1
     }
   ],
-  "ruleset_sha256": "caf0dba1f06542280d9b3aaaffe328a0e9ed34b45374d4488fdd444f21eb8812"
+  "ruleset_sha256": "9ed84a10e3074b0d7b4ecf14e527c5fc7f40765048da0b4ba3cb4756ce467005"
 }

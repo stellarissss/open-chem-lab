@@ -50,6 +50,15 @@
         "koh": 14797,
         "ammonia": 222
       }
+    },
+    {
+      "name": "NIST-JANAF / Aspen Plus V14 硫酸生成焓",
+      "role": "浓硫酸稀释焓（ΔH_dil，无限稀释积分热）数值源",
+      "endpoint": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7664939",
+      "license": "public domain (NIST)",
+      "snapshot_date": "2026-11-24",
+      "sha256": null,
+      "header": "液相 H2SO4 生成焓 -813.99 kJ/mol；无限稀释态 -909.27 kJ/mol；差 -95.28 kJ/mol（工程通用值 -95 交叉印证）"
     }
   ],
   "extracted_constants": [
@@ -151,12 +160,19 @@
       "expectation": "H+ + OH- = H2O，化学计量点中性",
       "computed_ph": 7.0,
       "formula": "25°C 中性点 pKw/2"
+    },
+    {
+      "case": "浓硫酸稀释焓（sulfuric_acid_dilution）",
+      "expectation": "ΔH_dil = -95.28 kJ/mol（1 mol H2SO4 稀释到无限）",
+      "computed_ph": null,
+      "formula": "ΔH = ΔHf[H2SO4(aq,∞)] - ΔHf[H2SO4(l)] = -909.27 - (-813.99) = -95.28 kJ/mol"
     }
   ],
   "notes": [
     "强酸（HCl/HNO3）与强碱（NaOH/KOH）在水中完全解离，不设有限 pKa/Kb，避免写入无意义数值。",
     "phreeqpython 动态求解调用属 spec-003 范围，本切片不做；对拍采用解析解。",
     "safety 层 GHS 代码来自 PubChem 构建期快照，只抽事实性结论，标签来源见各物质卡。",
-    "指示剂（酚酞/甲基橙）pKa 取自中科大化学实验中心指示剂表与 Bates(1964)，多源交叉一致；变色区间由 pKa±1 派生，表现层按 Henderson–Hasselbalch 连续混色，供 spec-003 涌现现象基座使用。"
+    "指示剂（酚酞/甲基橙）pKa 取自中科大化学实验中心指示剂表与 Bates(1964)，多源交叉一致；变色区间由 pKa±1 派生，表现层按 Henderson–Hasselbalch 连续混色，供 spec-003 涌现现象基座使用。",
+    "2026-11-24：新增浓硫酸物质卡与稀释规则；飞溅（水入酸）由加入顺序经安全层派生，整体温升方向无关（状态函数）。"
   ]
 }

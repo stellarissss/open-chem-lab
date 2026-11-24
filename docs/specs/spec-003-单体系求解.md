@@ -10,7 +10,7 @@
 - `solver-worker`（Python 3.11）接入 phreeqpython，加载 `content/materialized/ruleset.json`（切片 002 物化产物），对中和体系求解 pH / 物种分布 / 离子强度。
 - 与切片 002 黄金用例（`content/golden-cases/neutralization/cases.json`）对拍，逐条断言数值零错。
 - chempy 独立对拍主引擎结果（架构第四节对拍链）。
-- 错误操作后果最小用例：至少一例错误混合（如浓酸入水放热、密闭体系）入求解/黄金用例，验证后果可零风险重现。
+- 错误操作后果最小用例：至少一例错误操作（如水倒入浓硫酸致界面闪沸飞溅、密闭体系）入求解/黄金用例，验证后果可零风险重现。浓硫酸稀释放热按签核稀释焓计算，飞溅由加入顺序经安全层派生。
 - 物种分布输出契约对齐 `st.solution_speciation.v1`（切片 002 schema），含 `outcome` 出口语义三态。
 - 现象派生基座：求解输出的 `ph` / `temperature_K` / 物种浓度供表现层经 `st.phenomenon.v1` 的 `trigger`（可观测状态触发器）派生现象；本切片落地指示剂的 Henderson–Hasselbalch 连续混色（酚酞 pKa 9.1 无色→粉红、甲基橙 pKa 3.46 红→黄，取自权威源快照），确保任意涌现反应产生的 pH 都有可感知视觉反馈。指示剂卡在切片 002 事实层（compound.presentation.indicator），表现映射由状态触发器统一承担，任意反应共享同一套视觉派生机制。
 
@@ -36,7 +36,7 @@
 - 定量求解链（第四节）：phreeqpython 主引擎 / chempy 对拍 / SciPy LSODA（本切片快反应用平衡，不引入动力学积分）；无硬编码时间阈值。
 - 数据模型第五节：`solution_speciation` 契约；求解缓存内容寻址键（稳态复用，本切片可先不做缓存）。
 - 依赖规则第六节：solver-worker 独立 worker，经协议 JSON 通信，不 import web-ui；运行时零网络依赖。
-- 红线第七节：事实零错（黄金用例守门）、不造轮子（复用 phreeqpython 内置 `wateq4f_PWN.dat` / `phreeqc.dat`）。
+- 红线第七节：事实零错（黄金用例守门）、不造轮子（复用 USGS 权威源离线快照，本期 `minteq.dat.snapshot`——覆盖乙酸解离，`wateq4f.dat.snapshot` 并存签核）。
 - 活度模型适用域（对齐 01 第五节 5.2）：本切片面向稀水溶液（离子强度 < 0.5 mol/L，Davies/延展 Debye–Hückel 适用域），黄金用例容差在此域内成立；浓区/高离子强度由长线的 `pitzer.dat` 承担，越界时经 `outcome: degraded` 诚实降级，两域口径据此统一。
 - 复用切片 002 产物：`schemas/solution_speciation.v1.schema.json`、`content/golden-cases/neutralization/`、`content/ai-crosscheck/neutralization/`。
 
@@ -44,7 +44,7 @@
 
 1. **求解内核**：在 `solver-worker` 内实现纯函数 `solve(system, ruleset, root) -> st.solution_speciation.v1`，加载物化 ruleset，按输入组合经 phreeqpython 求解 pH / 物种分布 / 离子强度；活度域限稀区（I < 0.5 mol/L），越界与不收敛走 `outcome: degraded`。
 2. **对拍与守门**：`tests/golden-cases/run.py` 以「求解输出 vs 期望」对拍覆盖 6 条黄金用例 + 1 条错误操作后果用例，含计量守恒（电荷）断言；每条期望标注来源（独立对拍 / 权威源快照 / 解析式，见 cases.json `expect.source`）。稀区弱酸弱碱由 chempy 独立对拍、容差见关键决策，强电解质因离子特定活度模型走体系级快照签核；声称的对拍工具须在 runner 中真实调用并打印依赖指纹（由证据门禁校验）。
-3. **错误操作后果用例**：浓酸入水放热——复用 `strong_acid_strong_base` 规则 `delta_h = -55.84 kJ/mol`，按混合量算绝热温升，入求解输出 `temperature_K` 与黄金用例断言，零风险重现。
+3. **错误操作后果用例**：浓硫酸稀释——复用 `sulfuric_acid_dilution` 规则签核稀释焓 `delta_h = -95.28 kJ/mol`（液相生成焓差），按混合量算整体绝热温升（稀释焓为状态函数、两方向相同）；飞溅由 `addition_order`（水入酸 `water_into_acid`）经安全层派生，不改放热总量。两条黄金用例对照水入酸（飞溅）与酸入水（无飞溅），零风险重现。保留强酸强碱中和热 `delta_h = -55.84 kJ/mol` 供中和体系热效应。
 4. **涌现派生基座**：求解输出 `ph` / `temperature_K` / 物种浓度供状态触发器派生；落地指示剂 Henderson–Hasselbalch 连续混色（酚酞 pKa 9.1、甲基橙 pKa 3.46，取自事实层卡），产出 `st.phenomenon.v1` 指令（含 `trigger`）。
 5. **API 形态**：纯函数 + solver-worker 内轻量本地 HTTP 端点供测试/内部调用；本切片不接 gateway 路由，保持独立 worker 解耦。
 6. **验证与 CI**：求解链测试接入 CI job（与内容校验并列）；实测单次求解 P95 时延写入对拍记录；跑 schema-validate / 黄金用例 / build 全绿。
@@ -53,7 +53,7 @@
 
 - **对拍口径**：活度口径（phreeqpython 离子特定活度参数，稀区适用）；期望值回指权威源 `minteq.dat.snapshot` 实测活度 pH，`.dat` 快照为唯一数值真理源、体系级签核；理想解作对照字段，不参与对拍（用户裁决，对齐 01 第五节 5.2）。
 - **求解 API**：内部函数 + 本地 HTTP，本切片不接 gateway（用户裁决）。
-- **错误操作后果**：浓酸入水放热（用户裁决）。
+- **错误操作后果**：浓硫酸稀释——水入浓酸界面闪沸飞溅（用户裁决 2026-11-24）；稀释焓 -95.28 kJ/mol 签核，整体温升方向无关、飞溅由加入顺序派生。
 - **chempy 对拍容差**：pH 差 ≤ 0.01（与黄金用例 tolerance 统一，用户裁决）。
 
 ## 状态

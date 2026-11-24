@@ -209,6 +209,11 @@ _STRONG_ACID_ELEMENTS = {"Cl", "NO3"}
 _STRONG_BASE_ELEMENTS = {"Na", "K"}
 _WATER_CP = 4.184  # J/(g·K)
 _WATER_DENSITY_G_PER_L = 1000.0  # 1L 水 ≈ 1000 g（稀溶液近似）
+# 浓硫酸：浓区热效应物质，不进稀区平衡求解。物性来自已签核物质卡。
+_CONC_ACID_ID = "sulfuric_acid_conc"
+_CONC_ACID_CONC_MOL_L = 18.4  # 约 98% 质量分数，ρ=1.84 g/mL
+_CONC_ACID_DENSITY_G_ML = 1.84
+_WATER_DENSITY_G_ML = 1.0
 
 
 def neutralization_heat(substances: list[dict[str, Any]],
@@ -258,15 +263,75 @@ def neutralization_heat(substances: list[dict[str, Any]],
     }
 
 
+def dilution_heat(substances: list[dict[str, Any]], ruleset: dict[str, Any] | None = None,
+                  addition_order: str = "acid_into_water") -> dict[str, Any]:
+    """浓硫酸稀释的绝热温升与飞溅风险（错误操作后果，spec-003）。
+
+    物理模型（严格分层，对齐 01 第五节）：
+    - 事实层：稀释焓 ΔH 是状态函数，与加入方向无关；总放热 Q = n(H2SO4)·|ΔH|，
+      整体绝热温升 ΔT = Q /(m_total·cp)，两种方向数值相同——浓硫酸入水整体温度同样急剧上升。
+    - 安全层：飞溅由「加入顺序」派生——水入酸（water_into_acid）时水密度小浮于酸面，
+      界面薄层吸收稀释热瞬间闪沸（flash boiling）、裹挟酸液飞溅；酸入水（acid_into_water）
+      时酸沉底、热量分散于大水体，不飞溅。这是密度分层 + 局部传热的机制结论，
+      不改变放热总量，表现层据此派生 splash 强度（近似，不进事实层）。
+    """
+    ruleset = ruleset or load_ruleset()
+    rule = next((r for r in ruleset.get("reaction_rules", [])
+                 if r.get("rule_id") == "sulfuric_acid_dilution"), None)
+    if rule is None:
+        return {"outcome": "degraded", "reason": "missing sulfuric_acid_dilution rule"}
+    dh = float(rule["equilibrium"]["delta_h_kj_mol"])  # kJ/mol，负值放热
+
+    acid = next((s for s in substances if s.get("compound_id") == _CONC_ACID_ID), None)
+    if acid is None:
+        return {"outcome": "no_significant_change", "reason": "no concentrated sulfuric acid"}
+    a_vol_L = float(acid.get("volume_L", 1.0))
+    a_conc = float(acid.get("concentration_mol_L", _CONC_ACID_CONC_MOL_L))
+    n_mol = a_conc * a_vol_L
+    acid_mass_g = a_vol_L * _CONC_ACID_DENSITY_G_ML * _WATER_DENSITY_G_PER_L
+
+    # 水量：其他物质按体积折算为水（本体系只有水与浓硫酸）
+    water_vol_L = sum(float(s.get("volume_L", 1.0)) for s in substances
+                      if s.get("compound_id") != _CONC_ACID_ID)
+    water_mass_g = water_vol_L * _WATER_DENSITY_G_PER_L
+    total_mass_g = acid_mass_g + water_mass_g
+    if total_mass_g <= 0:
+        return {"outcome": "degraded", "reason": "non-positive mass"}
+
+    q_kj = n_mol * abs(dh)
+    delta_T = q_kj * 1000 / (total_mass_g * _WATER_CP)
+    # 飞溅是安全层派生：由加入顺序这个可观测操作状态驱动，不改放热总量。
+    splash_risk = addition_order == "water_into_acid"
+    return {
+        "outcome": "solved",
+        "reaction": "H2SO4 = 2H+ + SO4-2",
+        "delta_h_kj_mol": dh,
+        "moles": round(n_mol, 6),
+        "heat_released_kj": round(q_kj, 4),
+        "total_mass_g": round(total_mass_g, 4),
+        "delta_T_K": round(delta_T, 4),
+        "final_temperature_K": round(298.15 + delta_T, 4),
+        "addition_order": addition_order,
+        "splash_risk": splash_risk,
+        "hazard": ("水入浓硫酸：界面薄层闪沸、酸液飞溅（错误操作）" if splash_risk
+                   else "酸入水：整体急剧升温，须缓慢沿壁加入并搅拌；热量分散不飞溅"),
+        "ruleset_version": ruleset.get("ruleset_version", "neutralization-r1"),
+        "source": {"kind": "computed", "ref": "ruleset.sulfuric_acid_dilution.delta_h"},
+    }
+
+
 def solve_heat(compound_ids: list[str] | None = None, ruleset: dict[str, Any] | None = None,
-               substances: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    """错误操作后果：浓酸/强碱中和放热。兼容旧接口（compound_ids），
-    新调用建议传 substances（含浓度/体积）以按实际摩尔数计算。
+               substances: list[dict[str, Any]] | None = None,
+               addition_order: str = "acid_into_water") -> dict[str, Any]:
+    """错误操作后果热效应。浓硫酸稀释走 dilution_heat（方向相关的飞溅风险），
+    其余强酸强碱中和走 neutralization_heat。兼容旧接口（compound_ids）。
     """
     if substances is None:
         substances = [
             {"compound_id": cid, "concentration_mol_L": 0.1, "volume_L": 1.0}
             for cid in compound_ids
         ]
+    if any(s.get("compound_id") == _CONC_ACID_ID for s in substances):
+        return dilution_heat(substances, ruleset, addition_order)
     return neutralization_heat(substances, ruleset)
 

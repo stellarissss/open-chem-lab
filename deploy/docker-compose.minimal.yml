@@ -20,6 +20,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      solver-worker:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
@@ -41,9 +43,14 @@ services:
       HEARTBEAT_SECONDS: ${HEARTBEAT_SECONDS:-5}
       # 容器内仓库根为 /app，content/ 与 src/ 平级（见 solver-worker Dockerfile）。
       ST_REPO_ROOT: /app
-    depends_on:
-      gateway:
-        condition: service_healthy
+      # 跨容器可达：gateway 经 http://solver-worker:8765 调用，故绑定 0.0.0.0。
+      HOST: 0.0.0.0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
 
   postgres:

@@ -64,6 +64,9 @@ jobs:
           grep -q '\[EVIDENCE chempy=' /tmp/golden.log || {
             echo "::error::对拍声称用 chempy，但运行输出无真实调用指纹"; exit 1; }
 
+      - name: 部署可达 e2e（solver 绑定非回环，gateway 跨地址可调）
+        run: packages/solver-worker/.venv/bin/python tests/e2e/deploy_reachability.py
+
   license-scan:
     runs-on: ubuntu-latest
     steps:

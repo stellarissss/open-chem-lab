@@ -2,7 +2,8 @@
 
 设计约束（见 01-Architecture.md）：
 - 求解在独立 worker，不占 16.7ms 帧预算。
-- spec-003 起接中和体系求解；HTTP 仅回环、不接 gateway（保持解耦）。
+- spec-004 起 gateway 经 SOLVER_URL 调本 HTTP 端点；绑定地址由 HOST 控制，
+  本地默认回环、容器编排设 0.0.0.0，web-ui 始终只经 gateway（保持解耦）。
 """
 import argparse
 import logging
@@ -25,13 +26,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="ST solver-worker")
     parser.add_argument("--http", action="store_true", help="启动本地 HTTP 求解端点")
     parser.add_argument("--port", type=int, default=8765, help="HTTP 端口（默认 8765）")
+    parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"),
+                        help="绑定地址；单机本地默认回环，容器编排经 HOST=0.0.0.0 覆盖")
     args, _ = parser.parse_known_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     if args.http:
         from .server import serve
-        serve(port=args.port)
+        serve(host=args.host, port=args.port)
         return 0
 
     signal.signal(signal.SIGTERM, _stop)

@@ -1,0 +1,61 @@
+{
+  "schema_version": "st.compound.v1",
+  "compound_id": "sulfuric_acid_conc",
+  "names": {
+    "zh": "浓硫酸",
+    "en": "concentrated sulfuric acid"
+  },
+  "formula": "H2SO4",
+  "cas_number": "7664-93-9",
+  "data_class": "fact",
+  "properties": {
+    "molar_mass_g_mol": 98.079,
+    "density_g_ml": 1.84,
+    "strong_electrolyte": true,
+    "pka_note": "浓硫酸（约 98% 质量分数，约 18.4 mol/L）为浓区体系，活度远超稀区 Davies 适用域；水溶液平衡由长线 pitzer.dat 承担，本卡只供稀释热效应与危害操作计算，不进稀区平衡求解。无限稀释积分热 -95.28 kJ/mol（见 sulfuric_acid_dilution 规则）。",
+    "reference_temp_K": 298.15
+  },
+  "safety": {
+    "ghs_codes": [
+      "H290",
+      "H314"
+    ],
+    "signal_word": "danger",
+    "hazard_notes": "强腐蚀性、强吸水性。稀释须将酸沿壁缓慢加入大量水并搅拌（酸入水）；若将水倒入浓硫酸，水因密度小浮于酸面，界面薄层吸收稀释热瞬间超过沸点而暴沸飞溅（flash boiling），裹挟酸液造成灼伤。两种方向总放热量相同（稀释焓为状态函数），差别在热量分布的界面局部性。",
+    "source": {
+      "kind": "authoritative_db",
+      "ref": "PubChem CID 7664-93-9; NIST-JANAF Chase 1998 (gas); Aspen Plus V14 液相生成焓",
+      "endpoint": "pubchem.ncbi.nlm.nih.gov/rest/pug_view",
+      "license": "PubChem data / NIST public domain",
+      "version": null,
+      "snapshot_date": "2026-11-24",
+      "sha256": null
+    }
+  },
+  "presentation": {
+    "appearance": "无色油状黏稠液体（浓硫酸）",
+    "solution_color": "无色",
+    "notes": "密度约 1.84 g/mL，远大于水，故酸沉底、水浮面——决定稀释方向的危害差异。"
+  },
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "NIST-JANAF (Chase 1998); Aspen Plus V14 物性库液相生成焓",
+    "endpoint": "webbook.nist.gov/cgi/cbook.cgi?ID=C7664939",
+    "license": "public domain (NIST)",
+    "version": "JANAF 4th ed. / Aspen V14",
+    "snapshot_date": "2026-11-24",
+    "sha256": null
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-24；稀释焓按液相生成焓差 -909.27-(-813.99)=-95.28 kJ/mol，工程通用值 -95 kJ/mol 交叉印证"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-24",
+    "ai_crosscheck": "content/ai-crosscheck/neutralization/record.json"
+  },
+  "rule_revision": 1,
+  "playable": true
+}

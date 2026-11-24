@@ -1,7 +1,7 @@
-"""solver-worker 本地 HTTP 端点（spec-003，内部函数 + 轻量本地 HTTP）。
+"""solver-worker HTTP 端点（spec-003 起，内部函数 + 轻量本地 HTTP）。
 
-用标准库 http.server，零新增依赖、不接 gateway 路由（本切片保持独立 worker 解耦）。
-供测试与内部调用；绑定 127.0.0.1，仅回环可达。
+用标准库 http.server，零新增依赖；由 gateway 经 SOLVER_URL 调用，web-ui 不直连。
+绑定地址由 --host / HOST 决定：本地默认 127.0.0.1，容器编排设 0.0.0.0 供跨容器可达。
 
 端点：
     GET  /health                 → {"status":"ok","service":"solver-worker"}
@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
@@ -61,6 +62,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, solver.solve_heat(
                     payload.get("compound_ids", []),
                     substances=payload.get("substances"),
+                    addition_order=payload.get("addition_order", "acid_into_water"),
                 ))
             elif self.path == "/solve/timeline":
                 ratios = payload.get("ratios")
@@ -77,7 +79,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(500, {"outcome": "degraded", "reason": str(exc)})
 
 
-def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
+def serve(host: str | None = None, port: int = 8765) -> None:
+    host = host or os.environ.get("HOST", "127.0.0.1")
     server = ThreadingHTTPServer((host, port), Handler)
     print(f"[solver-worker] HTTP listening on http://{host}:{port}")
     try:

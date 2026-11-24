@@ -180,7 +180,9 @@ def main() -> int:
 
     # 错误操作后果用例
     for hz in data.get("hazard_cases", []):
-        heat = solver.solve_heat(substances=hz["solve_input"]["substances"], ruleset=ruleset)
+        heat = solver.solve_heat(
+            substances=hz["solve_input"]["substances"], ruleset=ruleset,
+            addition_order=hz["solve_input"].get("addition_order", "acid_into_water"))
         exp = hz["expect"]
         ok = heat.get("outcome") == "solved"
         if not ok:
@@ -190,7 +192,10 @@ def main() -> int:
             fail(f"{hz['case_id']}: ΔT={heat['delta_T_K']} 期望≈{exp['delta_T_K_approx']}")
         if heat["final_temperature_K"] <= exp["final_temp_gt_K"]:
             fail(f"{hz['case_id']}: 终温未高于 {exp['final_temp_gt_K']}")
-        print(f"[golden] PASS {hz['case_id']}: ΔT={heat['delta_T_K']}K 终温={heat['final_temperature_K']}K")
+        if "splash_risk" in exp and heat.get("splash_risk") != exp["splash_risk"]:
+            fail(f"{hz['case_id']}: splash_risk={heat.get('splash_risk')} 期望={exp['splash_risk']}")
+        print(f"[golden] PASS {hz['case_id']}: ΔT={heat['delta_T_K']}K 终温={heat['final_temperature_K']}K "
+              f"飞溅风险={heat.get('splash_risk')}")
 
     # 三态出口行为验证
     unknown = solver.solve({"container_id": "x", "substances": [
@@ -237,12 +242,25 @@ def main() -> int:
         fail(f"加入酚酞应派生 1 条 pKa=9.1 变色，实际 {ind_dirs}")
     print(f"[golden] PASS 指示剂派生: 无指示剂={len(plain)}条 加酚酞={len(ind_dirs)}条(pKa=9.1)")
 
-    # SLA 测量（P95 ≤ 500ms，本地单机稳态）
+    # SLA 测量（P95 ≤ 500ms，本地单机稳态）；实测值落盘为测试产物（spec-003 验收 #7）
     latencies.sort()
     p95 = latencies[int(len(latencies) * 0.95) - 1] if latencies else 0
     print(f"[golden] SLA: 求解次数={len(latencies)} P95={p95:.2f}ms (目标 ≤500ms)")
     if p95 > 500:
         fail(f"求解 P95={p95:.2f}ms 超过 500ms")
+    sla_record = {
+        "measurement": "single-solve end-to-end latency, local single machine, steady state",
+        "target_p95_ms": 500,
+        "samples": len(latencies),
+        "p95_ms": round(p95, 3),
+        "min_ms": round(latencies[0], 3) if latencies else None,
+        "max_ms": round(latencies[-1], 3) if latencies else None,
+        "ruleset_version": ruleset.get("ruleset_version"),
+        "note": "本地实测参考值，随机器波动；非签核数据，不入库（见 .gitignore）。",
+    }
+    sla_path = REPO / "content/ai-crosscheck/neutralization/sla_measurement.json"
+    sla_path.write_text(json.dumps(sla_record, ensure_ascii=False, indent=2) + "\n")
+    print(f"[golden] SLA 实测已写入 {sla_path.relative_to(REPO)}")
 
     if errors:
         print(f"[golden] 失败 {len(errors)} 项", file=sys.stderr)

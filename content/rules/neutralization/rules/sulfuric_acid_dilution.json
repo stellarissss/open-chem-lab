@@ -1,0 +1,70 @@
+{
+  "schema_version": "st.reaction_rule.v1",
+  "rule_id": "sulfuric_acid_dilution",
+  "system": "neutralization",
+  "reaction": {
+    "equation": "H2SO4 = 2H+ + SO4-2",
+    "reactants": {
+      "H2SO4": 1
+    },
+    "products": {
+      "H+": 2,
+      "SO4-2": 1
+    },
+    "net_charge_reactants": 0,
+    "net_charge_products": 0
+  },
+  "equilibrium": {
+    "delta_h_kj_mol": -95.28,
+    "temperature_K": 298.15,
+    "analytic_note": "无限稀释积分热：液相 H2SO4 生成焓 -813.99 与无限稀释态 -909.27 kJ/mol 之差 = -95.28 kJ/mol；工程通用值 -95 kJ/mol。浓硫酸稀释放热远大于强酸强碱中和热（-55.84），是错误操作后果的物理根源。log_k 不用于本规则（浓区非稀区平衡，仅取焓变做热效应）。"
+  },
+  "kinetics": {
+    "fast_equilibrium": true,
+    "note": "稀释与解离瞬时完成；飞溅由界面局部闪沸（传热/密度分层）派生，属表现层现象，不进化学事实层。"
+  },
+  "applicability": {
+    "conditions": [
+      "aqueous",
+      "concentrated_acid_dilution",
+      "25C"
+    ],
+    "temp_range_K": [
+      298.15,
+      373.15
+    ]
+  },
+  "numerics": {
+    "rtol": 1e-06,
+    "atol": 1e-09,
+    "note": "绝热温升为热量守恒闭式计算，无刚性积分。"
+  },
+  "effects": [
+    "temperature_change",
+    "splash"
+  ],
+  "data_class": "fact",
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "NIST-JANAF Chase 1998; Aspen Plus V14 液相生成焓（无限稀释 -909.27 / 液相 -813.99 kJ/mol）",
+    "license": "public domain (NIST)",
+    "version": "JANAF 4th ed. / Aspen V14",
+    "snapshot_date": "2026-11-24",
+    "sha256": null
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-24；生成焓差推导 + 工程通用值 -95 kJ/mol 交叉印证"
+  },
+  "ai_crosscheck": {
+    "method": "enthalpy_of_formation_difference",
+    "record_path": "content/ai-crosscheck/neutralization/record.json",
+    "note": "-909.27-(-813.99)=-95.28 kJ/mol；多源一致（Aspen/NIST/工程手册）"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-24"
+  },
+  "rule_revision": 1
+}

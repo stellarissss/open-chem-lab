@@ -38,6 +38,9 @@ data-thirdparty/
 *.parquet
 *.pb.gz
 *.sqlite
+
+# 运行时测量产物（随机器波动，非签核数据）
+content/ai-crosscheck/neutralization/sla_measurement.json
 *.duckdb
 /uploads/
 /tmp/
