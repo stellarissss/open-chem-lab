@@ -26,7 +26,7 @@ const PRESETS = [
 
 export default function App() {
   const { status, version, protocol, uptimeMs, checkedAt, refresh } = useHealth();
-  const { system, timeline, frameIndex, live, error, loading, loadTimeline, solveLive, clearLive } = useLab();
+  const { system, timeline, frameIndex, live, heat, error, loading, loadTimeline, solveLive, clearLive, solveHeat } = useLab();
   const [preset, setPreset] = useState(1);
 
   useEffect(() => {
@@ -83,6 +83,26 @@ export default function App() {
             </button>
             <button type="button" onClick={clearLive} disabled={!live}>回到回放</button>
           </div>
+
+          <h2>错误操作后果</h2>
+          <p className="muted tiny">浓硫酸稀释：水入酸飞溅 / 酸入水温升。见解剖面板指令溯源。</p>
+          <div className="inspector__actions">
+            <button type="button" onClick={() => void solveHeat("water_into_acid")} disabled={loading}>
+              水入浓酸
+            </button>
+            <button type="button" onClick={() => void solveHeat("acid_into_water")} disabled={loading}>
+              浓酸入水
+            </button>
+          </div>
+          {heat && heat.outcome === "solved" && (
+            <div className={`heat-card ${heat.splash_risk ? "heat-card--splash" : ""}`}>
+              <div>ΔT <strong>{heat.delta_T_K?.toFixed(2)} K</strong> · 终温 {heat.final_temperature_K?.toFixed(2)} K</div>
+              {heat.splash_risk
+                ? <div className="heat-card__warn">⚠ 界面闪沸 · 酸液飞溅（错误操作）</div>
+                : <div className="heat-card__ok">✓ 热量分散 · 无飞溅（正确操作）</div>}
+              <div className="muted tiny">派生指令：{heat.directives.map((d) => d.type).join(", ") || "无"}</div>
+            </div>
+          )}
         </aside>
       </main>
 

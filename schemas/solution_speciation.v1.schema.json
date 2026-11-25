@@ -27,6 +27,10 @@
       "maximum": 1,
       "description": "降级出口的置信度（outcome=degraded 时给出），表现层据此提示"
     },
+    "reason": {
+      "type": "string",
+      "description": "非 solved 出口的诚实原因（如覆盖外物质、活度越界、数值不收敛）；solved 时不给出。兑现 spec-003 降级附原因的承诺"
+    },
     "ionic_strength": { "type": "number", "minimum": 0, "description": "离子强度 mol/L" },
     "pe": { "type": "number", "description": "氧化还原电位 pe（可选）" },
     "temperature_K": { "type": "number", "exclusiveMinimum": 0, "default": 298.15 },

@@ -194,8 +194,19 @@ def main() -> int:
             fail(f"{hz['case_id']}: 终温未高于 {exp['final_temp_gt_K']}")
         if "splash_risk" in exp and heat.get("splash_risk") != exp["splash_risk"]:
             fail(f"{hz['case_id']}: splash_risk={heat.get('splash_risk')} 期望={exp['splash_risk']}")
+        # 现象指令派生（spec-005 飞溅链路）：水入酸须有 splash 指令、酸入水须无。
+        from st_solver_worker import phenomena as _phen
+        dirs = _phen.heat_directives(heat) if "directives" not in heat else heat["directives"]
+        types = [d["type"] for d in dirs]
+        want_splash = exp.get("splash_risk", False)
+        if want_splash and "splash" not in types:
+            fail(f"{hz['case_id']}: splash_risk=true 但未派生 splash 指令，实际 {types}")
+        if not want_splash and "splash" in types:
+            fail(f"{hz['case_id']}: 无飞溅风险却派生了 splash 指令，实际 {types}")
+        if "temperature_change" not in types:
+            fail(f"{hz['case_id']}: 温升用例应派生 temperature_change，实际 {types}")
         print(f"[golden] PASS {hz['case_id']}: ΔT={heat['delta_T_K']}K 终温={heat['final_temperature_K']}K "
-              f"飞溅风险={heat.get('splash_risk')}")
+              f"飞溅风险={heat.get('splash_risk')} 指令={types}")
 
     # 三态出口行为验证
     unknown = solver.solve({"container_id": "x", "substances": [

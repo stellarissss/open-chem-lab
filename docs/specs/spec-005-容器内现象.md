@@ -9,7 +9,8 @@
 ## 范围（大略）
 
 **做**：
-- 容器内现象渲染：以 `wasm-view` 消费 `st.phenomenon.v1` 指令，实现当前体系已派生类别（至少 color_change 连续混色、temperature_change 可视反馈），指令驱动、与求解耗时解耦。
+- 容器内现象渲染：以 `wasm-view` 消费 `st.phenomenon.v1` 指令，实现当前体系已派生类别（至少 color_change 连续混色、temperature_change 可视反馈、`splash` 浓硫酸水入酸飞溅），指令驱动、与求解耗时解耦。
+- 错误操作后果飞溅链路：把 `solve_heat()` 热结果经 `phenomena.heat_directives()` 派生为 `splash` + `temperature_change` 指令——浓硫酸属浓区不进稀区平衡，走 `POST /solve/heat`（非主 `solve()`，后者对浓酸返回 `no_significant_change`）；gateway 经 `POST /api/v1/heat` 代理并经 WS phenomenon 通道下发，表现层只认指令 ID 与物理量。飞溅仅由 `addition_order=water_into_acid` 经安全层派生，两方向整体 ΔT 相同（状态函数）。
 - 现象指令下发：经 gateway 的 WS phenomenon 订阅通道（切片 004 已预留）把指令推到表现层；web-ui 只认现象 ID 与物理量，不认分子与求解细节。
 - 装置建造最小版：实验台取真实器材与药品、摆放、倾倒，产出可求解的物质组合输入；作为现象呈现的操作前提。
 - 与物种面板/时间轴联动：一次操作同时更新现象与物种面板，时间轴回放关键帧时现象可复现。
@@ -23,10 +24,11 @@
 ## 验收标准（大略，可判定）
 
 1. 现象由客观状态派生：指示剂随求解 pH 按 Henderson–Hasselbalch 连续混色（渐变而非阈值跳变），温升有可视反馈；无定量解时不出现象。
-2. 装置建造最小交互可取器材/药品、摆放、倾倒并产出合法求解输入，触发后现象与物种面板同步更新。
-3. 表现固定 60fps 且与求解耗时解耦；WASM 只认 `st.phenomenon.v1` 指令，渲染器与求解器可独立替换。
-4. 时间轴回放关键帧时现象可复现；WS 经 gateway 下发，web-ui 不直连求解库（依赖规则）。
-5. 最小充分证据由测试产物承载（见 `03-DocDD-Process.md` 第四节证据自证原则）。
+2. 错误操作后果飞溅端到端可达：触发「水入浓酸」得 `splash` + `temperature_change` 指令并呈现飞溅；「浓酸入水」同温升但无 splash 指令（黄金用例断言指令类型）。浓硫酸走 `/solve/heat` 专用路径，不进稀区主求解。
+3. 装置建造最小交互可取器材/药品、摆放、倾倒并产出合法求解输入，触发后现象与物种面板同步更新。
+4. 表现固定 60fps 且与求解耗时解耦；WASM 只认 `st.phenomenon.v1` 指令，渲染器与求解器可独立替换。
+5. 时间轴回放关键帧时现象可复现；WS 经 gateway 下发，web-ui 不直连求解库（依赖规则）。
+6. 最小充分证据由测试产物承载（见 `03-DocDD-Process.md` 第四节证据自证原则）。
 
 ## 技术要点
 

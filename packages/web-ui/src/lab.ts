@@ -26,6 +26,7 @@ export interface PanelData {
   temperatureK?: number;
   outcome: string;
   confidence?: number;
+  reason?: string;
   species: SpeciesRow[];
   hiddenReactions: string[];
   phenomena: PhenomenonDirective[];
@@ -37,6 +38,7 @@ export interface PanelData {
 interface SnapshotExtra {
   outcome?: string;
   confidence?: number;
+  reason?: string;
   temperature_K?: number;
   hidden_reactions?: string[];
   phenomena?: PhenomenonDirective[];
@@ -51,6 +53,7 @@ export function fromSpeciation(spec: SolutionSpeciation): PanelData {
     temperatureK: spec.temperature_K,
     outcome: spec.outcome ?? "solved",
     confidence: spec.confidence,
+    reason: spec.reason,
     species: spec.species.map((s) => ({
       name: s.species_id,
       concentration: s.concentration_mol_L,
@@ -74,6 +77,7 @@ export function fromSnapshot(snapshot: SpeciationSnapshot, containerId: string):
     temperatureK: s.temperature_K,
     outcome: s.outcome ?? "solved",
     confidence: s.confidence,
+    reason: s.reason,
     species: (s.species ?? []).map((row) => ({
       name: row.name,
       concentration: row.concentration_mol_l,
@@ -91,6 +95,20 @@ export interface SubstanceInput {
   volume_L: number;
 }
 
+/** 错误操作后果热结果（spec-005 飞溅链路）：物理量 + 派生现象指令。 */
+export interface HeatResult {
+  outcome: string;
+  delta_T_K?: number;
+  final_temperature_K?: number;
+  splash_risk?: boolean;
+  addition_order?: string;
+  heat_released_kj?: number;
+  hazard?: string;
+  directives: PhenomenonDirective[];
+}
+
+export type AdditionOrder = "water_into_acid" | "acid_into_water";
+
 export interface LabState {
   system: ScanSystem;
   timeline: SpeciationTimeline | null;
@@ -99,12 +117,14 @@ export interface LabState {
   loading: boolean;
   error: string | null;
   live: PanelData | null;
+  heat: HeatResult | null;
   loadTimeline: (system: ScanSystem) => Promise<void>;
   setSystem: (system: ScanSystem) => void;
   setFrame: (index: number) => void;
   togglePlay: () => void;
   solveLive: (substances: SubstanceInput[]) => Promise<void>;
   clearLive: () => void;
+  solveHeat: (order: AdditionOrder) => Promise<void>;
 }
 
 export const SYSTEM_LABELS: Record<ScanSystem, string> = {
@@ -120,6 +140,7 @@ export const useLab = create<LabState>((set, get) => ({
   loading: false,
   error: null,
   live: null,
+  heat: null,
 
   loadTimeline: async (system) => {
     set({ loading: true, error: null });
@@ -172,4 +193,29 @@ export const useLab = create<LabState>((set, get) => ({
   },
 
   clearLive: () => set({ live: null }),
+
+  solveHeat: async (order) => {
+    set({ loading: true, error: null });
+    // 浓硫酸 18.4M × 54.4mL ≈ 1mol + 水 1L（与已签核黄金用例同形）。
+    const body = {
+      container_id: "hazard-beaker",
+      addition_order: order,
+      substances: [
+        { compound_id: "sulfuric_acid_conc", concentration_mol_L: 18.4, volume_L: 0.0544 },
+        { compound_id: "water", concentration_mol_L: 1.0, volume_L: 1.0 },
+      ],
+    };
+    try {
+      const res = await fetch("/api/v1/heat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const heat = (await res.json()) as HeatResult;
+      set({ heat, loading: false });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : "热效应求解失败", loading: false });
+    }
+  },
 }));

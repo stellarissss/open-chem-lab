@@ -19,6 +19,9 @@ from typing import Any
 
 from . import phenomena, solver, timeline
 
+# 服务版本与全仓 package.json 对齐（0.1.0）；可由环境覆盖，供缓存键与排障核对。
+SERVICE_VERSION = os.environ.get("SERVICE_VERSION", "0.1.0")
+
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
@@ -40,7 +43,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/health":
-            self._send(200, {"status": "ok", "service": "solver-worker", "version": "0.2.0"})
+            self._send(200, {"status": "ok", "service": "solver-worker", "version": SERVICE_VERSION})
         else:
             self._send(404, {"error": "not found"})
 
@@ -59,11 +62,17 @@ class Handler(BaseHTTPRequestHandler):
                 directives = phenomena.derive(spec, payload.get("timestamp_ms", 0))
                 self._send(200, directives)
             elif self.path == "/solve/heat":
-                self._send(200, solver.solve_heat(
+                heat = solver.solve_heat(
                     payload.get("compound_ids", []),
                     substances=payload.get("substances"),
                     addition_order=payload.get("addition_order", "acid_into_water"),
-                ))
+                )
+                # 错误操作后果的现象指令随热结果一并返回（spec-005 飞溅链路）：
+                # splash 由加入顺序派生、temperature_change 由温升派生。
+                heat["directives"] = phenomena.heat_directives(
+                    heat, container_id=payload.get("container_id", "heat-beaker"),
+                    timestamp_ms=payload.get("timestamp_ms", 0))
+                self._send(200, heat)
             elif self.path == "/solve/timeline":
                 ratios = payload.get("ratios")
                 spec, solve_calls = timeline.build_timeline(
@@ -72,7 +81,9 @@ class Handler(BaseHTTPRequestHandler):
                     container_id=payload.get("container_id", "titration-beaker"),
                 )
                 # 求解调用计数随响应返回，供缓存复用实证（关键帧数 == solve_calls）。
-                self._send(200, {"timeline": spec, "solve_calls": solve_calls})
+                # solver_version 供 gateway 内容寻址缓存键纳入 solver_ver 维度。
+                self._send(200, {"timeline": spec, "solve_calls": solve_calls,
+                                 "solver_version": SERVICE_VERSION})
             else:
                 self._send(404, {"error": "not found"})
         except Exception as exc:  # 诚实降级，不把内部异常当科学结论

@@ -1,13 +1,13 @@
 {
   "record_id": "neutralization-crosscheck-001",
   "system": "neutralization",
-  "date": "2026-11-22",
+  "date": "2026-11-24",
   "method": "authoritative-source + analytic-solution crosscheck",
   "review": {
     "status": "signed_off",
     "reviewer": "stellarisssa (user)",
-    "date": "2026-11-22",
-    "note": "用户签核全部候选数值进事实层"
+    "date": "2026-11-24",
+    "note": "用户签核全部候选数值进事实层；2026-11-24 追加签核 NIST-JANAF 浓硫酸稀释焓 -95.28 kJ/mol"
   },
   "authoritative_sources": [
     {
@@ -170,7 +170,7 @@
   ],
   "notes": [
     "强酸（HCl/HNO3）与强碱（NaOH/KOH）在水中完全解离，不设有限 pKa/Kb，避免写入无意义数值。",
-    "phreeqpython 动态求解调用属 spec-003 范围，本切片不做；对拍采用解析解。",
+    "解析解作独立对照；主引擎 phreeqpython 活度值回指权威源 .dat 快照，二者互为自证。",
     "safety 层 GHS 代码来自 PubChem 构建期快照，只抽事实性结论，标签来源见各物质卡。",
     "指示剂（酚酞/甲基橙）pKa 取自中科大化学实验中心指示剂表与 Bates(1964)，多源交叉一致；变色区间由 pKa±1 派生，表现层按 Henderson–Hasselbalch 连续混色，供 spec-003 涌现现象基座使用。",
     "2026-11-24：新增浓硫酸物质卡与稀释规则；飞溅（水入酸）由加入顺序经安全层派生，整体温升方向无关（状态函数）。"

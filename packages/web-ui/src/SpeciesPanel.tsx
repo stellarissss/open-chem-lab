@@ -52,9 +52,12 @@ export default function SpeciesPanel({ data, systemLabel, loading, error, timest
         <p className="notice">当前条件下，事实层覆盖范围内无明显变化（合法结论）。</p>
       )}
 
+      {degraded && data.reason && (
+        <p className="muted tiny">降级原因：{data.reason}</p>
+      )}
       <div className="metrics">
-        <div className="metric"><span>pH（活度口径）</span><strong>{data.ph.toFixed(4)}</strong></div>
-        <div className="metric"><span>离子强度</span><strong>{data.ionicStrength.toFixed(4)}</strong><small>mol/L</small></div>
+        <div className="metric"><span>pH（活度口径）</span><strong>{data.outcome === "solved" ? data.ph.toFixed(4) : "—"}</strong></div>
+        <div className="metric"><span>离子强度</span><strong>{data.outcome === "solved" ? data.ionicStrength.toFixed(4) : "—"}</strong><small>mol/L</small></div>
         <div className="metric"><span>温度</span><strong>{data.temperatureK != null ? data.temperatureK.toFixed(2) : "—"}</strong><small>K</small></div>
         <div className="metric"><span>回放时刻</span><strong>{timestamp != null ? `${(timestamp / 1000).toFixed(0)}s` : "—"}</strong></div>
       </div>

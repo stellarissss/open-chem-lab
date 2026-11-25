@@ -30,6 +30,10 @@ export interface SolutionSpeciation {
    */
   confidence?: number;
   /**
+   * 非 solved 出口的诚实原因（如覆盖外物质、活度越界、数值不收敛）；solved 时不给出。兑现 spec-003 降级附原因的承诺
+   */
+  reason?: string;
+  /**
    * 离子强度 mol/L
    */
   ionic_strength: number;

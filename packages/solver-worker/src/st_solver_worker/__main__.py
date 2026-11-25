@@ -39,7 +39,8 @@ def main() -> int:
 
     signal.signal(signal.SIGTERM, _stop)
     signal.signal(signal.SIGINT, _stop)
-    LOG.info("solver-worker 0.2.0 已启动（HTTP 求解端点用 --http 开启）")
+    LOG.info("solver-worker %s 已启动（HTTP 求解端点用 --http 开启）",
+             os.environ.get("SERVICE_VERSION", "0.1.0"))
     tick = 0
     while _running:
         tick += 1

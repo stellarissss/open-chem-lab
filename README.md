@@ -45,7 +45,7 @@ python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
 | [AGENTS.md](AGENTS.md) | AI 第一站：现场指针、当前焦点、硬约束 |
 | [docs/01-Architecture.md](docs/01-Architecture.md) | **唯一技术真理源**：产品定义、技术栈、数据模型、红线、验证原则 |
 | [docs/02-Roadmap.md](docs/02-Roadmap.md) | 当前进度、阶段、薄切片清单、下一步 |
-| [docs/03-DocDD-Process.md](docs/03-DocDD-Process.md) | 开发流程：任务闭环、spec 写法、无强制门禁、变更分级 |
+| [docs/03-DocDD-Process.md](docs/03-DocDD-Process.md) | 开发流程：任务闭环、spec 写法、任务内最小验证 + CI 强制门禁、变更分级 |
 | [docs/specs/](docs/specs/) | 切片规格：已完成 spec + 下一切片粗稿 |
 | [CREDITS.md](CREDITS.md) / [NOTICE](NOTICE) | 开源依赖致谢、逐项许可证、LGPL 显著声明 |
 | [deploy/README-windows.md](deploy/README-windows.md) | Windows / WSL2 部署指南 |
@@ -54,7 +54,7 @@ python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
 
 - **本项目代码**：[LGPL-3.0](LICENSE)（`LICENSE` + `LICENSE.GPL-3` + `LICENSE.LGPL-3` 三份构成完整交付）。第三方组件与数据各保留原许可证，见 [CREDITS.md](CREDITS.md)、[NOTICE](NOTICE)、`assets/attribution/`。
 - **库可替换**：LGPL 库以动态链接、运行时可替换形态接入，允许自用修改、替换与逆向调试。
-- **科学准确性**：事实层以数值零错为红线；本产品用于教学与自由探索，**不是实验级数据源**；界面常驻「现实操作勿模仿」。
+- **科学准确性**：事实层以数值零错为红线；本产品是以娱乐与自由探索为主、兼有学习价值的科学仿真软件，**不是实验级数据源**；界面常驻「现实操作勿模仿」。教学功能为长线附加内容，由使用方教师承担。
 - **商标与对标**：NB实验室/NOBOOK 为北京乐步教育科技有限公司产品与商标。本项目为独立开源实现，**与其无关联无背书**，不使用其代码/素材/界面/文案/商标；对标措辞与合规口径见 [docs/01-Architecture.md](docs/01-Architecture.md) 第七节。
 - 合规分析为工程判断、非法律意见；商业化前法务确认事项见 [CREDITS.md](CREDITS.md)。
 

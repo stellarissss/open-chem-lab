@@ -35,14 +35,18 @@ async function callSolver<T>(path: string, body: unknown): Promise<T> {
  * 时间轴缓存：键 = 体系名。扫描定义在 solver 侧固定（01 第五节「内容寻址键」），
  * 同一体系的 timeline_id 由 sha256(canonical(scan_def)+ruleset_version) 派生。
  * 命中即完全跳过 solver 调用——响应头 x-cache=hit / x-solve-calls=0 供复用实证。
+ * 失效由 solver_ver / ruleset_ver 双版本驱动（01 §5.2）：命中时比对 solver_version，
+ * 版本漂移即逐出重算；ruleset 变更体现为 timeline_id 变化，由 web 侧按 id 识别。
  */
-const timelineCache = new Map<string, { timeline: SpeciationTimeline; solve_calls: number }>();
+const timelineCache = new Map<string, { timeline: SpeciationTimeline; solve_calls: number; solverVersion: string }>();
+let lastSolverVersion = "unknown";
 
 // 健康检查：前端壳页与 Compose healthcheck 共用。返回体保持最小、稳定。
 app.get("/api/v1/health", async () => ({
   status: "ok" as const,
   service: "gateway",
   version: SERVICE_VERSION,
+  solver_version: lastSolverVersion,
   protocol: PHENOMENON_SCHEMA_VERSION,
   uptime_ms: Date.now() - startedAt,
 }));
@@ -57,6 +61,33 @@ app.post("/api/v1/speciation", async (request, reply) => {
     const spec = await callSolver<SolutionSpeciation>("/solve", body);
     reply.header("x-protocol", SOLUTION_SPECIATION_SCHEMA_VERSION);
     return reply.send(spec);
+  } catch (err) {
+    request.log.error(err);
+    return reply.code(502).send({ error: "solver unavailable" });
+  }
+});
+
+// 错误操作后果（浓硫酸稀释）：代理 solver 热结果 + 派生现象指令（spec-005 飞溅链路）。
+// 返回体含 heat 字段（ΔT / splash_risk）与 directives（splash / temperature_change）。
+// web-ui 只认指令 ID 与物理量，求解细节不外泄。
+function broadcastPhenomena(directives: PhenomenonDirective[]): void {
+  const payload = JSON.stringify({ type: "phenomenon", directives });
+  for (const sub of phenomenonSubscribers) {
+    try { sub.send(payload); } catch { /* 断连订阅者由 close 事件清理 */ }
+  }
+}
+
+app.post("/api/v1/heat", async (request, reply) => {
+  try {
+    const body = request.body as Record<string, unknown> | null;
+    if (!body || !Array.isArray(body.substances)) {
+      return reply.code(400).send({ error: "expected { container_id?, addition_order?, substances: [...] }" });
+    }
+    const heat = await callSolver<Record<string, unknown> & { directives: PhenomenonDirective[] }>(
+      "/solve/heat", body);
+    reply.header("x-protocol", PHENOMENON_SCHEMA_VERSION);
+    if (heat.directives?.length) broadcastPhenomena(heat.directives);
+    return reply.send(heat);
   } catch (err) {
     request.log.error(err);
     return reply.code(502).send({ error: "solver unavailable" });
@@ -84,7 +115,7 @@ app.get("/api/v1/timeline", async (request, reply) => {
   reply.header("x-protocol", TIMELINE_SCHEMA_VERSION);
 
   const cached = timelineCache.get(system);
-  if (cached) {
+  if (cached && cached.solverVersion === lastSolverVersion) {
     reply.header("x-cache", "hit");
     reply.header("x-solve-calls", "0");
     return reply.send(cached.timeline);
@@ -94,8 +125,15 @@ app.get("/api/v1/timeline", async (request, reply) => {
     const envelope = await callSolver<{
       timeline: SpeciationTimeline;
       solve_calls: number;
+      solver_version?: string;
     }>("/solve/timeline", { system });
-    timelineCache.set(system, envelope);
+    const solverVersion = envelope.solver_version ?? "unknown";
+    lastSolverVersion = solverVersion;
+    timelineCache.set(system, {
+      timeline: envelope.timeline,
+      solve_calls: envelope.solve_calls,
+      solverVersion,
+    });
     reply.header("x-cache", "miss");
     reply.header("x-solve-calls", String(envelope.solve_calls));
     return reply.send(envelope.timeline);

@@ -1,6 +1,6 @@
 # 构建 + 依赖许可证门禁；文档合规门禁在 docs.yml。
-# 数值零错/golden-cases/schema-validate 按切片接入。
-# 按 03-DocDD-Process.md：无强制门禁文化，CI 是最小充分证据，不是开发阻塞。
+# 数值零错/golden-cases/schema-validate 已接入（见 01-Architecture.md §7.2）。
+# 按 03-DocDD-Process.md §四：任务内只跑最小充分证据，本 CI 是 push/PR 强制门禁，红灯阻塞合并。
 name: ci
 
 on:

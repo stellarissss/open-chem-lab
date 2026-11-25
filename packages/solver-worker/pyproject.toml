@@ -1,6 +1,6 @@
 [project]
 name = "st-solver-worker"
-version = "0.2.0"
+version = "0.1.0"
 description = "动态定量求解 worker（中和体系：phreeqpython 主引擎 + 活度域 + chempy 对拍）"
 requires-python = ">=3.11,<3.12"
 # spec-003 锁定求解链依赖；版本与环境包 solver-venv 一致（离线可还原，零外网下载）。

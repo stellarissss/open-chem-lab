@@ -87,6 +87,9 @@ def _empty_outcome(container_id: str, ruleset_version: str, outcome: str,
     }
     if confidence is not None:
         result["confidence"] = confidence
+    # 诚实降级：把原因写进契约输出（spec-003 承诺 degraded 附 confidence 与原因）。
+    if reason:
+        result["reason"] = reason
     return result
 
 

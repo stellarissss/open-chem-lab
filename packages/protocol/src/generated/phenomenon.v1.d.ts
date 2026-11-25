@@ -57,11 +57,18 @@ export interface PhenomenonDirective {
  */
 export interface StateTrigger {
   /**
-   * 触发所用的可观测量：ph / temperature_K / species_concentration / ionic_strength / indicator_ratio 等
+   * 触发所用的可观测量：ph / temperature_K / species_concentration / ionic_strength / indicator_ratio / addition_order 等
    */
-  observable: "ph" | "temperature_K" | "species_concentration" | "ionic_strength" | "indicator_ratio" | "time_ms";
+  observable:
+    | "ph"
+    | "temperature_K"
+    | "species_concentration"
+    | "ionic_strength"
+    | "indicator_ratio"
+    | "time_ms"
+    | "addition_order";
   /**
-   * 取数来源：solution_speciation（求解输出）或 apparatus（器材状态）
+   * 取数来源：solution_speciation（求解输出）或 apparatus（器材/操作状态，如倾倒顺序）
    */
   source: "solution_speciation" | "apparatus";
   /**

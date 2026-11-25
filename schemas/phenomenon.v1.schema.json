@@ -60,12 +60,12 @@
       "properties": {
         "observable": {
           "type": "string",
-          "description": "触发所用的可观测量：ph / temperature_K / species_concentration / ionic_strength / indicator_ratio 等",
-          "enum": ["ph", "temperature_K", "species_concentration", "ionic_strength", "indicator_ratio", "time_ms"]
+          "description": "触发所用的可观测量：ph / temperature_K / species_concentration / ionic_strength / indicator_ratio / addition_order 等",
+          "enum": ["ph", "temperature_K", "species_concentration", "ionic_strength", "indicator_ratio", "time_ms", "addition_order"]
         },
         "source": {
           "type": "string",
-          "description": "取数来源：solution_speciation（求解输出）或 apparatus（器材状态）",
+          "description": "取数来源：solution_speciation（求解输出）或 apparatus（器材/操作状态，如倾倒顺序）",
           "enum": ["solution_speciation", "apparatus"]
         },
         "species_id": { "type": "string", "description": "observable=species_concentration 时指定的物种 ID" },

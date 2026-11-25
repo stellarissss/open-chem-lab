@@ -122,3 +122,61 @@ def derive(speciation: dict[str, Any], timestamp_ms: int = 0,
     if temp:
         out.append(temp)
     return out
+
+
+def heat_directives(heat: dict[str, Any], container_id: str = "heat-beaker",
+                    timestamp_ms: int = 0) -> list[dict[str, Any]]:
+    """从错误操作后果热效应派生 st.phenomenon.v1 指令（spec-005 飞溅链路）。
+
+    事实层热结果（solve_heat / dilution_heat）不是 solution_speciation（浓酸属浓区
+    不进稀区平衡），故走独立派生入口，触发来源标为 apparatus（操作状态）：
+
+    - splash：仅水入浓酸时 splash_risk=true 派生；intensity 由绝热温升归一化
+      （表现层近似，不进事实层）；trigger.observable=addition_order。
+    - temperature_change：温升超阈值时派生，与溶液温度指令同构。
+    无定量热解（outcome != solved）不派生任何指令（诚实降级）。
+    """
+    if heat.get("outcome") != "solved":
+        return []
+    out: list[dict[str, Any]] = []
+    delta_T = float(heat.get("delta_T_K", 0.0))
+
+    if heat.get("splash_risk"):
+        out.append({
+            "schema_version": "st.phenomenon.v1",
+            "directive_id": f"{container_id}-splash-{timestamp_ms}",
+            "container_id": container_id,
+            "type": "splash",
+            "timestamp_ms": timestamp_ms,
+            "intensity": round(min(1.0, delta_T / 40.0), 6),
+            "physics": {
+                "addition_order": heat.get("addition_order"),
+                "delta_T_K": round(delta_T, 4),
+                "heat_released_kj": heat.get("heat_released_kj"),
+            },
+            "trigger": {
+                "observable": "addition_order",
+                "source": "apparatus",
+                "condition": f"addition_order={heat.get('addition_order')}",
+                "derivation": "flash_boiling",
+            },
+        })
+
+    if delta_T >= 0.5:
+        out.append({
+            "schema_version": "st.phenomenon.v1",
+            "directive_id": f"{container_id}-temperature-{timestamp_ms}",
+            "container_id": container_id,
+            "type": "temperature_change",
+            "timestamp_ms": timestamp_ms,
+            "intensity": round(min(1.0, delta_T / 40.0), 6),
+            "physics": {"temperature_K": heat.get("final_temperature_K"),
+                        "delta_K": round(delta_T, 4)},
+            "trigger": {
+                "observable": "temperature_K",
+                "source": "apparatus",
+                "condition": f"delta_K={delta_T:.4f}",
+                "derivation": "delta",
+            },
+        })
+    return out
