@@ -9,16 +9,16 @@
 
 | 上游 | 许可 | 转换 / 用途 |
 |---|---|---|
-| `tikz-chemlab`（LaTeX/TikZ，13 个器材宏） | LPPL-1.3c | `.tex` → `lualatex` PDF → `pdftocairo -svg` → `svgo` → 分层 SVG（**只转译编译输出物**）；实验台写实主资产 |
+| `tikz-chemlab`（LaTeX/TikZ，13 个器材宏） | LPPL-1.3c | `.tex` → `pdflatex` PDF → `pdftocairo -svg` → `svgo` → 分层 SVG（**只转译编译输出物**）；实验台写实主资产；产物已入库 `assets/apparatus/` |
 | `@itkdm/open-lab-components`（210 组件 / 化学相关 35 个，HTML fragment 库） | MIT | 无需转换；CSS 变量注入或 Web Component 封装；仅用于图鉴 / 资料卡 / 器材列表缩略图，不进写实主视图 |
 
 **只转译编译产物、不 fork 源码**是不可绕过的第一原则（LPPL 1.3c Clause 1）。
 
 ## 转换链规范
 
-统一使用 `lualatex → PDF → pdftocairo -svg → svgo`。DVI / dvisvgm 路径不可用（TikZ/PGF 在 DVI 模式注入 PostScript specials；dvisvgm 不支持 Ghostscript 10.02.1）。
+统一使用 `pdflatex → PDF → pdftocairo -svg → svgo`。**引擎必须是 pdflatex**：tikz-chemlab 的 `\tkzGlassTypeLookup` 依赖 pdfTeX 原语 `\pdfstrcmp`，lualatex 实测触发 `Undefined control sequence`（glassType 相关宏全挂），故不走 lualatex。DVI / dvisvgm 路径同样不可用（TikZ/PGF 在 DVI 模式注入 PostScript specials；dvisvgm 不支持 Ghostscript 10.02.1）。
 
-产物为纯 `<path>`、零 `<text>` / 零外部字体，保留 `<g>` 分组与 `clipPath`（液位可控）。宏包源码与 TeX 中间产物只在构建期存在，不入库。
+产物为纯 `<path>`、零 `<text>` / 零外部字体，保留 `<g>` 分组与 `clipPath`（液位可控）。宏包源码与 TeX 中间产物只在构建期存在，不入库。构建期需把宏包三文件（`tikz-chemlab.sty` / `.tex` / `Obj.tex`，v1.0.0）置于临时目录并通过 `TEXINPUTS` 指向；**产物已在 `assets/apparatus/`（13 个器材，320KB），日常开发直接用 SVG，无需 TeX Live**。
 
 ## 硬约束
 
