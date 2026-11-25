@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: 安装 uv
-        run: pip install uv==0.9.0
+        run: pip install uv==0.10.0
       - name: 按 lock 安装求解链（离线可复现版本）
         working-directory: packages/solver-worker
         run: uv sync --frozen
