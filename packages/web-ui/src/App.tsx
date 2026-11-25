@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useHealth } from "./health";
 import SpeciesPanel from "./SpeciesPanel";
 import Timeline from "./Timeline";
+import LabBench from "./LabBench";
+import VesselView from "./VesselView";
 import { fromSnapshot, SYSTEM_LABELS, useLab } from "./lab";
+import type { PhenomenonDirective } from "@st/protocol";
 import "./style.css";
 
 /** 最小直接求解入口：演示 gateway 物种读取接口，配比走已签核中和体系。 */
@@ -26,7 +29,11 @@ const PRESETS = [
 
 export default function App() {
   const { status, version, protocol, uptimeMs, checkedAt, refresh } = useHealth();
-  const { system, timeline, frameIndex, live, heat, error, loading, loadTimeline, solveLive, clearLive, solveHeat } = useLab();
+  const {
+    system, timeline, frameIndex, live, heat, error, loading,
+    phenomenonSource, wsDirectives,
+    loadTimeline, solveLive, clearLive, solveHeat,
+  } = useLab();
   const [preset, setPreset] = useState(1);
 
   useEffect(() => {
@@ -42,17 +49,40 @@ export default function App() {
   const frame = timeline?.keyframes[frameIndex];
   const panelData = live ?? (frame ? fromSnapshot(frame.speciation, frame.container_id) : null);
 
+  // 现象来源优先级：live 倾倒结果 > WS 实时推送 > 时间轴回放帧 > 热效应结果。
+  // 三者都喂给同一 VesselView 渲染管线（st.phenomenon.v1 指令驱动）。
+  const frameDirectives: PhenomenonDirective[] =
+    (frame?.speciation as { phenomena?: PhenomenonDirective[] } | undefined)?.phenomena ?? [];
+  let directives: PhenomenonDirective[];
+  let solvable: boolean;
+  if (phenomenonSource === "live" && heat) {
+    directives = heat.directives ?? [];
+    solvable = heat.outcome === "solved";
+  } else if (live && phenomenonSource !== "ws") {
+    directives = live.phenomena ?? [];
+    solvable = live.outcome === "solved";
+  } else if (phenomenonSource === "ws" && wsDirectives.length) {
+    directives = wsDirectives;
+    solvable = true;
+  } else {
+    directives = frameDirectives;
+    solvable = (panelData?.outcome ?? "") === "solved";
+  }
+
   const label = status === "ok" ? "后端已连接" : status === "error" ? "后端不可用" : "检测中…";
 
   return (
     <div className="shell">
       <header className="topbar">
-        <span className="brand">ST Crucible · 物种面板</span>
+        <span className="brand">ST Crucible · 实验台</span>
         <span className={`badge badge--${status}`}>● {label}</span>
       </header>
 
       <main className="stage">
         <div className="stage__left">
+          <LabBench />
+          <VesselView directives={directives} solvable={solvable}
+            label={phenomenonSource === "timeline" ? "时间轴复现" : phenomenonSource === "ws" ? "WS 实时" : "实验台容器"} />
           <Timeline timeline={timeline} />
           <SpeciesPanel
             data={panelData}

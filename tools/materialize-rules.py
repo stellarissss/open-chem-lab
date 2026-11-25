@@ -23,6 +23,7 @@ def main() -> int:
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
     rules_dir = root / "content" / "rules"
     compounds: list[dict] = []
+    apparatus: list[dict] = []
     rules: list[dict] = []
     systems: set[str] = set()
 
@@ -30,6 +31,9 @@ def main() -> int:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "compounds" in path.parts:
             compounds.append(data)
+        elif "apparatus" in path.parts:
+            # 器材参数单一事实源（spec-005 装置建造）：驱动实验台容量/物理约束。
+            apparatus.append(data)
         elif "rules" in path.parts:
             rules.append(data)
             if data.get("system"):
@@ -40,6 +44,7 @@ def main() -> int:
         "ruleset_version": "neutralization-r1",
         "systems": sorted(systems),
         "compounds": sorted(compounds, key=lambda c: c["compound_id"]),
+        "apparatus": sorted(apparatus, key=lambda a: a["apparatus_id"]),
         "reaction_rules": sorted(rules, key=lambda r: r["rule_id"]),
     }
     body = canonical(payload)
@@ -51,7 +56,7 @@ def main() -> int:
     (out / "ruleset.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    print(f"[materialize] {len(compounds)} compounds, {len(rules)} rules, {len(systems)} systems")
+    print(f"[materialize] {len(compounds)} compounds, {len(apparatus)} apparatus, {len(rules)} rules, {len(systems)} systems")
     print(f"[materialize] ruleset_sha256={digest}")
     print(f"[materialize] -> {out / 'ruleset.json'}")
     return 0

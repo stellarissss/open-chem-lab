@@ -1,0 +1,27 @@
+{
+  "name": "@st/wasm-view",
+  "version": "0.1.0",
+  "private": true,
+  "description": "st.phenomenon.v1 指令 → 表现参数的纯函数变换（Rust→WASM 优先，TS 等价 fallback）",
+  "type": "module",
+  "main": "./ts/index.ts",
+  "types": "./ts/index.ts",
+  "exports": {
+    ".": {
+      "types": "./ts/index.ts",
+      "import": "./ts/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf pkg target",
+    "test:rust": "cargo test --manifest-path Cargo.toml"
+  },
+  "dependencies": {
+    "@st/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

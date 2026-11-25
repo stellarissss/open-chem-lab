@@ -80,6 +80,27 @@ select { width: 100%; padding: 6px 8px; border: 1px solid #d8d0c0; border-radius
 .heat-card__ok { color: #2f6b4f; font-weight: 700; margin-top: 4px; }
 @keyframes splash-pulse { 0% { transform: translateX(0); } 25% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
 
+/* spec-005 实验台装置建造 + 容器内现象 */
+.bench-grid { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 14px; }
+.bench-rack h3 { margin: 10px 0 6px; font-size: 12px; color: #8a8272; }
+.reagent-list { display: flex; flex-direction: column; gap: 4px; }
+.reagent { text-align: left; font-size: 11px; padding: 5px 8px; background: #fffdf8; color: #23201b; border-color: #d8d0c0; }
+.reagent--active { background: #1d2b25; color: #f4f1ea; border-color: #1d2b25; }
+.pour-controls { margin: 10px 0; display: flex; flex-direction: column; gap: 5px; }
+.pour-controls label { font-size: 11px; color: #8a8272; }
+.pour-controls input[type="range"] { width: 100%; accent-color: #2f6b4f; }
+.apparatus-palette { display: flex; flex-wrap: wrap; gap: 5px; }
+.apparatus-palette button { font-size: 11px; padding: 5px 8px; }
+.bench-stage { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 12px;
+  min-height: 150px; padding: 12px; background: repeating-linear-gradient(0deg,#f1ede3,#f1ede3 23px,#e9e4d8 24px);
+  border: 1px solid #d8d0c0; border-radius: 8px; }
+.bench-slot { display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: #fffdf8; border: 1px solid #d8d0c0; border-radius: 8px; padding: 8px; }
+.bench-slot__meta { display: flex; flex-direction: column; align-items: center; font-size: 12px; }
+.bench-slot button { font-size: 11px; padding: 4px 10px; }
+.vessel-host { width: 100%; display: flex; justify-content: center; min-height: 260px; }
+.vessel-host canvas { border-radius: 8px; }
+
 .footer { padding: 10px 20px; font-size: 12px; color: #8a8272; text-align: center; }
 
 @media (max-width: 720px) {

@@ -1,0 +1,21 @@
+[package]
+name = "st-wasm-view"
+version = "0.1.0"
+edition = "2021"
+description = "st.phenomenon.v1 指令 → 表现参数的纯函数变换（不认分子、不认求解细节）"
+license = "LGPL-3.0-only"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2.130"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false

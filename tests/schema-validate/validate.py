@@ -91,6 +91,28 @@ def guard_compound(data: dict, path: Path) -> None:
         fail(f"护栏拒绝 {path.name}: rule_revision 须 >=1")
 
 
+def guard_apparatus(data: dict, path: Path) -> None:
+    """器材护栏：apparatus_id 小写 snake_case 且与文件名一致；id 唯一由 collect 层保证。"""
+    aid = data.get("apparatus_id", "")
+    if not re.fullmatch(r"[a-z0-9_]+", aid):
+        fail(f"护栏拒绝 {path.name}: apparatus_id 须小写 snake_case，实际 {aid!r}")
+    if aid != path.stem:
+        fail(f"护栏拒绝 {path.name}: apparatus_id={aid!r} 与文件名 {path.stem!r} 不一致")
+    conf = data.get("confidence", {}).get("level")
+    review = data.get("review", {}).get("status")
+    if conf == "ml_guess":
+        fail(f"护栏拒绝 {path.name}: confidence=ml_guess 禁用")
+    if conf == "verified" and review != "signed_off":
+        fail(f"护栏拒绝 {path.name}: verified 器材须 signed_off")
+    if data.get("rule_revision", 0) < 1:
+        fail(f"护栏拒绝 {path.name}: rule_revision 须 >=1")
+    if data.get("capacity_mL", 0) <= 0:
+        fail(f"护栏拒绝 {path.name}: capacity_mL 须 > 0")
+    grads = data.get("graduations", [])
+    if any(g > data["capacity_mL"] for g in grads):
+        fail(f"护栏拒绝 {path.name}: 刻度值超出容量")
+
+
 ELEMENT_RE = re.compile(r"([A-Z][a-z]?)(\d*)")
 
 
@@ -180,9 +202,12 @@ def main() -> int:
 
     for path in sorted(rules_dir.rglob("*.json")):
         rel = path.relative_to(root)
-        # 由文件名前缀/目录判断类型：compounds/ 下为 compound，rules/ 下为 reaction_rule
+        # 由目录判断类型：compounds/ 下为 compound，apparatus/ 下为 apparatus，
+        # rules/ 下为 reaction_rule（注意 apparatus 判断须在 rules 之前，二者同属 rules/ 子树）。
         if "compounds" in path.parts:
             kind = "compound"
+        elif "apparatus" in path.parts:
+            kind = "apparatus"
         elif "rules" in path.parts:
             kind = "reaction_rule"
         else:
@@ -194,6 +219,8 @@ def main() -> int:
         checked[kind] += 1
         if kind == "compound":
             guard_compound(data, path)
+        elif kind == "apparatus":
+            guard_apparatus(data, path)
         else:
             guard_rule(data, path, seen_rules)
 

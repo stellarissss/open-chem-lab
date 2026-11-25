@@ -1,0 +1,29 @@
+{
+  "schema_version": "st.apparatus.v1",
+  "apparatus_id": "dropper",
+  "names": { "zh": "胶头滴管", "en": "Dropper" },
+  "type": "dropper",
+  "capacity_mL": 2,
+  "graduations": [],
+  "max_temp_K": 323.15,
+  "sealable": false,
+  "asset": "assets/apparatus/dropper.svg",
+  "physics": {
+    "wall_thickness_mm": 0.8,
+    "thermal_shock_sensitive": false,
+    "max_pressure_kPa": 101.3,
+    "notes": "逐滴滴加；胶头不可接触反应液"
+  },
+  "source": {
+    "kind": "asset_spec",
+    "ref": "实验室常规胶头滴管规格",
+    "endpoint": null,
+    "license": null,
+    "version": null,
+    "snapshot_date": "2026-11-25",
+    "sha256": null
+  },
+  "confidence": { "level": "verified", "note": "标准实验器材规格" },
+  "review": { "status": "signed_off", "reviewer": "stellarisssa", "date": "2026-11-25", "ai_crosscheck": null },
+  "rule_revision": 1
+}

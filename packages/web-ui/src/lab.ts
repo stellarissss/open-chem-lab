@@ -109,6 +109,40 @@ export interface HeatResult {
 
 export type AdditionOrder = "water_into_acid" | "acid_into_water";
 
+/** 实验台可取的药品（引用 content 中已签核可玩物质；id 与 ruleset compound_id 对齐）。 */
+export interface ReagentOption {
+  compound_id: string;
+  label: string;
+  default_concentration_mol_L: number;
+  /** 浓硫酸为危险试剂，走 /api/v1/heat 专用路径，不进稀区主求解。 */
+  hazard?: boolean;
+}
+
+export const REAGENTS: ReagentOption[] = [
+  { compound_id: "hcl", label: "盐酸 HCl", default_concentration_mol_L: 0.1 },
+  { compound_id: "naoh", label: "氢氧化钠 NaOH", default_concentration_mol_L: 0.1 },
+  { compound_id: "acetic_acid", label: "乙酸 CH₃COOH", default_concentration_mol_L: 0.1 },
+  { compound_id: "koh", label: "氢氧化钾 KOH", default_concentration_mol_L: 0.1 },
+  { compound_id: "phenolphthalein", label: "酚酞（指示剂）", default_concentration_mol_L: 0.001 },
+  { compound_id: "methyl_orange", label: "甲基橙（指示剂）", default_concentration_mol_L: 0.001 },
+  { compound_id: "sulfuric_acid_conc", label: "浓硫酸 H₂SO₄（危险）", default_concentration_mol_L: 18.4, hazard: true },
+  { compound_id: "water", label: "蒸馏水 H₂O", default_concentration_mol_L: 1.0 },
+];
+
+/** 实验台摆放的一件器材（apparatus 单一事实源引用的运行时实例）。 */
+export interface ApparatusSlot {
+  slot_id: string;
+  apparatus_id: string;
+  label: string;
+  x: number;
+  y: number;
+  /** 当前容器内的物质（倾倒追加）。 */
+  contents: SubstanceInput[];
+}
+
+/** 现象来源：live 求解 / WS 推送 / 时间轴回放。三者走同一渲染管线。 */
+export type PhenomenonSource = "none" | "live" | "ws" | "timeline";
+
 export interface LabState {
   system: ScanSystem;
   timeline: SpeciationTimeline | null;
@@ -125,12 +159,31 @@ export interface LabState {
   solveLive: (substances: SubstanceInput[]) => Promise<void>;
   clearLive: () => void;
   solveHeat: (order: AdditionOrder) => Promise<void>;
+  // spec-005 装置建造 + WS 现象下发
+  slots: ApparatusSlot[];
+  selectedReagent: string;
+  selectedVolume_L: number;
+  additionOrder: AdditionOrder;
+  phenomenonSource: PhenomenonSource;
+  wsStatus: "off" | "connecting" | "on" | "error";
+  wsDirectives: PhenomenonDirective[];
+  setSelectedReagent: (id: string) => void;
+  setSelectedVolume: (v: number) => void;
+  setAdditionOrder: (o: AdditionOrder) => void;
+  placeApparatus: (apparatus_id: string, label: string) => void;
+  pourInto: (slot_id: string) => Promise<void>;
+  clearBench: () => void;
+  connectWs: () => () => void;
 }
 
 export const SYSTEM_LABELS: Record<ScanSystem, string> = {
   strong: "强酸—强碱滴定",
   weak: "弱酸—强碱滴定",
 };
+
+/** WS phenomenon 单例：StrictMode 双挂载下避免误关连接（模块级，非 store 状态）。 */
+let phenomWs: WebSocket | null = null;
+let phenomWsRefs = 0;
 
 export const useLab = create<LabState>((set, get) => ({
   system: "strong",
@@ -141,6 +194,120 @@ export const useLab = create<LabState>((set, get) => ({
   error: null,
   live: null,
   heat: null,
+  // spec-005 装置建造初始态：台上预置一只烧杯（容量来自 apparatus 事实源 beaker_250ml）。
+  slots: [{ slot_id: "beaker-1", apparatus_id: "beaker_250ml", label: "烧杯 250 mL",
+            x: 0, y: 0, contents: [] }],
+  selectedReagent: "naoh",
+  selectedVolume_L: 0.5,
+  additionOrder: "acid_into_water",
+  phenomenonSource: "none",
+  wsStatus: "off",
+  wsDirectives: [],
+
+  setSelectedReagent: (id) => set({ selectedReagent: id }),
+  setSelectedVolume: (v) => set({ selectedVolume_L: v }),
+  setAdditionOrder: (o) => set({ additionOrder: o }),
+
+  placeApparatus: (apparatus_id, label) => {
+    const slots = get().slots;
+    const slot_id = `${apparatus_id}-${slots.length + 1}`;
+    set({ slots: [...slots, { slot_id, apparatus_id, label, x: 0, y: 0, contents: [] }] });
+  },
+
+  clearBench: () => set({
+    slots: [{ slot_id: "beaker-1", apparatus_id: "beaker_250ml", label: "烧杯 250 mL",
+              x: 0, y: 0, contents: [] }],
+    live: null, heat: null, phenomenonSource: "none", wsDirectives: [],
+  }),
+
+  /** 倾倒：把当前选中药品按体积加入目标容器，再经 gateway 求解，同步更新现象与物种面板。 */
+  pourInto: async (slot_id) => {
+    const { slots, selectedReagent, selectedVolume_L, additionOrder } = get();
+    const reagent = REAGENTS.find((r) => r.compound_id === selectedReagent);
+    if (!reagent) return;
+    const added: SubstanceInput = {
+      compound_id: reagent.compound_id,
+      concentration_mol_L: reagent.default_concentration_mol_L,
+      volume_L: selectedVolume_L,
+    };
+    const target = slots.find((s) => s.slot_id === slot_id);
+    const contents = [...(target?.contents ?? []), added];
+    set({
+      slots: slots.map((s) => s.slot_id === slot_id ? { ...s, contents } : s),
+      loading: true, error: null,
+    });
+
+    const hasHazard = contents.some((s) => REAGENTS.find((r) => r.compound_id === s.compound_id)?.hazard);
+    try {
+      if (hasHazard) {
+        // 浓硫酸走热效应专用路径（稀区主求解对浓酸返回 no_significant_change）。
+        const body = { container_id: slot_id, addition_order: additionOrder, substances: contents };
+        const res = await fetch("/api/v1/heat", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const heat = (await res.json()) as HeatResult;
+        set({ heat, loading: false, phenomenonSource: "live" });
+      } else {
+        const body = { container_id: slot_id, substances: contents };
+        const [specRes, phenRes] = await Promise.all([
+          fetch("/api/v1/speciation", {
+            method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+          }),
+          fetch("/api/v1/speciation/phenomena", {
+            method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+          }),
+        ]);
+        if (!specRes.ok) throw new Error(`求解 HTTP ${specRes.status}`);
+        const spec = (await specRes.json()) as SolutionSpeciation;
+        const data = fromSpeciation(spec);
+        if (phenRes.ok) data.phenomena = (await phenRes.json()) as PhenomenonDirective[];
+        set({ live: data, heat: null, loading: false, phenomenonSource: "live" });
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : "倾倒求解失败", loading: false });
+    }
+  },
+
+  /** 订阅 gateway 的 WS phenomenon 通道；返回的清理函数按引用计数释放连接。 */
+  connectWs: () => {
+    // 模块级单例：React StrictMode 会双挂载，引用计数避免第一次 cleanup 误关
+    // 第二次挂载正要使用的连接（否则出现 "closed before established"）。
+    phenomWsRefs += 1;
+    set({ wsStatus: phenomWs ? "on" : "connecting" });
+    if (!phenomWs) {
+      const proto = location.protocol === "https:" ? "wss" : "ws";
+      try {
+        const socket = new WebSocket(`${proto}://${location.host}/ws`);
+        phenomWs = socket;
+        socket.onopen = () => {
+          socket.send(JSON.stringify({ type: "subscribe", channel: "phenomenon" }));
+          set({ wsStatus: "on" });
+        };
+        socket.onmessage = (ev) => {
+          try {
+            const msg = JSON.parse(String(ev.data)) as {
+              type?: string; directives?: PhenomenonDirective[];
+            };
+            if (msg.type === "phenomenon" && Array.isArray(msg.directives)) {
+              set({ wsDirectives: msg.directives, phenomenonSource: "ws" });
+            }
+          } catch { /* 忽略非 JSON 心跳/回显 */ }
+        };
+        socket.onerror = () => set({ wsStatus: "error" });
+        socket.onclose = () => { phenomWs = null; set({ wsStatus: "off" }); };
+      } catch {
+        set({ wsStatus: "error" });
+      }
+    }
+    return () => {
+      phenomWsRefs = Math.max(0, phenomWsRefs - 1);
+      if (phenomWsRefs === 0 && phenomWs) {
+        phenomWs.close();
+        phenomWs = null;
+      }
+    };
+  },
 
   loadTimeline: async (system) => {
     set({ loading: true, error: null });

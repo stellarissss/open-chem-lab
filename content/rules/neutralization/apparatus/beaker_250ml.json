@@ -1,0 +1,29 @@
+{
+  "schema_version": "st.apparatus.v1",
+  "apparatus_id": "beaker_250ml",
+  "names": { "zh": "烧杯 250 mL", "en": "Beaker 250 mL" },
+  "type": "beaker",
+  "capacity_mL": 250,
+  "graduations": [50, 100, 150, 200, 250],
+  "max_temp_K": 573.15,
+  "sealable": false,
+  "asset": "assets/apparatus/beaker_250ml.svg",
+  "physics": {
+    "wall_thickness_mm": 1.5,
+    "thermal_shock_sensitive": true,
+    "max_pressure_kPa": 101.3,
+    "notes": "硼硅酸盐玻璃；急冷急热可能炸裂（表现层后果，不进化学事实层）"
+  },
+  "source": {
+    "kind": "asset_spec",
+    "ref": "实验室常规硼硅酸盐烧杯规格",
+    "endpoint": null,
+    "license": null,
+    "version": null,
+    "snapshot_date": "2026-11-25",
+    "sha256": null
+  },
+  "confidence": { "level": "verified", "note": "标准实验器材规格，参数取自公开产品规格" },
+  "review": { "status": "signed_off", "reviewer": "stellarisssa", "date": "2026-11-25", "ai_crosscheck": null },
+  "rule_revision": 1
+}

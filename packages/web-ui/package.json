@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@st/protocol": "workspace:*",
+    "@st/wasm-view": "workspace:*",
+    "pixi.js": "8.23.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "zustand": "5.1.0"

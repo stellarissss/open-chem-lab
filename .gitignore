@@ -5,6 +5,11 @@ build/
 target/
 pkg/
 *.wasm
+# wasm-view 产物入库：CI 无 Rust 工具链，构建/运行须与本地零差异。
+# wasm-pack 会在输出目录写 .gitignore(*)，构建后须删除该 .gitignore 方可入库。
+!packages/wasm-view/wasm-pkg/*.wasm
+# wasm-view 的 WASM 产物入库：CI 无 Rust 工具链，需保证构建/运行与本地零差异。
+!packages/wasm-view/pkg/*.wasm
 .pnpm-store/
 .turbo/
 .vite/
