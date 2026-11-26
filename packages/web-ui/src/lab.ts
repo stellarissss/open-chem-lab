@@ -176,7 +176,7 @@ export interface LabState {
   pourInto: (slot_id: string) => Promise<void>;
   clearBench: () => void;
   connectWs: () => () => void;
-  // spec-006 实验报告：操作序列记录 + 经 gateway 汇编只读报告
+  // spec-006 实验报告：操作序列记录 + 经 gateway 取 solver-worker 汇编的只读报告
   operations: Operation[];
   report: LabReport | null;
   generateReport: () => Promise<void>;
@@ -410,7 +410,7 @@ export const useLab = create<LabState>((set, get) => ({
     }
   },
 
-  /** 生成只读报告：把操作序列 + 实验台当前物质组合交 gateway 汇编；数值不在此层加工。 */
+  /** 生成只读报告：把操作序列 + 实验台当前物质组合经 gateway 提交，由 solver-worker 汇编；数值不在此层加工。 */
   generateReport: async () => {
     const { operations, slots, system } = get();
     // 以实验台现状（所有容器物质汇总）作为报告求解输入，保证数值来自真实状态。

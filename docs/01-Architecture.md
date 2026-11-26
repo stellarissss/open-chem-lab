@@ -37,7 +37,7 @@
 | 教学层 | 附加内容、后置长线，不进前期阶段验收；教学由使用方教师承担 |
 | 对标 | 公开点名「对标并超越 NB实验室」，同时声明「独立开源实现、与其无关联无背书」；只用一级来源数据，禁用未证实宣传数字 |
 
-**科学边界与求解出口（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。求解通过 `st.solution_speciation.v1` 的 `outcome` 如实返回三种状态：覆盖范围内给出定量解（`solved`）；条件在事实层覆盖范围外给出「当前条件下无明显变化」（`no_significant_change`，合法结论）；数值不收敛或活度模型超出适用域给出标注置信度的降级提示（`degraded`）。三种出口各自对应真实计算状态，均进入补体系日志。已制作的体系必须既好玩又科学、零科学性错误。
+**科学边界与求解出口（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。求解通过 `st.solution_speciation.v1` 的 `outcome` 如实返回三种状态：覆盖范围内给出定量解（`solved`）；条件在事实层覆盖范围外给出「当前条件下无明显变化」（`no_significant_change`，合法结论）；数值不收敛或活度模型超出适用域给出标注置信度的降级提示（`degraded`）。三种出口均由求解出口如实返回，不掩盖为定量结论。已制作的体系必须既好玩又科学、零科学性错误。
 
 ---
 
@@ -132,6 +132,7 @@ flowchart TB
 | `speciation_timeline` | 关键快照时间轴 | `keyframes[]`、`curves`、`ruleset_version` |
 | `phenomenon` | 12 类现象注册表（`st.phenomenon.v1` 指令） | `type`、`trigger`（可观测状态触发器）、`关联物理量` |
 | `save` | 轻量存档（无网格/RLE/Yjs） | `apparatus[]`、`substances[]`、`timeline_ref`、`ruleset_version` |
+| `report` | 实验报告（`st.report.v1`，汇编投影，非事实层、不进求解主链、不新增需签核化学参数） | `operations[]`、`snapshots[]`、`curves[]`、`reactions[]`、`sources[]`、`outcome_summary`、`report_id`（内容寻址幂等）；每条数值带 `source_ref` |
 
 **三类数据分层**：`fact`（计量/热力学/动力学，零错签核）、`presentation`（颜色/焰色/外观，可夸张但标来源，不受零错红线）、`safety`（GHS/危害，严谨签核，驱动错误操作后果）。
 
@@ -202,7 +203,7 @@ open-chem-lab/
 ├── tools/doc-hygiene-check.py      # 文档纯净门禁（单一状态 + 无过程痕迹 + 正向规格）
 ├── assets/                 # 资产产物 + attribution/
 ├── deploy/                 # docker-compose / Dockerfile / .env.example / README-windows.md
-├── tests/                  # e2e(部署可达) / golden-cases / schema-validate / evidence-check / license-scan / lgpl-link-check
+├── tests/                  # e2e(部署可达) / golden-cases / schema-validate / evidence-check / asset-attribution / report / license-scan / lgpl-link-check
 └── docs/                   # 本真理源 + Roadmap + DocDD + specs/
 ```
 

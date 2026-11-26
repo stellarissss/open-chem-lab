@@ -1,6 +1,6 @@
 import type { LabReport, Operation, SourceAnchor } from "@st/protocol";
 
-/** 只读实验报告视图（spec-006）：只展示 gateway 汇编产物，不在表现层加工数值。 */
+/** 只读实验报告视图（spec-006）：只展示 solver-worker 汇编、gateway 代理转发的产物，不在表现层加工数值。 */
 const KIND_LABEL: Record<Operation["kind"], string> = {
   place_apparatus: "取用器材",
   pour: "倾倒",

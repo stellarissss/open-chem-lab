@@ -10,7 +10,7 @@
 
 ## 这是什么
 
-一个**开源、可自建服务器部署**的交互式仿真化学实验室：在实验台上按实验室规格取用真实器材与药品、自由组合、调节参数，即时看到变色、沉淀、气泡、燃烧、结晶、温度与 pH 曲线等现象；**错误操作的后果（密闭加热炸裂、浓硫酸稀释飞溅、钠入水爆燃）可零风险重现**。
+一个**开源、可自建服务器部署**的交互式仿真化学实验室：在实验台上按实验室规格取用真实器材与药品、自由组合、调节参数，观察由真实化学法则驱动的现象；**错误操作的后果可零风险重现**。已实现能力与现象清单见 [docs/02-Roadmap.md](docs/02-Roadmap.md) 与各切片 spec。
 
 它不是落沙游戏，也不提供虚构物质、自制规则或 MOD 工坊。「超自由」的精确含义：
 
@@ -20,23 +20,17 @@
 
 ## 快速开始
 
-仓库提供可运行的产品骨架（前后端常驻 + Docker Compose 单机自托管）：
+仓库提供单机自托管的仿真化学实验室（前后端常驻 + Docker Compose）：
 
 ```bash
-# 1. 构建并起服（仓库根执行；需 Node 20.19+ / pnpm 10 / Docker）
 cp deploy/.env.example deploy/.env        # 按需修改端口与本地开发口令
 docker compose -f deploy/docker-compose.minimal.yml up -d --build
-
-# 2. 浏览器打开 http://localhost:8080 —— 实验台壳页显示后端 health=OK
-#    网关 health: curl http://localhost:3001/api/v1/health
-#    停止: docker compose -f deploy/docker-compose.minimal.yml down
-
-# 开发者本地构建（不起容器）：
-pnpm install && pnpm build
-python3 tests/license-scan/scan.py        # 依赖许可证白名单门禁
+# 浏览器打开 http://localhost:8080 进入实验台；停止用 ... down
 ```
 
-> 当前骨架不含真实化学体系与求解逻辑，按 [docs/02-Roadmap.md](docs/02-Roadmap.md) 逐片接入。AI/开发者入口按 `AGENTS.md` → `docs/02-Roadmap.md` → `docs/01-Architecture.md` → `docs/03-DocDD-Process.md` → `docs/specs/` 顺序。
+具体环境要求、运行命令、开发构建与部署细节见 [deploy/README-windows.md](deploy/README-windows.md) 与 [docs/01-Architecture.md](docs/01-Architecture.md)。
+
+> **当前进度、已实现能力、下一步**一律以 [docs/02-Roadmap.md](docs/02-Roadmap.md) 为准；技术栈与数据模型见 [docs/01-Architecture.md](docs/01-Architecture.md)；开发流程见 [docs/03-DocDD-Process.md](docs/03-DocDD-Process.md)。本 README 不复述这些易变内容。AI/开发者入口按 `AGENTS.md` → `docs/02-Roadmap.md` → `docs/01-Architecture.md` → `docs/03-DocDD-Process.md` → `docs/specs/` 顺序。
 
 ## 文档导航
 
