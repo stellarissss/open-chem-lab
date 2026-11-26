@@ -380,7 +380,8 @@ export const useLab = create<LabState>((set, get) => ({
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const heat = (await res.json()) as HeatResult;
-      set({ heat, loading: false });
+      // 与 pourInto 的危害分支同源：显式标记 live，飞溅渲染不依赖 WS 恰好连上。
+      set({ heat, loading: false, phenomenonSource: "live" });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : "热效应求解失败", loading: false });
     }

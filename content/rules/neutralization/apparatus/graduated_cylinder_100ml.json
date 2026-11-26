@@ -7,7 +7,7 @@
   "graduations": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
   "max_temp_K": 323.15,
   "sealable": false,
-  "asset": "assets/apparatus/graduated_cylinder_100ml.svg",
+  "asset": "assets/apparatus/graduated-cylinder.svg",
   "physics": {
     "wall_thickness_mm": 1.2,
     "thermal_shock_sensitive": true,

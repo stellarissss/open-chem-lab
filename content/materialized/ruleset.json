@@ -635,7 +635,7 @@
       ],
       "max_temp_K": 323.15,
       "sealable": false,
-      "asset": "assets/apparatus/graduated_cylinder_100ml.svg",
+      "asset": "assets/apparatus/graduated-cylinder.svg",
       "physics": {
         "wall_thickness_mm": 1.2,
         "thermal_shock_sensitive": true,
@@ -1012,5 +1012,5 @@
       "rule_revision": 1
     }
   ],
-  "ruleset_sha256": "e6fe70999584587a4bfd8c58f681b53c185db1584dbee2afb258ea8f7b910db6"
+  "ruleset_sha256": "c62b75be2002dbd45182d6511689a639db44e501fac40f6df2d0533b849f44a9"
 }

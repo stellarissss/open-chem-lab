@@ -228,7 +228,7 @@ open-chem-lab/
 ### 7.2 验证原则（敏捷轻量）
 
 - **任务内按需验证、产品级门禁由 CI 统一守门**：单个任务收尾只跑与该任务相关的最小充分证据，不要求每个任务跑全套；质量由「数值零错红线 + CI 强制门禁 + 用户随时可打断」保障，验证结果由测试产物与 git log 承载。
-- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线。随切片继续接入：`lgpl-link-check`、`rule-lint`、`asset-attribution`、`e2e`（部署可达已落地）、`dual-platform`。
+- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、美术资产署名与存在性（`asset-attribution`：逐 SVG 署名、许可白名单、纯 path、器材卡 asset 路径闭合）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线、部署可达（`e2e`）。随切片继续接入：`lgpl-link-check`、`rule-lint`、`dual-platform`。
 - **证据自证**：凡验收声称用某工具独立对拍，须在代码中真实调用、运行时打印版本与调用指纹、CI 校验一致；黄金用例期望标注来源（独立对拍/权威源快照/解析式）并锚定权威源哈希；关键量纲不变量（体积无关性、浓度十倍 pH 降一）固化为断言（流程见 `03-DocDD-Process.md` 第四节）。
 
 ### 7.3 对外口径（不可拆分的三层）
@@ -240,3 +240,7 @@ open-chem-lab/
 | 合规兜底 | 点名「对标并超越」+「独立开源实现·无关联无背书」声明；NB 侧只用一级来源，禁用「几万种物质」「免费版 20%」未证实表述 | 强制 |
 
 > 法律边界：本项目合规分析为工程判断、非法律意见。商业化前就 CC-BY-SA 衍生边界、LPPL 输出物商用、CC-BY 署名充分性、比较广告合规四项做法务确认。
+
+### 7.4 已知限制（当前形态可接受、条件变化时须修）
+
+- **WS 现象通道按房间全局广播**：gateway 的 `phenomenon` 订阅把热效应指令推给所有订阅者，指令自带 `container_id` 但前端按"最新一条"渲染、不按容器过滤。当前 compose 仅回环发布、面向单机单用户，无实际串扰触发路径；**进入多用户/多实验台形态前，须改为按 `container_id` 定向推送或前端按当前容器过滤**，否则 A 的错误操作现象会显示在 B 的容器上。属体验隔离限制，不影响数值零错红线。

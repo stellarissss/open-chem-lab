@@ -2,38 +2,32 @@ import { useEffect } from "react";
 import {
   REAGENTS, useLab, type ApparatusSlot, type AdditionOrder,
 } from "./lab";
+// 写实 2D 器材：tikz-chemlab 编译输出物（assets/apparatus/，逐资产署名见 ASSETS.csv）。
+// ?url 导入让 Vite 在 dev 与 Docker build 都把 SVG 拷入产物，前端只经静态资源取用。
+import beakerSvg from "../../../assets/apparatus/beaker_250ml.svg?url";
+import cylinderSvg from "../../../assets/apparatus/graduated-cylinder.svg?url";
+import dropperSvg from "../../../assets/apparatus/dropper.svg?url";
 
-/** 内联简笔器材图（不落 assets/ 资产文件，署名与出版级资产链不受影响）。 */
-function ApparatusSvg({ type, liquid }: { type: string; liquid: string | null }) {
-  const body = (
-    <>
-      {type === "beaker" && (
-        <>
-          <path d="M20 14 L24 78 Q60 84 96 78 L100 14" fill="#eef3f1" stroke="#5b6b63" strokeWidth="2" />
-          <path d="M14 14 L26 14 M94 14 L106 14" stroke="#5b6b63" strokeWidth="2" />
-          {[32, 46, 60, 74].map((y) => <path key={y} d={`M26 ${y} L34 ${y}`} stroke="#9aa9a2" strokeWidth="1" />)}
-          {liquid && <clipPath id="beaker-clip"><rect x="24" y="48" width="72" height="30" /></clipPath>}
-          {liquid && <rect x="24" y="48" width="72" height="30" fill={liquid} clipPath="url(#beaker-clip)" opacity="0.8" />}
-        </>
-      )}
-      {type === "graduated_cylinder" && (
-        <>
-          <rect x="44" y="10" width="32" height="74" rx="3" fill="#eef3f1" stroke="#5b6b63" strokeWidth="2" />
-          <rect x="40" y="84" width="40" height="6" rx="2" fill="#5b6b63" />
-          {[22, 34, 46, 58, 70].map((y) => <path key={y} d={`M46 ${y} L58 ${y}`} stroke="#9aa9a2" strokeWidth="1" />)}
-          {liquid && <rect x="46" y="46" width="28" height="38" fill={liquid} opacity="0.8" />}
-        </>
-      )}
-      {type === "dropper" && (
-        <>
-          <rect x="54" y="8" width="12" height="22" rx="5" fill="#8a5a2b" />
-          <path d="M54 30 L56 76 Q60 82 64 76 L66 30 Z" fill="#eef3f1" stroke="#5b6b63" strokeWidth="2" />
-          {liquid && <path d="M57 52 L63 52 L62 74 L58 74 Z" fill={liquid} opacity="0.8" />}
-        </>
-      )}
-    </>
+/** apparatus_id → 写实资产 URL（与 apparatus 卡 asset 字段同源，单一事实源）。 */
+const APPARATUS_ASSET: Record<string, string> = {
+  beaker_250ml: beakerSvg,
+  graduated_cylinder_100ml: cylinderSvg,
+  dropper: dropperSvg,
+};
+
+/**
+ * 写实器材呈现：<img> 为出版级主视觉；液体色以半透明层叠加在容器下半部
+ * （表现近似，不进化学事实层；精确的指示剂混色/温升/飞溅由 VesselView 的 PixiJS 层负责）。
+ */
+function ApparatusSvg({ apparatusId, liquid }: { apparatusId: string; liquid: string | null }) {
+  const src = APPARATUS_ASSET[apparatusId];
+  if (!src) return null;
+  return (
+    <span className="apparatus-art" role="img" aria-label="写实器材">
+      <img src={src} alt="" />
+      {liquid && <span className="apparatus-art__liquid" style={{ background: liquid }} aria-hidden="true" />}
+    </span>
   );
-  return <svg viewBox="0 0 120 96" width="120" height="96" role="img" aria-label="器材示意">{body}</svg>;
 }
 
 const ORDER_LABEL: Record<AdditionOrder, string> = {
@@ -115,7 +109,7 @@ function BenchSlot({ slot, onPour, loading }: { slot: ApparatusSlot; onPour: () 
   const totalVolume = slot.contents.reduce((s, c) => s + c.volume_L, 0);
   return (
     <div className="bench-slot">
-      <ApparatusSvg type={slot.apparatus_id.split("_")[0] ?? "beaker"} liquid={liquid} />
+      <ApparatusSvg apparatusId={slot.apparatus_id} liquid={liquid} />
       <div className="bench-slot__meta">
         <strong>{slot.label}</strong>
         <span className="muted tiny">{slot.contents.length ? reagentIds.join(" + ") : "空"}</span>
