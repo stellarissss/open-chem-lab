@@ -20,6 +20,18 @@
 
 **「超自由」的精确定义**：在 100% 真实、已验算的物质与器材之上，由真实物理化学法则驱动的无限组合与涌现。**绝不**接受虚构物质、用户自制物质、自定义规则、MOD 或规则包工坊。
 
+**能力现状（当前 M1）与目标（分栏，避免把目标语气读成现状）**：
+
+| 维度 | 当前已实现 | 规划目标 |
+|---|---|---|
+| 化学体系 | 中和体系 1 个；可玩物质以 `content/materialized/ruleset.json` 为准（含水溶剂特例），反应规则以同文件为准 | 1000+ 可验算物种下限、长线不封顶；真实反应由物种网络涌现 |
+| 求解 | phreeqpython 水溶液主解 + chempy 真对拍 + 三态出口；纯水/稀释/温度依赖已守门 | SciPy 长线、Cantera/reaktoro-service 多相高温高压 |
+| 现象 | `st.phenomenon.v1` 协议预留 12 类，当前实装 3 类（指示剂连续混色 / 温升 / 飞溅）；其余类别只有枚举无实现 | 12 类逐步实装，扩类走协议版本升级 |
+| 表现 | React/PixiJS 容器内现象 + 写实 2D SVG 资产 + 物种面板 + 时间轴 + 实验报告 | 自适应调度器（关注度分数 / 16.7ms 帧预算，当前为设计约束、无独立调度包与帧率测试）、固定 60fps 目标 |
+| 玩法 | 错误操作后果（浓硫酸稀释飞溅 / 中和放热）、涌现派生、装置建造最小版、实验报告 | 图鉴与进度（M2 启动）、微观视图、教学层（M4 长线） |
+
+> 上表"当前已实现"栏随切片推进由回写同步（见 `03-DocDD-Process.md` 2.3）；任一数值以指向的权威文件为准，不在本表复写易变数字。
+
 ---
 
 ## 二、产品定义与边界
@@ -121,6 +133,18 @@ flowchart TB
 
 ## 五、数据模型（事实层核心）
 
+**事实源层级（权威链，逐层派生、不并列争夺"唯一"）**：
+
+| 层 | 权威对象 | 谁派生谁 | 对齐机制 |
+|---|---|---|---|
+| 数值层 | 权威源 `.dat` 快照（热力学 logK/ΔH 唯一数值真理源） | 派生出精校卡 | `source.sha256` 锚定快照 |
+| 结构层 | `schemas/*.v1.schema.json`（结构唯一事实源） | 约束精校卡与投影契约形状 | 各语言类型由 schema 生成 |
+| 精校层 | `content/rules/` 物质卡/规则卡（条件、来源、置信度） | 物化出运行时 ruleset | `confidence`/`review` 签核、体系级黄金用例 |
+| 运行层 | `content/materialized/ruleset.json`（运行时事实源） | 供求解器加载 | `ruleset_version` + `ruleset_sha256` |
+| 投影层 | `st.report.v1` 等汇编投影 | 由求解/时间轴出口派生，非事实层 | 每条数值带 `source_ref` 回指上游 |
+
+> 各层的"唯一"只在本层成立：文档层以 `01` 为真理源、结构层以 schema 为准、数值层以 `.dat` 快照为准、运行层以物化 ruleset 为准。判定现状数字一律下沉到对应权威文件，不在上层文档复写。
+
 ### 5.1 核心实体（单一事实源：`schemas/`）
 
 | 实体 | 作用 | 关键字段 |
@@ -130,7 +154,7 @@ flowchart TB
 | `reaction_rule` | 条件化真实反应（核心） | `equilibrium`/`kinetics`/`thermo`(定量)、`applicability`、`numerics`、`effects`、`source`/`confidence`/`ai_crosscheck`、`data_class` |
 | `solution_speciation` | 每容器隐藏化学态（不可见反应也真实发生） | `species[]`、`ph`、`ionic_strength`、`temperature_K`、`equilibria`、`hidden_reactions`、`outcome`（三态出口）、`confidence`、`indicators`（实际加入的指示剂，供现象派生）、`physics_note` |
 | `speciation_timeline` | 关键快照时间轴 | `keyframes[]`、`curves`、`ruleset_version` |
-| `phenomenon` | 12 类现象注册表（`st.phenomenon.v1` 指令） | `type`、`trigger`（可观测状态触发器）、`关联物理量` |
+| `phenomenon` | 现象类别注册表（`st.phenomenon.v1` 指令）：协议预留 12 类，当前实装 3 类（见第一节能力现状表） | `type`、`trigger`（可观测状态触发器）、`关联物理量` |
 | `save` | 轻量存档（无网格/RLE/Yjs） | `apparatus[]`、`substances[]`、`timeline_ref`、`ruleset_version` |
 | `report` | 实验报告（`st.report.v1`，汇编投影，非事实层、不进求解主链、不新增需签核化学参数） | `operations[]`、`snapshots[]`、`curves[]`、`reactions[]`、`sources[]`、`outcome_summary`、`report_id`（内容寻址幂等）；每条数值带 `source_ref` |
 
@@ -169,6 +193,7 @@ flowchart TB
 
 以下决策已由切片 003 落地并经用户裁决，是现行口径，开发须遵循：
 
+- **水为溶剂特例（化学与物理层统一）**：水（`water`）在事实层是溶剂型物质，不贡献溶质元素、只贡献体积/质量参与归一：加水稀释使溶质浓度按总体积下降、pH 按强度量变化（0.1 M HCl 稀释一倍 pH 1.08→1.37），固化为黄金用例。纯水（无溶质）走 PHREEQC 原生 `SOLUTION -temp` 路径求中性点——`add_solution_simple({})` 空组成路径恒返回 pH 7.0，在 25°C 外是科学错误（100°C 中性点应约 6.02）；权威 `.dat` 水解离带 `delta_h 13.345 kcal`，原生路径实测与 IAPWS 中性点序列吻合（0°C 7.45 / 25°C 7.00 / 100°C 6.02），固化为三端点黄金用例。UI 可取药品必须全部在事实层可玩，由 `tests/content-consistency` 门禁锁定。
 - **体积归一（pH 是强度量）**：溶液 pH 只取决于浓度（总物质的量 ÷ 总体积），与绝对体积无关。求解按各物质体积折算实际摩尔数后归一到 phreeqpython 的固定 1 kg 水基准；缺此归一会把「0.1 M × 2 L」错算成 0.2 M。固化为不变量断言（体积无关性、浓度十倍 pH 降一）。
 - **指示剂为痕量探针**：指示剂（酚酞/甲基橙）是被动探针，不参与稀区平衡求解（权威源 `.dat` 未定义其平衡）；求解输出 `indicators` 记录实际加入的指示剂，现象层只对其派生变色——倒什么看什么，且不以伪元素破坏求解收敛。变色按 Henderson–Hasselbalch 随 pH 连续混色，不设阈值跳变。
 - **热效应按混合总质量**：绝热温升 `ΔT = Q /(m_total · cp)` 按混合后总质量折算（固定 1000 g 会把 1 L+1 L 的温升高估一倍）。
@@ -203,7 +228,7 @@ open-chem-lab/
 ├── tools/doc-hygiene-check.py      # 文档纯净门禁（单一状态 + 无过程痕迹 + 正向规格）
 ├── assets/                 # 资产产物 + attribution/
 ├── deploy/                 # docker-compose / Dockerfile / .env.example / README-windows.md
-├── tests/                  # e2e(部署可达) / golden-cases / schema-validate / evidence-check / asset-attribution / report / license-scan / lgpl-link-check
+├── tests/                  # e2e(部署可达) / golden-cases / schema-validate / evidence-check / asset-attribution / content-consistency(UI-事实层闭合) / report / license-scan / lgpl-link-check
 └── docs/                   # 本真理源 + Roadmap + DocDD + specs/
 ```
 
@@ -229,7 +254,7 @@ open-chem-lab/
 ### 7.2 验证原则（敏捷轻量）
 
 - **任务内按需验证、产品级门禁由 CI 统一守门**：单个任务收尾只跑与该任务相关的最小充分证据，不要求每个任务跑全套；质量由「数值零错红线 + CI 强制门禁 + 用户随时可打断」保障，验证结果由测试产物与 git log 承载。
-- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、美术资产署名与存在性（`asset-attribution`：逐 SVG 署名、许可白名单、纯 path、器材卡 asset 路径闭合）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线、部署可达（`e2e`）。随切片继续接入：`lgpl-link-check`、`rule-lint`、`dual-platform`。
+- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、美术资产署名与存在性（`asset-attribution`：逐 SVG 署名、许可白名单、纯 path、器材卡 asset 路径闭合）、UI-事实层一致性（`content-consistency`：可取药品全部可玩）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线、部署可达（`e2e`）。随切片继续接入：`lgpl-link-check`、`rule-lint`、`dual-platform`。
 - **证据自证**：凡验收声称用某工具独立对拍，须在代码中真实调用、运行时打印版本与调用指纹、CI 校验一致；黄金用例期望标注来源（独立对拍/权威源快照/解析式）并锚定权威源哈希；关键量纲不变量（体积无关性、浓度十倍 pH 降一）固化为断言（流程见 `03-DocDD-Process.md` 第四节）。
 
 ### 7.3 对外口径（不可拆分的三层）

@@ -38,6 +38,9 @@ _ELEMENT_OF: dict[str, str] = {
 # 指示剂 compound_id：痕量探针，不参与平衡求解（权威源 .dat 未定义其平衡），
 # 只记录到 indicators 供现象派生；倒什么看什么，且不以伪元素破坏求解收敛。
 _INDICATOR_IDS = {"methyl_orange", "phenolphthalein"}
+# 溶剂 compound_id：水是溶剂（化学计量基准 1kg 水本身），不贡献溶质元素，
+# 但贡献体积参与归一——加水稀释时溶质浓度被正确稀释。水作为特例走纯水温度路径。
+_SOLVENT_IDS = {"water"}
 
 
 def _repo_root() -> Path:
@@ -68,6 +71,28 @@ def _database_name() -> str:
 
 def make_phreeq(root: Path | None = None) -> PhreeqPython:
     return PhreeqPython(database=_database_name(), database_directory=_database_dir(root))
+
+
+def solve_pure_water(temp_C: float, root: Path | None = None) -> Any:
+    """纯水（无溶质）专用求解：走 PHREEQC 原生 SOLUTION + -temp，温度依赖正确。
+
+    根因：phreeqpython 的 add_solution_simple({}) 空组成路径不建立配平水溶液，
+    pH 恒返回 7.0，导致纯水在 25°C 外的中性点科学错误（100°C 应约 6.02）。
+    权威 .dat 的水解离带 delta_h 13.345 kcal，PHREEQC 原生输入能正确算温度依赖，
+    实测与 IAPWS 中性点序列吻合（0°C 7.45 / 25°C 7.00 / 100°C 6.02）。
+    返回与 add_solution_simple 同构的 Solution 对象（pH/I/molality/activity/species）。
+    """
+    pp = make_phreeq(root)
+    inp = (
+        "SOLUTION 1\n"
+        f"-temp {temp_C}\n"
+        "units mmol/L\n"
+        "pH 7 charge\n"
+        "SAVE SOLUTION 1\n"
+        "END\n"
+    )
+    pp.ip.run_string(inp)
+    return pp.get_solution(1)
 
 
 def _empty_outcome(container_id: str, ruleset_version: str, outcome: str,
@@ -123,7 +148,8 @@ def solve(system: dict[str, Any], ruleset: dict[str, Any] | None = None,
     playable = {c["compound_id"] for c in ruleset.get("compounds", []) if c.get("playable")}
     for sub in substances:
         cid = sub.get("compound_id")
-        if cid not in playable or (cid not in _ELEMENT_OF and cid not in _INDICATOR_IDS):
+        allowed = cid in _ELEMENT_OF or cid in _INDICATOR_IDS or cid in _SOLVENT_IDS
+        if cid not in playable or not allowed:
             return _empty_outcome(container_id, ruleset_version, "no_significant_change",
                                   reason=f"out-of-coverage: {cid}")
 
@@ -144,15 +170,25 @@ def solve(system: dict[str, Any], ruleset: dict[str, Any] | None = None,
                               confidence=0.2, reason="non-positive reactive volume")
     totals: dict[str, float] = {}
     for sub in reactive:
-        element = _ELEMENT_OF[sub["compound_id"]]
+        cid = sub["compound_id"]
+        if cid in _SOLVENT_IDS:
+            # 溶剂（水）不贡献溶质元素，只贡献体积；体积已在 total_volume_L 计入。
+            continue
+        element = _ELEMENT_OF[cid]
         conc = float(sub.get("concentration_mol_L", 0.1))
         vol = float(sub.get("volume_L", 1.0))
         total_mmol = conc * vol * _MMOL_PER_MOL_L
         totals[element] = totals.get(element, 0.0) + total_mmol / total_volume_L
 
+    temp_C = temp_K - 273.15
     try:
-        pp = make_phreeq(root)
-        solution = pp.add_solution_simple(totals, temperature=temp_K - 273.15)
+        if not totals:
+            # 纯水/仅溶剂：走原生 SOLUTION 路径，温度依赖正确（add_solution_simple({}) 恒 pH 7）。
+            solution = solve_pure_water(temp_C, root)
+        else:
+            # 含溶质：REACTION 路径正确（氨水/乙酸等中性物种靠它平衡），稀释已由体积归一处理。
+            pp = make_phreeq(root)
+            solution = pp.add_solution_simple(totals, temperature=temp_C)
         ph = float(solution.pH)          # 活度口径（主文档裁决）
         ionic = float(solution.I)
     except Exception as exc:  # 数值不收敛 → 诚实降级

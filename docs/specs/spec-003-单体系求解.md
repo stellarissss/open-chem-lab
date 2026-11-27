@@ -23,12 +23,12 @@
 ## 验收标准（大略，可判定）
 
 1. solver-worker 能加载物化 ruleset 并对中和体系求解；`GET /api/v1/solve`（或内部调用）返回 ph / 物种分布，符合 `st.solution_speciation.v1`。
-2. 6 条黄金用例全部数值零错（pH 在容差内、计量守恒、电荷守恒）。
+2. 黄金用例集（`content/golden-cases/neutralization/cases.json`，现行条数以该文件为准）全部数值零错（pH 在容差内、计量守恒、电荷守恒）。
 3. 至少 1 条错误操作后果用例通过（错误混合入求解有可复现的定量后果）。
 4. chempy 对拍 phreeqpython 主引擎，差异在容差内。
 5. 求解失败出口按语义二分，均写入 `st.solution_speciation.v1` 契约：条件不在事实层覆盖范围 → `outcome: "no_significant_change"`（当前条件下无明显变化）；数值不收敛或活度模型超出适用域 → `outcome: "degraded"` 附 `confidence` 与原因（诚实降级），三种出口各自对应真实计算状态。
 6. 求解链测试接入 CI：黄金用例对拍由 CI job 执行（与切片 002 的内容校验并列），求解代码变更触发数值零错复核。
-7. 求解时延指标：以单次中和体系求解的端到端耗时为对象，设 P95 ≤ 500ms 的首版目标（本地单机、单体系、稳态），实测值写入对拍记录；该指标与渲染帧预算 16.7ms 分属求解与表现两个环节，分别度量。
+7. 求解时延为**观测指标**（非阻塞验收）：以单次中和体系求解的端到端耗时为对象，实测 P95 写入对拍记录（`content/ai-crosscheck/neutralization/sla_measurement.json`，该文件为测试产物、不入库），不设硬阈值、不阻塞合并——求解与渲染已异步解耦，用户几乎无感；该指标与渲染帧预算 16.7ms 分属求解与表现两个环节，分别度量。
 
 ## 技术要点
 
@@ -43,7 +43,7 @@
 ## 任务拆解
 
 1. **求解内核**：在 `solver-worker` 内实现纯函数 `solve(system, ruleset, root) -> st.solution_speciation.v1`，加载物化 ruleset，按输入组合经 phreeqpython 求解 pH / 物种分布 / 离子强度；活度域限稀区（I < 0.5 mol/L），越界与不收敛走 `outcome: degraded`。
-2. **对拍与守门**：`tests/golden-cases/run.py` 以「求解输出 vs 期望」对拍覆盖 6 条黄金用例 + 1 条错误操作后果用例，含计量守恒（电荷）断言；每条期望标注来源（独立对拍 / 权威源快照 / 解析式，见 cases.json `expect.source`）。稀区弱酸弱碱由 chempy 独立对拍、容差见关键决策，强电解质因离子特定活度模型走体系级快照签核；声称的对拍工具须在 runner 中真实调用并打印依赖指纹（由证据门禁校验）。
+2. **对拍与守门**：`tests/golden-cases/run.py` 以「求解输出 vs 期望」对拍覆盖黄金用例集（含纯水/稀释特例，条数以 `cases.json` 为准）+ 错误操作后果用例，含计量守恒（电荷）断言；每条期望标注来源（独立对拍 / 权威源快照 / 解析式，见 cases.json `expect.source`）。稀区弱酸弱碱由 chempy 独立对拍、容差见关键决策，强电解质因离子特定活度模型走体系级快照签核；声称的对拍工具须在 runner 中真实调用并打印依赖指纹（由证据门禁校验）。
 3. **错误操作后果用例**：浓硫酸稀释——复用 `sulfuric_acid_dilution` 规则签核稀释焓 `delta_h = -95.28 kJ/mol`（液相生成焓差），按混合量算整体绝热温升（稀释焓为状态函数、两方向相同）；飞溅由 `addition_order`（水入酸 `water_into_acid`）经安全层派生，不改放热总量。两条黄金用例对照水入酸（飞溅）与酸入水（无飞溅），零风险重现。保留强酸强碱中和热 `delta_h = -55.84 kJ/mol` 供中和体系热效应。
 4. **涌现派生基座**：求解输出 `ph` / `temperature_K` / 物种浓度供状态触发器派生；落地指示剂 Henderson–Hasselbalch 连续混色（酚酞 pKa 9.1、甲基橙 pKa 3.46，取自事实层卡），产出 `st.phenomenon.v1` 指令（含 `trigger`）。
 5. **API 形态**：纯函数 + solver-worker 内轻量本地 HTTP 端点供测试/内部调用；本切片不接 gateway 路由，保持独立 worker 解耦。

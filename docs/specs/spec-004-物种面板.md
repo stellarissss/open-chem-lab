@@ -22,7 +22,7 @@
 ## 验收标准
 
 1. gateway 提供物种读取接口与时间轴读取接口，返回体分别符合 `st.solution_speciation.v1` 与 `st.timeline.v1`（经 schema 校验）；web-ui 仅经 gateway 取数，不直连求解库。
-2. 6 条中和黄金用例的求解输出可在面板正确呈现（pH、物种浓度/活度、三态出口），数值不失真；滴定扫描的每一关键帧均为求解器真实输出，等当点 pH 回指黄金用例 `strong_acid_base_equivalence_ph`。
+2. 中和黄金用例集（`content/golden-cases/neutralization/cases.json`，条数以该文件为准）的求解输出可在面板正确呈现（pH、物种浓度/活度、三态出口），数值不失真；滴定扫描的每一关键帧均为求解器真实输出，等当点 pH 回指黄金用例 `strong_acid_base_equivalence_ph`。
 3. 时间轴关键帧可按时间/当量比定位回放；同一体系重复请求命中缓存、不重复求解（以求解调用计数或缓存命中标记佐证）。
 4. `outcome` 三态在面板有区分呈现：`degraded` 附置信度提示，`no_significant_change` 明示「当前条件下无明显变化」，不把数值失败表述为科学结论。
 5. 现象 trigger 溯源可见：指示剂给出 pH/pKa 与 H-H 分数、温升给出来源；WS 存在现象推送通道（本切片不要求渲染）。

@@ -8,7 +8,7 @@
 
 **做**：
 - 在 `schemas/` 补齐核心实体的 JSON Schema：`compound` / `apparatus` / `reaction_rule` / `solution_speciation`，并由 `@st/protocol` 的 `build:types` 生成 TS 类型（延续切片 001 的契约先行机制）。
-- 在 `content/rules/neutralization/` 以**酸碱中和**落一组最小真实数据：6 种可玩物质卡（HCl、HNO₃、NaOH、KOH、醋酸、氨水）+ 条件化反应规则，覆盖 fact / presentation / safety 三层。
+- 在 `content/rules/neutralization/` 以**酸碱中和**落一组最小真实数据：强弱搭配的可玩物质卡（HCl、HNO₃、NaOH、KOH、醋酸、氨水等）+ 条件化反应规则，覆盖 fact / presentation / safety 三层。**现行物质清单与数量以 `content/materialized/ruleset.json` 为准**（后续切片追加指示剂、浓硫酸、水溶剂等）。
 - 落地事实层的护栏字段与门禁：`source` / `confidence` / `review`、`applicability`、`data_class`、`rule_revision`；非 verified 不进可玩层、`ml_guess` 禁用。
 - 构建期物化链与黄金用例（`content/golden-cases/neutralization/`）：数据可机读、可 diff、可回滚；运行时零网络依赖。
 - 权威源快照与 AI 对拍记录（`content/ai-crosscheck/neutralization/`）：USGS PHREEQC `wateq4f.dat` / `minteq.dat` 快照入库，记录 endpoint/license/snapshot_date/sha256 与解析解对拍值。
@@ -39,7 +39,7 @@
 **复用优先**：schema 校验与类型生成沿用切片 001 已建立的 `json-schema-to-typescript` 链；校验用系统已装的 Python `jsonschema`（4.26.0，免新增依赖）；化学参数从 USGS PHREEQC 权威源取，不自造。
 
 **已裁决方向**（开工时用户逐项确认）：
-- 体系边界：强弱搭配 6 种（HCl/HNO₃/NaOH/KOH 强酸碱 + 醋酸/氨水弱电解质）。
+- 体系边界：强弱搭配（HCl/HNO₃/NaOH/KOH 强酸碱 + 醋酸/氨水弱电解质）；现行清单以 `content/materialized/ruleset.json` 为准。
 - 数值来源：抓权威源 + 列清单签核（已签核通过，见 `content/ai-crosscheck/neutralization/`）。
 - 校验门禁：Python `jsonschema`；`ajv` 仅未来浏览器前端候选，不作全局唯一校验器。
 
@@ -50,7 +50,7 @@
 3. 写 `schemas/reaction_rule.v1.schema.json`：equilibrium/kinetics/thermo 定量 + applicability + numerics + effects + 护栏 + rule_revision。
 4. 写 `schemas/solution_speciation.v1.schema.json`：species[]/ph/ionic_strength/equilibria/hidden_reactions。
 5. 更新 `packages/protocol/scripts/generate-types.mjs` 与 `src/index.ts`，纳入 4 个新 schema 并生成类型。
-6. 落 `content/rules/neutralization/`：6 种物质卡 + 中和反应规则（强弱搭配，fact/presentation/safety 三层）。
+6. 落 `content/rules/neutralization/`：强弱搭配物质卡 + 中和反应规则（fact/presentation/safety 三层；数量以物化 ruleset 为准）。
 7. 落 `content/golden-cases/neutralization/`：黄金用例期望值（pH、守恒、计量）。
 8. 落 `content/ai-crosscheck/neutralization/`：权威源快照 + 解析解对拍记录，附 endpoint/license/snapshot_date/sha256。
 9. 写 Python `jsonschema` 校验门禁脚本，接入 `package.json` 脚本与 CI。

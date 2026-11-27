@@ -1,0 +1,48 @@
+{
+  "schema_version": "st.compound.v1",
+  "compound_id": "water",
+  "names": {
+    "zh": "水（溶剂）",
+    "en": "water (solvent)",
+    "common": "蒸馏水"
+  },
+  "formula": "H2O",
+  "cas_number": "7732-18-5",
+  "data_class": "fact",
+  "properties": {
+    "molar_mass_g_mol": 18.015,
+    "density_g_ml": 1.0,
+    "reference_temp_K": 298.15
+  },
+  "safety": {
+    "ghs_codes": [],
+    "signal_word": "none",
+    "hazard_notes": "水本身无 GHS 危害；危险来自水与浓硫酸等物质的加入顺序（飞溅），由安全层按 addition_order 派生。"
+  },
+  "presentation": {
+    "appearance": "无色透明液体",
+    "solution_color": "无色",
+    "notes": "水溶液体系的溶剂与化学计量基准（PHREEQC 固定 1kg 水）。不贡献溶质元素、只贡献体积参与归一：加水稀释使溶质浓度按比例下降、pH 按强度量口径变化。纯水中性点随温度变化（Kw 温度依赖）：0°C≈7.45 / 25°C≈7.00 / 50°C≈6.62 / 100°C≈6.02，由 PHREEQC 原生 -temp 求解，对拍 IAPWS R11-24（2024）。比热 4.184 J/(g·K)、密度 1000 g/L 为热效应层常量（见 solver heat 路径），非新增化学事实参数。"
+  },
+  "source": {
+    "kind": "authoritative_db",
+    "ref": "USGS PHREEQC wateq4f.dat/minteq.dat（H2O = OH- + H+，delta_h 13.345 kcal）；中性点 IAPWS R11-24",
+    "endpoint": null,
+    "license": "public domain",
+    "version": "2016/2024",
+    "snapshot_date": "2026-11-22",
+    "sha256": "15a0ad8ae92fc8f52182377802be26352b0ac00ba46c37f02f3bba98e98abbf6"
+  },
+  "confidence": {
+    "level": "verified",
+    "note": "user signed off 2026-11-27（水特例全量深研裁决）；溶剂身份与水解离温度系数均来自已签核 .dat 权威源，IAPWS 中性点仅作对拍对照，不新增需签核化学参数"
+  },
+  "review": {
+    "status": "signed_off",
+    "reviewer": "stellarisssa (user)",
+    "date": "2026-11-27",
+    "ai_crosscheck": "content/ai-crosscheck/neutralization/"
+  },
+  "rule_revision": 1,
+  "playable": true
+}

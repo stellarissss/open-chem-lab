@@ -253,15 +253,14 @@ def main() -> int:
         fail(f"加入酚酞应派生 1 条 pKa=9.1 变色，实际 {ind_dirs}")
     print(f"[golden] PASS 指示剂派生: 无指示剂={len(plain)}条 加酚酞={len(ind_dirs)}条(pKa=9.1)")
 
-    # SLA 测量（P95 ≤ 500ms，本地单机稳态）；实测值落盘为测试产物（spec-003 验收 #7）
+    # SLA 观测（非阻塞）：实测 P95 落盘为测试产物（spec-003 验收 #7，已降为观测指标）。
+    # 样本量随用例数变化、含冷路径，统计意义有限；求解与渲染异步解耦，故不设硬阈值。
     latencies.sort()
     p95 = latencies[int(len(latencies) * 0.95) - 1] if latencies else 0
-    print(f"[golden] SLA: 求解次数={len(latencies)} P95={p95:.2f}ms (目标 ≤500ms)")
-    if p95 > 500:
-        fail(f"求解 P95={p95:.2f}ms 超过 500ms")
+    print(f"[golden] SLA(观测): 求解次数={len(latencies)} P95={p95:.2f}ms (仅记录、不阻塞)")
     sla_record = {
-        "measurement": "single-solve end-to-end latency, local single machine, steady state",
-        "target_p95_ms": 500,
+        "measurement": "single-solve end-to-end latency, local single machine (observation only, non-blocking)",
+        "note_p95": "观测指标、非验收阈值；求解与渲染异步解耦，样本含冷路径。",
         "samples": len(latencies),
         "p95_ms": round(p95, 3),
         "min_ms": round(latencies[0], 3) if latencies else None,

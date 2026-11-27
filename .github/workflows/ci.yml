@@ -39,6 +39,8 @@ jobs:
         run: python3 tests/schema-validate/validate.py
       - name: 美术资产署名与存在性门禁（LPPL 输出物 + 逐资产署名 + 路径闭合）
         run: python3 tests/asset-attribution/check.py
+      - name: UI-事实层一致性门禁（可取药品全部可玩）
+        run: python3 tests/content-consistency/check.py
       - name: 物化链产物一致性（幂等）
         run: |
           python3 tools/materialize-rules.py

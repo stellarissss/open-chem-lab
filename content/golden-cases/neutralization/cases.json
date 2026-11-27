@@ -3,7 +3,7 @@
   "system": "neutralization",
   "ruleset_version": "neutralization-r1",
   "source": "content/ai-crosscheck/neutralization/record.json",
-  "description": "中和体系数值零错黄金用例。spec-003 起以活度口径对拍：期望值回指权威源 .dat 快照（minteq.dat.snapshot）的 phreeqpython 实测活度 pH；ideal_expect 保留原理想溶液解析解作对照，不参与对拍。",
+  "description": "中和体系数值零错黄金用例。spec-003 起以活度口径对拍：期望值回指权威源 .dat 快照（minteq.dat.snapshot）的 phreeqpython 实测活度 pH；ideal_expect 保留原理想溶液解析解作对照，不参与对拍。 含纯水/稀释特例：水作溶剂只贡献体积，纯水温度依赖走原生 -temp 路径。",
   "ph_convention": "activity",
   "database": "minteq.dat.snapshot",
   "database_sha256": "0858232d8126f95cda1c8edbb2e50fa4c06055a1bcbb1aed154cc89cf61d168d",
@@ -194,6 +194,128 @@
         "rule": "弱酸强碱恰好中和生成 CH3COO- 水解，计量点 pH>7"
       },
       "rule": "弱酸强碱计量点生成 CH3COO- 水解，pH>7（只断言趋势）"
+    },
+    {
+      "case_id": "pure_water_25C_neutral_ph",
+      "setup": {
+        "compound": "water",
+        "temperature_K": 298.15,
+        "note": "纯水溶剂特例：中性点 25°C≈7.00"
+      },
+      "solve_input": {
+        "temperature_K": 298.15,
+        "substances": [
+          {
+            "compound_id": "water",
+            "concentration_mol_L": 1.0,
+            "volume_L": 1.0
+          }
+        ]
+      },
+      "expect": {
+        "ph": 7.0,
+        "tolerance": 0.02,
+        "source": "authority_snapshot",
+        "rule": "PHREEQC H2O=OH-+H+ (log_k=-13.998)，IAPWS R11-24 中性点 7.00"
+      },
+      "ideal_expect": {
+        "ph": 7.0,
+        "rule": "中性水 [H+]=[OH-]=1e-7"
+      },
+      "rule": "纯水走原生 -temp 路径（add_solution_simple({}) 恒 7.0 不反映温度）"
+    },
+    {
+      "case_id": "pure_water_100C_neutral_ph",
+      "setup": {
+        "compound": "water",
+        "temperature_K": 373.15,
+        "note": "温度红线：100°C 纯水中性点≈6.02（非 7.0）"
+      },
+      "solve_input": {
+        "temperature_K": 373.15,
+        "substances": [
+          {
+            "compound_id": "water",
+            "concentration_mol_L": 1.0,
+            "volume_L": 1.0
+          }
+        ]
+      },
+      "expect": {
+        "ph": 6.02,
+        "tolerance": 0.15,
+        "source": "authority_snapshot",
+        "rule": "PHREEQC -temp 100 + delta_h 13.345kcal；IAPWS pKw(100°C)=12.25→中性 pH≈6.13，引擎值 6.02 在容差内"
+      },
+      "ideal_expect": {
+        "ph": 6.13,
+        "rule": "IAPWS R11-24 中性点 6.13（引擎活度口径 6.02）"
+      },
+      "rule": "事实零错：25°C 外纯水 pH≠7；此用例锁死温度依赖不回退"
+    },
+    {
+      "case_id": "pure_water_0C_neutral_ph",
+      "setup": {
+        "compound": "water",
+        "temperature_K": 273.15,
+        "note": "0°C 纯水中性点≈7.45"
+      },
+      "solve_input": {
+        "temperature_K": 273.15,
+        "substances": [
+          {
+            "compound_id": "water",
+            "concentration_mol_L": 1.0,
+            "volume_L": 1.0
+          }
+        ]
+      },
+      "expect": {
+        "ph": 7.45,
+        "tolerance": 0.1,
+        "source": "authority_snapshot",
+        "rule": "IAPWS pKw(0°C)=14.95→中性 pH≈7.48，引擎 7.45"
+      },
+      "ideal_expect": {
+        "ph": 7.48,
+        "rule": "IAPWS R11-24 中性点 7.48"
+      },
+      "rule": "低温端温度依赖守门"
+    },
+    {
+      "case_id": "hcl_dilution_by_water_ph",
+      "setup": {
+        "compound": "hcl",
+        "concentration_mol_L": 0.1,
+        "volume_L": 1.0,
+        "diluted_with_water_L": 1.0,
+        "note": "0.1M HCl 1L 加水 1L → 浓度减半"
+      },
+      "solve_input": {
+        "substances": [
+          {
+            "compound_id": "hcl",
+            "concentration_mol_L": 0.1,
+            "volume_L": 1.0
+          },
+          {
+            "compound_id": "water",
+            "concentration_mol_L": 1.0,
+            "volume_L": 1.0
+          }
+        ]
+      },
+      "expect": {
+        "ph": 1.37,
+        "tolerance": 0.02,
+        "source": "authority_snapshot",
+        "rule": "体积归一：0.1M×1L/(1L+1L)=0.05M；PHREEQC 活度 pH≈1.3695"
+      },
+      "ideal_expect": {
+        "ph": 1.301,
+        "rule": "理想：-log10(0.05)=1.301；活度口径更高"
+      },
+      "rule": "加水稀释：水只贡献体积不贡献元素，溶质浓度按总体积稀释，pH 按强度量变化"
     }
   ],
   "hazard_cases": [

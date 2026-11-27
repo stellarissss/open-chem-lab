@@ -31,20 +31,25 @@
 ### 验证与门禁（敏捷轻量，见 03）
 
 - 不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，验证结果由测试产物与 git log 承载。
-- 产品级强制门禁已接入 CI：构建（`build`/`typecheck`）、`schema-validate`、`asset-attribution`、物化幂等、`golden-cases`（数值零错）、`evidence-check`、`doc-hygiene-check`、`license-scan`、部署可达 `e2e`（完整清单见 `docs/01-Architecture.md` §7.2）；`lgpl-link-check`、`rule-lint`、`dual-platform` 随相关切片接入。
+- 产品级强制门禁已接入 CI：构建（`build`/`typecheck`）、`schema-validate`、`asset-attribution`、`content-consistency`（可取药品全部可玩）、物化幂等、`golden-cases`（数值零错）、`evidence-check`、`doc-hygiene-check`、`license-scan`、部署可达 `e2e`（完整清单见 `docs/01-Architecture.md` §7.2）；`lgpl-link-check`、`rule-lint`、`dual-platform` 随相关切片接入。
 
 ### 内容（真实反应）贡献要求
 
 **严格只做真实库**：不接受虚构物质、用户自制物质、自定义规则、MOD 或规则包工坊。每条参数必须包含：
 
+字段以 `schemas/*.v1.schema.json` 为准，照抄 `content/rules/neutralization/` 里的真实卡即可，不要另造字段名。护栏要点（真实字段名）：
+
 ```yaml
-confidence: verified          # 仅 verified 可进沙盒
-source: { type: nist_crc_iupac, ref: "…", reviewed_by: "…", reviewed_at: "…" }
-applicability: { temp_K: [..], concentration_M: [..], solvent: …, ionic_strength: … }
-equilibrium: { Ka: …, Kb: …, Ksp: …, E0: …, deltaG: … }   # 定量，非近似
-numerics: { rtol: 1e-8, atol: 1e-10, stiffness: auto, significance: auto }
-effects: [ ... ]              # 现象指令，不是渲染代码
+confidence: { level: verified, note: "…" }   # 仅 verified 可进可玩层
+source: { kind: authoritative_db, ref: "…", snapshot_date: "…", sha256: "…" }
+review: { status: signed_off, reviewer: "…", date: "…" }
+applicability: { conditions: [...], temp_range_K: [...] }
+rule_revision: 1                              # 参数改动递增，禁原地覆盖
+equilibrium: { log_k_25C: …, delta_h: "…" }   # 定量，回指权威源 .dat
+effects: [ ... ]                              # 现象指令 ID，不是渲染代码
 ```
+
+完整样例见 `content/rules/neutralization/compounds/hcl.json` 与 `content/rules/neutralization/rules/strong_acid_strong_base.json`。
 
 流程：**权威源 → AI 用独立解析解 + chempy/Cantera/phreeqpython 交叉对拍 → 用户人工签核 → 黄金用例进 CI**，错了不许进沙盒。黄金用例须同时校验 `sane` 与 `success`，PHREEQC `-999` 哨兵值列为非法输入。**数值零错红线**：方向、产物、计量、守恒、平衡趋势、pH/浓度数值准确，近似不得进化学事实层。参数改动走 `rule_revision`（禁止原地覆盖）并补黄金用例。字段名英文 snake_case；物质名/术语/方程式双语（文档仅简体中文）。详见 `01-Architecture.md` 第五节。
 
