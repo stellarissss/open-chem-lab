@@ -129,6 +129,8 @@ export const REAGENTS: ReagentOption[] = [
   { compound_id: "methyl_orange", label: "甲基橙（指示剂）", default_concentration_mol_L: 0.001 },
   { compound_id: "sulfuric_acid_conc", label: "浓硫酸 H₂SO₄（危险）", default_concentration_mol_L: 18.4, hazard: true },
   { compound_id: "water", label: "蒸馏水 H₂O", default_concentration_mol_L: 1.0 },
+  { compound_id: "ammonia", label: "氨水 NH₃·H₂O", default_concentration_mol_L: 0.1 },
+  { compound_id: "hno3", label: "硝酸 HNO₃", default_concentration_mol_L: 0.1 },
 ];
 
 /** 实验台摆放的一件器材（apparatus 单一事实源引用的运行时实例）。 */

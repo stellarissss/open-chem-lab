@@ -31,7 +31,7 @@
 ### 验证与门禁（敏捷轻量，见 03）
 
 - 不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，验证结果由测试产物与 git log 承载。
-- 产品级强制门禁已接入 CI：构建（`build`/`typecheck`）、`schema-validate`、`asset-attribution`、`content-consistency`（可取药品全部可玩）、物化幂等、`golden-cases`（数值零错）、`evidence-check`、`doc-hygiene-check`、`license-scan`、部署可达 `e2e`（完整清单见 `docs/01-Architecture.md` §7.2）；`lgpl-link-check`、`rule-lint`、`dual-platform` 随相关切片接入。
+- 产品级强制门禁已接入 CI：构建（`build`/`typecheck`）、`schema-validate`、`asset-attribution`、`content-consistency`（可取药品全部可玩）、物化幂等、`golden-cases`（数值零错）、`evidence-check`、`report`（报告汇编零加工）、`doc-hygiene-check`、`license-scan`、部署可达 `e2e`（完整清单见 `docs/01-Architecture.md` §7.2）；`lgpl-link-check`、`rule-lint`、`dual-platform` 随相关切片接入。
 
 ### 内容（真实反应）贡献要求
 

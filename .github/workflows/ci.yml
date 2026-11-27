@@ -85,6 +85,12 @@ jobs:
       - name: 全链路集成验收 e2e（spec-007）
         run: packages/solver-worker/.venv/bin/python tests/e2e/full_pipeline.py
 
+      # M2（用户裁决）：报告汇编门禁——数值零加工、来源闭合、三态如实、幂等。
+      - name: 报告汇编门禁（spec-006 契约）
+        run: |
+          PYTHONPATH=packages/solver-worker/src \
+          packages/solver-worker/.venv/bin/python tests/report/check.py
+
   license-scan:
     runs-on: ubuntu-latest
     steps:

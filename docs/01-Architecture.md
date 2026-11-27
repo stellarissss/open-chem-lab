@@ -254,7 +254,7 @@ open-chem-lab/
 ### 7.2 验证原则（敏捷轻量）
 
 - **任务内按需验证、产品级门禁由 CI 统一守门**：单个任务收尾只跑与该任务相关的最小充分证据，不要求每个任务跑全套；质量由「数值零错红线 + CI 强制门禁 + 用户随时可打断」保障，验证结果由测试产物与 git log 承载。
-- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、美术资产署名与存在性（`asset-attribution`：逐 SVG 署名、许可白名单、纯 path、器材卡 asset 路径闭合）、UI-事实层一致性（`content-consistency`：可取药品全部可玩）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线、部署可达（`e2e`）。随切片继续接入：`lgpl-link-check`、`rule-lint`、`dual-platform`。
+- **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、美术资产署名与存在性（`asset-attribution`：逐 SVG 署名、许可白名单、纯 path、器材卡 asset 路径闭合）、UI-事实层一致性（`content-consistency`：可取药品全部可玩）、物化幂等、`golden-cases`（数值零错 + 依赖指纹）、证据自证（`evidence-check`）、报告汇编（`report`：数值零加工、来源闭合、三态如实、幂等）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线、部署可达（`e2e`）。随切片继续接入：`lgpl-link-check`、`rule-lint`、`dual-platform`。
 - **证据自证**：凡验收声称用某工具独立对拍，须在代码中真实调用、运行时打印版本与调用指纹、CI 校验一致；黄金用例期望标注来源（独立对拍/权威源快照/解析式）并锚定权威源哈希；关键量纲不变量（体积无关性、浓度十倍 pH 降一）固化为断言（流程见 `03-DocDD-Process.md` 第四节）。
 
 ### 7.3 对外口径（不可拆分的三层）
