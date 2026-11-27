@@ -13,6 +13,8 @@ COPY packages/solver-worker/src ./src
 # solver 求解时读取已物化 ruleset 与权威源 .dat 快照（只读事实层）。
 COPY content/materialized ./content/materialized
 COPY content/ai-crosscheck ./content/ai-crosscheck
+# spec-006 报告汇编的来源锚点读取黄金用例 database_sha256（只读事实层）。
+COPY content/golden-cases ./content/golden-cases
 
 ENV PYTHONPATH=/app/src
 ENV VIRTUAL_ENV=/app/.venv

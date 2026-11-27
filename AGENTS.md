@@ -25,7 +25,7 @@
 
 ## 当前焦点
 
-- 下一步：开工切片 007「集成验收」——粗稿已就位 `specs/spec-007-集成验收.md`（全链路贯通、四类好玩载体各一例、双平台最小部署），就地补全为正式规格再走完整闭环（`03-DocDD-Process.md` 2.1）。切片 006 已落实验报告（操作序列 + 数值快照 + 曲线 + 反应式 + 来源锚点，`st.report.v1` 在 solver-worker 汇编、gateway 仅代理转发、数值零加工、三态出口如实）；切片 005 已落 `wasm-view` 表现参数变换（WASM 优先 + TS 等价 fallback）、PixiJS 容器内现象（指示剂连续混色 / 温升 / 飞溅）、可视化实验台装置建造最小版、WS phenomenon 下发与回放复现。
+- 下一步：开工切片 008（M2 首个真实体系扩张）——粗稿已就位 `specs/spec-008-反应覆盖扩张.md`，就地补全为正式规格再走完整闭环（`03-DocDD-Process.md` 2.1）。切片 007 已收口 M1：全链路贯通验收（求解→现象→时间轴→报告经 gateway 连续走通）、四类好玩载体各一条端到端证据、双平台最小部署可达，已固化为 `tests/e2e/full_pipeline.py` 与 `docker_reachability.py` 并接入 CI。现行可玩物质/规则以 `content/materialized/ruleset.json` 为准，勿据已完成 spec 的旧数字判断现状。
 
 ## 现行事实指针
 

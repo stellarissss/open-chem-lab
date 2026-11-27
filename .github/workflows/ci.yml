@@ -50,9 +50,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: 安装前端依赖（全链路验收需启动 gateway/tsx）
+        run: pnpm install --frozen-lockfile
       - name: 安装 uv
         run: pip install uv==0.10.0
       - name: 按 lock 安装求解链（离线可复现版本）
@@ -71,6 +80,11 @@ jobs:
       - name: 部署可达 e2e（solver 绑定非回环，gateway 跨地址可调）
         run: packages/solver-worker/.venv/bin/python tests/e2e/deploy_reachability.py
 
+      # M1 收口（spec-007）：全链路贯通 + 四类好玩载体证据 + 数值零加工，
+      # 真实启动 gateway(tsx) + solver-worker，经 /api/v1/* 连续走通五个环节。
+      - name: 全链路集成验收 e2e（spec-007）
+        run: packages/solver-worker/.venv/bin/python tests/e2e/full_pipeline.py
+
   license-scan:
     runs-on: ubuntu-latest
     steps:
@@ -86,3 +100,21 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: 依赖许可证白名单门禁
         run: python3 tests/license-scan/scan.py
+
+  # M1 收口（spec-007）：容器构建可达。本地 workspace 完整安装会掩盖 Dockerfile
+  # 的 COPY 遗漏（wasm-view 源码 / assets SVG / golden-cases），此门禁在干净构建
+  # 上下文中真实构建三服务镜像并校验 compose 配置，防止双平台部署回归。
+  deploy-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 校验 compose 配置（双平台共用的相对路径 + LF）
+        run: docker compose -f deploy/docker-compose.minimal.yml config -q
+      - name: 构建三服务镜像（干净构建上下文，验证 COPY 闭合）
+        run: docker compose -f deploy/docker-compose.minimal.yml build gateway solver-worker web
+      - name: 起服并验收容器全链路（健康检查 + 网关求解/报告 + 错误操作）
+        run: |
+          cp deploy/.env.example deploy/.env
+          docker compose -f deploy/docker-compose.minimal.yml up -d
+          python3 tests/e2e/docker_reachability.py
+          docker compose -f deploy/docker-compose.minimal.yml down -v
