@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import websocket from "@fastify/websocket";
 import {
   PHENOMENON_SCHEMA_VERSION,
+  REPORT_SCHEMA_VERSION,
   SOLUTION_SPECIATION_SCHEMA_VERSION,
   TIMELINE_SCHEMA_VERSION,
 } from "@st/protocol";
@@ -137,6 +138,28 @@ app.get("/api/v1/timeline", async (request, reply) => {
     reply.header("x-cache", "miss");
     reply.header("x-solve-calls", String(envelope.solve_calls));
     return reply.send(envelope.timeline);
+  } catch (err) {
+    request.log.error(err);
+    return reply.code(502).send({ error: "solver unavailable" });
+  }
+});
+
+// 实验报告读取接口（spec-006）：gateway 只做代理，汇编在 solver-worker 侧只读复用
+// solve/timeline/ruleset 出口，不在网关层重算任何化学量。web-ui 不直连求解库。
+app.post("/api/v1/report", async (request, reply) => {
+  try {
+    const body = request.body as Record<string, unknown> | null;
+    if (!body) {
+      return reply.code(400).send({ error: "expected report request body" });
+    }
+    const built = await callSolver<Record<string, unknown>>("/solve/report", {
+      operations: body.operations ?? [],
+      substances: body.substances ?? [],
+      system: body.system ?? "strong",
+      container_id: body.container_id ?? "report-beaker",
+    });
+    reply.header("x-protocol", REPORT_SCHEMA_VERSION);
+    return reply.send(built);
   } catch (err) {
     request.log.error(err);
     return reply.code(502).send({ error: "solver unavailable" });

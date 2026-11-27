@@ -4,6 +4,7 @@ import SpeciesPanel from "./SpeciesPanel";
 import Timeline from "./Timeline";
 import LabBench from "./LabBench";
 import VesselView from "./VesselView";
+import Report from "./Report";
 import { fromSnapshot, SYSTEM_LABELS, useLab } from "./lab";
 import type { PhenomenonDirective } from "@st/protocol";
 import "./style.css";
@@ -31,8 +32,8 @@ export default function App() {
   const { status, version, protocol, uptimeMs, checkedAt, refresh } = useHealth();
   const {
     system, timeline, frameIndex, live, heat, error, loading,
-    phenomenonSource, wsDirectives,
-    loadTimeline, solveLive, clearLive, solveHeat,
+    phenomenonSource, wsDirectives, report,
+    loadTimeline, solveLive, clearLive, solveHeat, generateReport, clearReport,
   } = useLab();
   const [preset, setPreset] = useState(1);
 
@@ -80,6 +81,7 @@ export default function App() {
 
       <main className="stage">
         <div className="stage__left">
+          {report && <Report report={report} onClose={clearReport} />}
           <LabBench />
           <VesselView directives={directives} solvable={solvable}
             label={phenomenonSource === "timeline" ? "时间轴复现" : phenomenonSource === "ws" ? "WS 实时" : "实验台容器"} />
@@ -112,6 +114,14 @@ export default function App() {
               求解
             </button>
             <button type="button" onClick={clearLive} disabled={!live}>回到回放</button>
+          </div>
+
+          <h2>实验报告</h2>
+          <p className="muted tiny">汇编操作序列 + 求解数值 + 曲线 + 反应式 + 来源；经 gateway，不重算。</p>
+          <div className="inspector__actions">
+            <button type="button" onClick={() => void generateReport()} disabled={loading}>
+              生成报告
+            </button>
           </div>
 
           <h2>错误操作后果</h2>

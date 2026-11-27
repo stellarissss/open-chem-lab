@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import type {
+  LabReport,
+  Operation,
   PhenomenonDirective,
   SolutionSpeciation,
   SpeciationSnapshot,
@@ -174,6 +176,16 @@ export interface LabState {
   pourInto: (slot_id: string) => Promise<void>;
   clearBench: () => void;
   connectWs: () => () => void;
+  // spec-006 实验报告：操作序列记录 + 经 gateway 汇编只读报告
+  operations: Operation[];
+  report: LabReport | null;
+  generateReport: () => Promise<void>;
+  clearReport: () => void;
+}
+
+/** 追加一条操作记录；序号由当前长度派生，不用墙钟时间以保证报告幂等。 */
+function appendOp(ops: Operation[], op: Omit<Operation, "seq">): Operation[] {
+  return [...ops, { seq: ops.length + 1, ...op } as Operation];
 }
 
 export const SYSTEM_LABELS: Record<ScanSystem, string> = {
@@ -203,6 +215,8 @@ export const useLab = create<LabState>((set, get) => ({
   phenomenonSource: "none",
   wsStatus: "off",
   wsDirectives: [],
+  operations: [],
+  report: null,
 
   setSelectedReagent: (id) => set({ selectedReagent: id }),
   setSelectedVolume: (v) => set({ selectedVolume_L: v }),
@@ -211,13 +225,17 @@ export const useLab = create<LabState>((set, get) => ({
   placeApparatus: (apparatus_id, label) => {
     const slots = get().slots;
     const slot_id = `${apparatus_id}-${slots.length + 1}`;
-    set({ slots: [...slots, { slot_id, apparatus_id, label, x: 0, y: 0, contents: [] }] });
+    set({
+      slots: [...slots, { slot_id, apparatus_id, label, x: 0, y: 0, contents: [] }],
+      operations: appendOp(get().operations, { kind: "place_apparatus", container_id: slot_id, apparatus_id }),
+    });
   },
 
   clearBench: () => set({
     slots: [{ slot_id: "beaker-1", apparatus_id: "beaker_250ml", label: "烧杯 250 mL",
               x: 0, y: 0, contents: [] }],
     live: null, heat: null, phenomenonSource: "none", wsDirectives: [],
+    operations: [], report: null,
   }),
 
   /** 倾倒：把当前选中药品按体积加入目标容器，再经 gateway 求解，同步更新现象与物种面板。 */
@@ -234,6 +252,11 @@ export const useLab = create<LabState>((set, get) => ({
     const contents = [...(target?.contents ?? []), added];
     set({
       slots: slots.map((s) => s.slot_id === slot_id ? { ...s, contents } : s),
+      operations: appendOp(get().operations, {
+        kind: "pour", container_id: slot_id, compound_id: reagent.compound_id,
+        concentration_mol_L: reagent.default_concentration_mol_L, volume_L: selectedVolume_L,
+        ...(reagent.hazard ? { addition_order: additionOrder } : {}),
+      }),
       loading: true, error: null,
     });
 
@@ -386,4 +409,26 @@ export const useLab = create<LabState>((set, get) => ({
       set({ error: err instanceof Error ? err.message : "热效应求解失败", loading: false });
     }
   },
+
+  /** 生成只读报告：把操作序列 + 实验台当前物质组合交 gateway 汇编；数值不在此层加工。 */
+  generateReport: async () => {
+    const { operations, slots, system } = get();
+    // 以实验台现状（所有容器物质汇总）作为报告求解输入，保证数值来自真实状态。
+    const substances = slots.flatMap((s) => s.contents);
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch("/api/v1/report", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ operations, substances, system, container_id: "report-beaker" }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const built = (await res.json()) as LabReport;
+      set({ report: built, loading: false });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : "报告生成失败", loading: false });
+    }
+  },
+
+  clearReport: () => set({ report: null }),
 }));

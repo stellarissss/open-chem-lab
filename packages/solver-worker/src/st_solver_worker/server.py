@@ -9,6 +9,7 @@
     POST /solve/phenomena        → [st.phenomenon.v1]
     POST /solve/heat             → 错误操作后果（浓酸入水放热）
     POST /solve/timeline         → st.timeline.v1（滴定关键帧 + pH 曲线）
+    POST /solve/report           → st.report.v1（操作序列 + 快照 + 曲线 + 反应式 + 来源，只汇编）
 """
 from __future__ import annotations
 
@@ -17,7 +18,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
-from . import phenomena, solver, timeline
+from . import phenomena, report, solver, timeline
 
 # 服务版本与全仓 package.json 对齐（0.1.0）；可由环境覆盖，供缓存键与排障核对。
 SERVICE_VERSION = os.environ.get("SERVICE_VERSION", "0.1.0")
@@ -84,6 +85,15 @@ class Handler(BaseHTTPRequestHandler):
                 # solver_version 供 gateway 内容寻址缓存键纳入 solver_ver 维度。
                 self._send(200, {"timeline": spec, "solve_calls": solve_calls,
                                  "solver_version": SERVICE_VERSION})
+            elif self.path == "/solve/report":
+                # spec-006：报告只汇编既有 solve/timeline/ruleset 出口，不改化学口径。
+                built = report.build_report(
+                    operations=payload.get("operations"),
+                    substances=payload.get("substances"),
+                    system=payload.get("system", "strong"),
+                    container_id=payload.get("container_id", "report-beaker"),
+                )
+                self._send(200, built)
             else:
                 self._send(404, {"error": "not found"})
         except Exception as exc:  # 诚实降级，不把内部异常当科学结论

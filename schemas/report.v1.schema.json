@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/report.v1.schema.json",
+  "title": "LabReport",
+  "description": "实验报告：操作序列 + 求解快照 + 时间轴曲线 + 反应式 + 来源锚点的只读汇编投影。数值原样取自求解与时间轴产物，不加工、不重算；每条数值以 source_ref 回指来源锚点，三态出口如实呈现。非事实层、不进求解主链。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "report_id", "ruleset_version", "operations", "snapshots", "curves", "reactions", "sources", "outcome_summary"],
+  "properties": {
+    "schema_version": { "const": "st.report.v1" },
+    "report_id": { "type": "string", "minLength": 1, "description": "内容寻址：由操作序列/快照/曲线/反应式/来源锚点/规则集版本规范化后 sha256 派生，同内容幂等" },
+    "ruleset_version": { "type": "string", "minLength": 1, "description": "汇编所用规则集版本，保证可复现" },
+    "operations": { "type": "array", "description": "操作序列（取用/倾倒/加入顺序/求解/热效应），按 seq 升序", "items": { "$ref": "#/$defs/Operation" } },
+    "snapshots": { "type": "array", "description": "物种快照：一次实验的最终容器状态，outcome 三态如实", "items": { "$ref": "#/$defs/Snapshot" } },
+    "curves": { "type": "array", "description": "时间轴曲线原值（物种/物理量 -> [timestamp_ms, value]）", "items": { "$ref": "#/$defs/Curve" } },
+    "reactions": { "type": "array", "description": "反应式：逐条引用已签核 reaction_rule，不手写虚构方程式", "items": { "$ref": "#/$defs/Reaction" } },
+    "sources": { "type": "array", "minItems": 1, "description": "来源锚点：每条数值 source_ref 指向本数组 source_id", "items": { "$ref": "#/$defs/SourceAnchor" } },
+    "outcome_summary": { "$ref": "#/$defs/OutcomeSummary" }
+  },
+  "$defs": {
+    "Operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seq", "kind", "container_id"],
+      "properties": {
+        "seq": { "type": "integer", "minimum": 1, "description": "操作序号（时序由序号表达，不用墙钟时间以保证幂等）" },
+        "kind": { "type": "string", "enum": ["place_apparatus", "pour", "set_order", "solve", "heat"] },
+        "container_id": { "type": "string", "minLength": 1 },
+        "apparatus_id": { "type": "string" },
+        "compound_id": { "type": "string" },
+        "concentration_mol_L": { "type": "number" },
+        "volume_L": { "type": "number" },
+        "addition_order": { "type": "string", "enum": ["water_into_acid", "acid_into_water"] }
+      }
+    },
+    "Snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_id", "outcome", "source_ref"],
+      "properties": {
+        "container_id": { "type": "string", "minLength": 1 },
+        "outcome": { "$ref": "#/$defs/Outcome" },
+        "ph": { "type": "number", "description": "求解活度口径 pH 原值" },
+        "ionic_strength": { "type": "number", "minimum": 0 },
+        "temperature_K": { "type": "number", "exclusiveMinimum": 0 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "降级出口置信度" },
+        "reason": { "type": "string", "description": "非 solved 出口的诚实原因" },
+        "species": { "type": "array", "items": { "$ref": "#/$defs/SpeciesValue" }, "default": [] },
+        "source_ref": { "type": "string", "minLength": 1, "description": "指向 sources[].source_id" }
+      }
+    },
+    "SpeciesValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "concentration_mol_l", "source_ref"],
+      "properties": {
+        "name": { "type": "string", "description": "物种名（引用事实层标识）" },
+        "concentration_mol_l": { "type": "number", "minimum": 0 },
+        "phase": { "type": "string" },
+        "source_ref": { "type": "string", "minLength": 1, "description": "指向 sources[].source_id" }
+      }
+    },
+    "Curve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["species", "points", "source_ref"],
+      "properties": {
+        "species": { "type": "string", "description": "物种名或 ph 等物理量" },
+        "points": { "type": "array", "description": "时间轴原值，不插值不加工", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+        "source_ref": { "type": "string", "minLength": 1, "description": "指向 sources[].source_id" }
+      }
+    },
+    "Reaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "equation", "source_ref"],
+      "properties": {
+        "rule_id": { "type": "string", "minLength": 1, "description": "已签核 reaction_rule 的 rule_id" },
+        "equation": { "type": "string", "minLength": 1, "description": "取自规则 reaction.equation 原值，不手写" },
+        "data_class": { "type": "string" },
+        "confidence_level": { "type": "string" },
+        "source_ref": { "type": "string", "minLength": 1, "description": "指向 sources[].source_id（权威源快照哈希锚点）" }
+      }
+    },
+    "SourceAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "kind", "ref"],
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["solver", "timeline", "ruleset", "authoritative_db", "crosscheck", "computed"] },
+        "ref": { "type": "string", "minLength": 1, "description": "求解器/数据源/时间轴标识" },
+        "sha256": { "type": ["string", "null"], "description": "权威源快照或规则集哈希锚点；无则 null" },
+        "version": { "type": ["string", "null"] },
+        "snapshot_date": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      }
+    },
+    "Outcome": {
+      "type": "string",
+      "enum": ["solved", "no_significant_change", "degraded"],
+      "description": "三态出口：定量解 / 覆盖外无明显变化 / 诚实降级"
+    },
+    "OutcomeSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["solved", "no_significant_change", "degraded", "total"],
+      "properties": {
+        "solved": { "type": "integer", "minimum": 0 },
+        "no_significant_change": { "type": "integer", "minimum": 0 },
+        "degraded": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

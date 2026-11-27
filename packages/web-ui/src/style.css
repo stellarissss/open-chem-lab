@@ -112,3 +112,34 @@ select { width: 100%; padding: 6px 8px; border: 1px solid #d8d0c0; border-radius
 @media (max-width: 720px) {
   .stage { grid-template-columns: 1fr; }
 }
+
+/* spec-006 实验报告：只读汇编视图 */
+.report { background: #fffdf8; border: 1px solid #d8d0c0; border-left: 3px solid #2f6b4f;
+  border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+.report__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.report__head h2 { margin: 0 0 4px; font-size: 16px; }
+.report__summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin: 10px 0; font-size: 12px; }
+.report__tag { background: #eef3ee; border: 1px solid #cfddd2; border-radius: 12px; padding: 2px 8px; }
+.report__tag--warn { background: #fbeae6; border-color: #e6bdb3; color: #b23a2b; }
+.report__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.report__block { min-width: 0; }
+.report__block h3 { margin: 8px 0 6px; font-size: 13px; color: #2f6b4f; }
+.report__ops { margin: 0; padding-left: 20px; font-size: 12px; }
+.report__ops li { margin-bottom: 3px; display: flex; flex-wrap: wrap; gap: 6px; }
+.report__snap { border: 1px solid #e5ded0; border-radius: 6px; padding: 8px; margin-bottom: 8px; font-size: 12px; }
+.report__snap-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.report__outcome { font-weight: 700; border-radius: 4px; padding: 1px 6px; }
+.report__outcome--solved { color: #2f6b4f; background: #eef3ee; }
+.report__outcome--no_significant_change { color: #8a6d2f; background: #f7f0dd; }
+.report__outcome--degraded { color: #b23a2b; background: #fbeae6; }
+.report__reason { color: #b23a2b; margin-top: 4px; }
+.report__species { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11px; }
+.report__species th, .report__species td { text-align: left; padding: 2px 4px; border-bottom: 1px solid #eee8dc; }
+.report__curve { margin-bottom: 8px; }
+.report__curve-head { display: flex; justify-content: space-between; font-size: 11px; }
+.report__spark { width: 100%; height: 34px; background: #f7f4ec; border-radius: 4px; }
+.report__rxns, .report__sources { margin: 0; padding-left: 18px; font-size: 11px; }
+.report__rxns li, .report__sources li { margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+.report__hash { font-size: 10px; word-break: break-all; color: #8a8272; }
+@media (max-width: 720px) { .report__grid { grid-template-columns: 1fr; } }
