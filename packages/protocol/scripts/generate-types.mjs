@@ -22,6 +22,9 @@ const SCHEMAS = [
   ["reaction_rule.v1.schema.json", "ReactionRuleV1"],
   ["solution_speciation.v1.schema.json", "SolutionSpeciationV1"],
   ["report.v1.schema.json", "ReportV1"],
+  ["bench_world.v1.schema.json", "BenchWorldV1"],
+  ["operation_event.v1.schema.json", "OperationEventV1"],
+  ["container_state.v1.schema.json", "ContainerStateV1"],
 ];
 
 await mkdir(outDir, { recursive: true });

@@ -25,6 +25,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: 全量构建（protocol 类型生成 + gateway/web-ui 编译）
         run: pnpm build
+      - name: 倾角倾倒物理单测（临界角/托里拆利/液面水平/体积守恒）
+        run: packages/gateway/node_modules/.bin/tsx tests/bench-physics/test.mjs
 
   content-validate:
     runs-on: ubuntu-latest
@@ -39,8 +41,10 @@ jobs:
         run: python3 tests/schema-validate/validate.py
       - name: 美术资产署名与存在性门禁（LPPL 输出物 + 逐资产署名 + 路径闭合）
         run: python3 tests/asset-attribution/check.py
-      - name: UI-事实层一致性门禁（可取药品全部可玩）
+      - name: UI-事实层一致性门禁（试剂架瓶装试剂有浓度且可玩）
         run: python3 tests/content-consistency/check.py
+      - name: 范式红线门禁（禁旧演示层复活）
+        run: python3 tests/paradigm-redline/check.py
       - name: 物化链产物一致性（幂等）
         run: |
           python3 tools/materialize-rules.py
@@ -80,9 +84,9 @@ jobs:
       - name: 部署可达 e2e（solver 绑定非回环，gateway 跨地址可调）
         run: packages/solver-worker/.venv/bin/python tests/e2e/deploy_reachability.py
 
-      # M1 收口（spec-007）：全链路贯通 + 四类好玩载体证据 + 数值零加工，
-      # 真实启动 gateway(tsx) + solver-worker，经 /api/v1/* 连续走通五个环节。
-      - name: 全链路集成验收 e2e（spec-007）
+      # M2 自由台面（spec-008）：数据驱动 + 操作原语 + 定向求解 + 三态如实 + 范式护栏，
+      # 真实启动 gateway(tsx) + solver-worker，经 /api/v1/* 走通新范式核心循环。
+      - name: 全链路集成验收 e2e（spec-008 自由台面）
         run: packages/solver-worker/.venv/bin/python tests/e2e/full_pipeline.py
 
       # M2（用户裁决）：报告汇编门禁——数值零加工、来源闭合、三态如实、幂等。

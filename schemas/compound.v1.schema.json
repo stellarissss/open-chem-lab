@@ -32,6 +32,7 @@
     "properties": { "$ref": "#/$defs/CompoundProperties" },
     "safety": { "$ref": "#/$defs/Safety" },
     "presentation": { "$ref": "#/$defs/Presentation" },
+    "reagent_solution": { "$ref": "#/$defs/ReagentSolution" },
     "source": { "$ref": "#/$defs/Source" },
     "confidence": { "$ref": "#/$defs/Confidence" },
     "review": { "$ref": "#/$defs/Review" },
@@ -105,6 +106,19 @@
           "description": "指示剂响应：表现层按求解 pH 用 Henderson–Hasselbalch 连续混色，现象由状态派生而非逐反应手写"
         },
         "notes": { "type": "string" }
+      }
+    },
+    "ReagentSolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "试剂瓶标签浓度（008）：玩家从试剂架取用的瓶装溶液初始条件，非求解结果——故不违反诚实计算红线，但须来源锚定并经用户签核。仅可瓶装可玩物质填写；纯水等溶剂型物质以 solvent 标记、浓度仅作参考。",
+      "required": ["concentration_mol_L", "source"],
+      "properties": {
+        "concentration_mol_L": { "type": "number", "exclusiveMinimum": 0, "description": "瓶装溶液标称浓度 mol/L（操作初始条件，非计算值）" },
+        "solvent": { "type": "boolean", "default": false, "description": "是否溶剂型（如蒸馏水）；浓度仅参考，求解按溶剂特例处理" },
+        "hazard": { "type": "boolean", "default": false, "description": "是否危险试剂（如浓硫酸）；走热效应/后果写实路径，不进稀区主求解" },
+        "applicability": { "type": "string", "description": "适用范围/注意事项（如浓区体系、仅供滴加）" },
+        "source": { "type": "string", "minLength": 1, "description": "浓度来源：实验室常规试剂规格 + 用户签核日期" }
       }
     },
     "Indicator": {

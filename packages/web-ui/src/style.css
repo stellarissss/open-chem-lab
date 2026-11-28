@@ -80,30 +80,66 @@ select { width: 100%; padding: 6px 8px; border: 1px solid #d8d0c0; border-radius
 .heat-card__ok { color: #2f6b4f; font-weight: 700; margin-top: 4px; }
 @keyframes splash-pulse { 0% { transform: translateX(0); } 25% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
 
-/* spec-005 实验台装置建造 + 容器内现象 */
-.bench-grid { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 14px; }
-.bench-rack h3 { margin: 10px 0 6px; font-size: 12px; color: #8a8272; }
-.reagent-list { display: flex; flex-direction: column; gap: 4px; }
-.reagent { text-align: left; font-size: 11px; padding: 5px 8px; background: #fffdf8; color: #23201b; border-color: #d8d0c0; }
-.reagent--active { background: #1d2b25; color: #f4f1ea; border-color: #1d2b25; }
-.pour-controls { margin: 10px 0; display: flex; flex-direction: column; gap: 5px; }
-.pour-controls label { font-size: 11px; color: #8a8272; }
-.pour-controls input[type="range"] { width: 100%; accent-color: #2f6b4f; }
-.apparatus-palette { display: flex; flex-wrap: wrap; gap: 5px; }
-.apparatus-palette button { font-size: 11px; padding: 5px 8px; }
-.bench-stage { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 12px;
-  min-height: 150px; padding: 12px; background: repeating-linear-gradient(0deg,#f1ede3,#f1ede3 23px,#e9e4d8 24px);
-  border: 1px solid #d8d0c0; border-radius: 8px; }
-.bench-slot { display: flex; flex-direction: column; align-items: center; gap: 6px;
-  background: #fffdf8; border: 1px solid #d8d0c0; border-radius: 8px; padding: 8px; }
-.bench-slot__meta { display: flex; flex-direction: column; align-items: center; font-size: 12px; }
-.bench-slot button { font-size: 11px; padding: 4px 10px; }
-/* 写实器材：tikz-chemlab 编译输出物；液体色层为表现近似（精确混色归 VesselView）。 */
-.apparatus-art { position: relative; display: inline-flex; align-items: center; justify-content: center;
-  width: 76px; height: 92px; overflow: hidden; }
-.apparatus-art img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.apparatus-art__liquid { position: absolute; left: 26%; right: 26%; bottom: 12%; height: 38%;
-  opacity: 0.62; border-radius: 0 0 32% 32%; pointer-events: none; }
+/* 008 自由实验台：写实台面 + 架子 + 临近浮动按钮 + 倾角倾倒液面物理 */
+.topbar__meta { font-size: 12px; color: #b8c6bc; margin-left: auto; }
+.help-list { font-size: 12px; line-height: 1.7; padding-left: 20px; margin: 8px 0; }
+
+.bench-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 14px; }
+.rack h3 { margin: 6px 0 8px; font-size: 12px; color: #8a8272; }
+.rack__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 12px; }
+.rack__item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  font-size: 11px; padding: 6px; background: #fffdf8; color: #23201b; border: 1px solid #d8d0c0; }
+.rack__item:hover { border-color: #2f6b4f; }
+.rack__swatch { width: 100%; height: 6px; border-radius: 3px; border: 1px solid #d8d0c0; }
+.rack__label { font-weight: 600; text-align: left; }
+
+/* 台面：水平视角写实台面纹理 + 物理边界 */
+.bench-stage { position: relative; overflow: hidden; min-height: 460px;
+  background: linear-gradient(180deg, #e8e0cf 0%, #d8cdb7 100%);
+  border: 2px solid #b8a98c; border-radius: 8px;
+  box-shadow: inset 0 0 40px rgba(90,70,40,0.12);
+  touch-action: none; user-select: none; }
+.bench-stage::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 22px;
+  background: repeating-linear-gradient(90deg, #cbbc9e, #cbbc9e 18px, #bfae8c 20px);
+  border-bottom: 2px solid #a99876; }
+.bench-stage--pouring { cursor: crosshair; }
+
+/* 单件器材：容器外壳 */
+.bench-piece { position: absolute; display: flex; flex-direction: column; align-items: center;
+  cursor: grab; transition: filter 0.12s; }
+.bench-piece:active { cursor: grabbing; }
+.bench-piece--selected { filter: drop-shadow(0 0 4px #2f6b4f); }
+.bench-piece--pouring { filter: drop-shadow(0 0 6px #b8860b); z-index: 5; }
+.bench-piece__vessel { position: relative; width: 76px; height: 92px; margin-top: 18px;
+  transform-origin: center bottom; transition: transform 0.05s linear; }
+.bench-piece__vessel img { width: 100%; height: 100%; object-fit: contain;
+  pointer-events: none; -webkit-user-drag: none; }
+/* 液面层：clip-path 约束到容器下部轮廓；反向旋转抵消容器倾角 → 世界水平 */
+.bench-piece__liquid { position: absolute; left: 20%; right: 20%; bottom: 14%;
+  opacity: 0.62; clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
+  border-radius: 4px 4px 12px 12px; pointer-events: none; }
+.bench-piece__meta { display: flex; align-items: center; gap: 6px; margin-top: 2px;
+  background: rgba(255,253,248,0.9); border: 1px solid #d8d0c0; border-radius: 6px;
+  padding: 2px 6px; font-size: 11px; max-width: 110px; }
+.bench-piece__label { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bench-piece__close { margin-left: auto; font-size: 11px; line-height: 1; padding: 0 4px;
+  background: transparent; color: #8a8272; border: none; }
+.bench-piece__close:hover { color: #7a3b3b; }
+
+/* 临近交互范式：交界浮动操作按钮（缩略图图标） */
+.nearby-action { position: absolute; transform: translate(-50%, -50%); z-index: 8;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 6px 8px; background: #1d2b25; color: #f4f1ea; border: 1px solid #2f6b4f;
+  border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.25); font-size: 14px; }
+.nearby-action:hover { background: #2f6b4f; }
+.nearby-action small { font-size: 10px; }
+
+.pour-hint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  z-index: 9; display: flex; align-items: center; gap: 10px;
+  background: rgba(29,43,37,0.92); color: #f4f1ea; padding: 8px 14px;
+  border-radius: 8px; font-size: 12px; white-space: nowrap; }
+.pour-hint button { background: #2f6b4f; border-color: #2f6b4f; color: #fff; }
+
 .vessel-host { width: 100%; display: flex; justify-content: center; min-height: 260px; }
 .vessel-host canvas { border-radius: 8px; }
 
@@ -111,35 +147,5 @@ select { width: 100%; padding: 6px 8px; border: 1px solid #d8d0c0; border-radius
 
 @media (max-width: 720px) {
   .stage { grid-template-columns: 1fr; }
+  .bench-layout { grid-template-columns: 1fr; }
 }
-
-/* spec-006 实验报告：只读汇编视图 */
-.report { background: #fffdf8; border: 1px solid #d8d0c0; border-left: 3px solid #2f6b4f;
-  border-radius: 8px; padding: 14px; margin-bottom: 14px; }
-.report__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.report__head h2 { margin: 0 0 4px; font-size: 16px; }
-.report__summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-  margin: 10px 0; font-size: 12px; }
-.report__tag { background: #eef3ee; border: 1px solid #cfddd2; border-radius: 12px; padding: 2px 8px; }
-.report__tag--warn { background: #fbeae6; border-color: #e6bdb3; color: #b23a2b; }
-.report__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.report__block { min-width: 0; }
-.report__block h3 { margin: 8px 0 6px; font-size: 13px; color: #2f6b4f; }
-.report__ops { margin: 0; padding-left: 20px; font-size: 12px; }
-.report__ops li { margin-bottom: 3px; display: flex; flex-wrap: wrap; gap: 6px; }
-.report__snap { border: 1px solid #e5ded0; border-radius: 6px; padding: 8px; margin-bottom: 8px; font-size: 12px; }
-.report__snap-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.report__outcome { font-weight: 700; border-radius: 4px; padding: 1px 6px; }
-.report__outcome--solved { color: #2f6b4f; background: #eef3ee; }
-.report__outcome--no_significant_change { color: #8a6d2f; background: #f7f0dd; }
-.report__outcome--degraded { color: #b23a2b; background: #fbeae6; }
-.report__reason { color: #b23a2b; margin-top: 4px; }
-.report__species { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11px; }
-.report__species th, .report__species td { text-align: left; padding: 2px 4px; border-bottom: 1px solid #eee8dc; }
-.report__curve { margin-bottom: 8px; }
-.report__curve-head { display: flex; justify-content: space-between; font-size: 11px; }
-.report__spark { width: 100%; height: 34px; background: #f7f4ec; border-radius: 4px; }
-.report__rxns, .report__sources { margin: 0; padding-left: 18px; font-size: 11px; }
-.report__rxns li, .report__sources li { margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
-.report__hash { font-size: 10px; word-break: break-all; color: #8a8272; }
-@media (max-width: 720px) { .report__grid { grid-template-columns: 1fr; } }

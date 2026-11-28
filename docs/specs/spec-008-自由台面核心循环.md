@@ -7,15 +7,16 @@
 ## 范围
 
 **做**：
-- **台面场景**：水平视角写实台面（有边界）+ 器材架 + 试剂架；器材按真实比例渲染（复用 `assets/apparatus/` 写实 SVG 与 apparatus 卡参数），自由拖动摆放、不可重叠、放回架子。
-- **取用与倾倒**：从试剂架取试剂瓶（固定浓度，如实验室试剂瓶）拖到容器口倾倒；抓起容器 A 拖到 B 上方按住倾倒，转移量随按住时长连续增长（体积由操作自然产生，**无体积滑条、无配比下拉、无顺序下拉**）。
+- **台面场景**：水平视角写实台面（有边界）+ 器材架 + 试剂架；器材按真实比例渲染（复用 `assets/apparatus/` 写实 SVG 与 apparatus 卡参数），自由拖动摆放、不可重叠、放回架子。DOM + CSS 绝对定位实现拖放（不引拖拽重依赖），PixiJS/`VesselView` 继续只负责选中容器的现象渲染。
+- **临近交互范式**（L1 裁决，已写入 `01` §二）：两可交互对象物理靠近到阈值内→交界浮现**浮动操作按钮**（图标为操作缩略图）→点按进入对应操作态。倾倒遵守此范式：移近源/目标容器→点「倾倒」缩略钮→进入倾角控制。
+- **取用与倾角倾倒**：试剂瓶与容器统一为**可摆放容器实例**（内容来自事实层、可自由摆放）；抓起源容器后以容器中心为支点，**指针相对该中心的方位角**控制倾角；**容器旋转而液面世界水平**（容器 `rotate(θ)` + 液面层 `rotate(-θ)` 抵消 + `clip-path` 约束到器材轮廓）；倾角超瓶口临界角开始流出，**流速按托里拆利近似**（√液柱高 × 开口有效面积）对时间积分得转移量（量来自几何与操作、无预设常数表；黏度为表现层近似暂不引入）。**无体积滑条、无配比下拉、无顺序下拉**。
 - **新契约三件**（`packages/protocol/`，schema 先行）：
   - `st.bench_world.v1`：台面世界状态（器材实例/位置/容器内容）；
   - `st.operation_event.v1`：操作原语事件（取放/倾倒等，物理量按操作类型）；
-  - `container_state` WS 定向推送：按 `container_id` 定向（替换旧全局广播）。
-- **求解接入**：倾倒后容器组成变化经 gateway 实时求解（复用现有 `/solve` 链路），容器内液体颜色/液面按结果派生；物种面板点容器查看。
-- **旧演示层废弃**：删除预设配比下拉、错误操作两按钮、预置时间轴（`/api/v1/timeline` 旧扫描链路）、硬编码药品架（改由物化 ruleset 驱动试剂架）、二选一加入顺序、写死的 solveHeat 参数。「实验报告」按钮与视图下线（spec-006 产物过渡保留在 solver 侧，前端入口移除；010 前后以台面快照取代）。
-- **试剂架数据驱动**：架内试剂由 `content/materialized/ruleset.json` 派生（可玩物质自动上架），`content-consistency` 门禁升级为「架上试剂全部可玩」。
+  - `st.container_state.v1`：WS 按 `container_id` 定向推送（替换旧全局广播）。
+- **求解接入**：倾倒后容器组成变化经 gateway 实时求解（复用现有 `/solve` 链路），容器内液体颜色/液面按结果派生；物种面板点容器查看；三态出口如实。
+- **旧演示层废弃**：删除预设配比下拉、错误操作两按钮、预置时间轴（`/api/v1/timeline` 旧扫描链路）、二选一加入顺序、写死的 solveHeat 参数。「实验报告」按钮与视图下线（spec-006 产物过渡保留在 solver 侧，前端入口移除；010 前后以台面快照取代）。
+- **试剂瓶浓度进事实层 + 数据驱动**：`compound` schema 加可选 `reagent_solution`（`concentration_mol_L` + 来源/适用范围）；可试剂瓶化物质在 `content/rules/` 配浓度并物化进 ruleset；试剂架由 ruleset 派生（不再硬编码 `REAGENTS`），`content-consistency` 门禁升级为「架上试剂有浓度且可玩」。
 
 **不做**（明确边界）：
 - 实时求解调度器（状态驱动重算/稳态冻结/焦点配额）→ 009；本片沿用「操作完成后求解一次」。
@@ -26,18 +27,31 @@
 
 ## 验收标准（可判定）
 
-1. 器材可从架子拖到台面任意位置、可拖回、不可重叠；真实比例与 apparatus 卡参数一致。
-2. 倾倒转移量由按住时长连续决定，两次同样操作可产生不同体积；全程**无任何预设配比/顺序/数值控件**（范式红线检查纳入门禁）。
-3. 倾倒后容器经 gateway 实时求解，物种面板与容器液体表现按结果派生；三态出口如实（含覆盖外诚实降级）。
-4. 三新契约 schema 发布、类型生成、经 gateway 走通；`container_state` 按 `container_id` 定向推送，多容器现象不串扰。
-5. 试剂架由物化 ruleset 驱动；`content-consistency` 门禁升级并通过；旧演示层代码与路由删除后全仓无死引用。
-6. 既有门禁（build/typecheck/schema/asset-attribution/golden-cases/evidence/doc-hygiene/license/e2e/双平台构建）全绿、无回归；`report` 门禁过渡期按前端入口下线状态调整后保持绿。
-7. 全链路端到端测试更新为「拖放取用→倾倒→求解→现象」新范式脚本，接入 CI。
+1. 器材/试剂瓶可从架子拖到台面任意位置、可拖回、不可重叠；真实比例与 apparatus 卡参数一致（单位 px 尺寸由卡参数换算）。
+2. 两容器靠近到阈值内浮现带缩略图的**浮动操作按钮**，点按进入倾倒态（临近交互范式）；全程**无任何预设配比/顺序/数值控件**（范式红线门禁静态扫描）。
+3. 倾倒由指针相对容器中心方位角控制倾角；**容器旋转时液面在世界坐标保持水平**（单位测试：容器 +θ、液面 -θ 抵消），视觉上液面相对容器壁倾斜；倾角超临界角才流出，两次不同倾角/时长产生不同体积。
+4. 转移量按临界角 + 托里拆利流速对时间积分（转移量随倾角单调、随液柱高单调），数值来自几何与操作、无硬编码常数表；无黏度虚构数值。
+5. 倾倒后容器经 gateway 实时求解，物种面板与容器液体表现按结果派生；三态出口如实（含覆盖外诚实降级与友好表达）。
+6. 三新契约 schema（`bench_world.v1`/`operation_event.v1`/`container_state.v1`）发布、类型生成、经 gateway 走通；`container_state` 按 `container_id` 定向推送，多容器现象不串扰（负向测试：订阅 A 收不到 B 的现象）。
+7. 试剂架浓度来自事实层 `reagent_solution` 并物化；`content-consistency` 门禁升级为「架上试剂有浓度且可玩」并通过；旧演示层代码与路由删除后全仓无死引用（预设下拉/时间轴/报告入口/写死热参数等关键词零命中）。
+8. 既有门禁（build/typecheck/schema/asset-attribution/golden-cases/evidence/doc-hygiene/license/e2e/双平台构建）全绿、无回归；`report` 门禁过渡期按前端入口下线状态调整后保持绿。
+9. 全链路端到端测试更新为「拖放取用→临近浮动按钮→倾角倾倒→求解→现象→三态」新范式脚本，接入 CI。
 
 ## 技术要点
 
-遵循 `01-Architecture.md`：§一优先级（玩法真实与自由第一、诚实计算第二）；§二主视图与核心玩法（禁预设按钮/写死数值）；§五新契约与实体（`bench_world`/`operation_event`/`container_state`/`bench_snapshot`）；§六包结构（不新增顶层包，落在 `packages/protocol`、`packages/web-ui`、`packages/gateway`、`packages/solver-worker`）；§7.1 范式红线。复用：写实 SVG 资产与 `asset-attribution` 管线、apparatus 卡参数、现象渲染管线（`VesselView`/wasm-view）、`solution_speciation` 契约与三态出口、`content-consistency` 门禁骨架。台面交互建议自研轻量实现（PixiJS 场景 + 指针事件），不引入拖拽重依赖；动手前先搜开源成品验证（红线 7）。
+遵循 `01-Architecture.md`：§一优先级（玩法真实与自由第一、诚实计算第二）与操作原语物理口径；§二临近交互范式与核心玩法（禁预设按钮/写死数值）；§五新契约与实体（`bench_world`/`operation_event`/`container_state`/`bench_snapshot`）；§六包结构（不新增顶层包，落在 `packages/protocol`、`packages/web-ui`、`packages/gateway`、`packages/solver-worker`）；§7.1 范式红线。复用：写实 SVG 资产与 `asset-attribution` 管线、apparatus 卡参数、现象渲染管线（`VesselView`/wasm-view）、`solution_speciation` 契约与三态出口、`content-consistency` 门禁骨架。台面交互自研轻量实现（DOM + CSS 绝对定位 + 指针事件；液面水平用反向旋转 + `clip-path`），不引入拖拽/流体重依赖；动手前已搜证 CSS 反向旋转保液面水平为成熟做法。
+
+## 任务拆解
+
+1. **契约先行**：三 schema + `reagent_solution` 字段 → 生成类型 → gateway 出口。
+2. **事实层**：可试剂瓶化物质配浓度 → 物化 → content-consistency 升级。
+3. **状态模型**：`bench_world` store（器材/试剂瓶统一实例、位置、内容、倾角、临近关系）。
+4. **台面渲染**：架子（数据驱动）+ 拖放 + 重叠判定 + 临近浮动按钮。
+5. **倾角倾倒**：方位角→倾角 + 液面反向旋转 + 临界角 + 托里拆利积分 + 操作事件。
+6. **求解接入**：倾倒后 `/speciation` + `/phenomena` + `container_state` 定向 WS；物种面板。
+7. **旧层清理 + 门禁**：删旧演示层 → 范式红线门禁 → e2e 新范式 → 全量验证。
+8. **回写**：三样产出物 + 查漏（§5.1 实体表/目录树/quantity 指针）。
 
 ## 状态
 
-待开始
+进行中

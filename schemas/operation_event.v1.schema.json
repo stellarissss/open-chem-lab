@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/operation_event.v1.schema.json",
+  "title": "OperationEvent",
+  "description": "st.operation_event.v1 — 操作原语事件（008）：取放/倾倒/倾角等一切玩家操作。物理量按操作类型承载，一切数值由操作与求解产生、绝无预设配比。事件幂等由 event_id 保证，供台面状态重建与现象溯源。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "op_type", "timestamp_ms"],
+  "properties": {
+    "schema_version": { "const": "st.operation_event.v1" },
+    "event_id": { "type": "string", "minLength": 1, "description": "事件唯一 ID（内容寻址或递增序列，保证幂等）" },
+    "op_type": { "$ref": "#/$defs/OpType" },
+    "timestamp_ms": { "type": "integer", "minimum": 0, "description": "事件时间戳 ms（相对台面会话）" },
+    "source_instance_id": { "type": "string", "description": "操作源器材实例（取放/倾倒时必填）" },
+    "target_instance_id": { "type": "string", "description": "操作目标器材实例（倾倒时必填）" },
+    "payload": { "$ref": "#/$defs/OpPayload" }
+  },
+  "$defs": {
+    "OpType": {
+      "type": "string",
+      "enum": ["place", "remove", "pour", "tilt", "take_reagent"],
+      "description": "操作原语：place/remove=器材取放；pour=倾倒转移；tilt=倾角调整；take_reagent=从试剂架取用"
+    },
+    "OpPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "按操作类型承载的物理量；倾倒的 transferred_volume_L 由流速对时间积分产生，非预设。",
+      "properties": {
+        "compound_id": { "type": "string", "description": "取用/倾倒涉及的物质 ID" },
+        "position_mm": { "type": "object", "additionalProperties": false, "required": ["x", "y"], "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+        "rotation_deg": { "type": "number", "description": "倾角（度）" },
+        "tilt_angle_deg": { "type": "number", "description": "倾倒触发时的容器倾角（度）" },
+        "transferred_volume_L": { "type": "number", "minimum": 0, "description": "本次倾倒转移体积 L（托里拆利积分结果，非预设）" },
+        "head_height_mm": { "type": "number", "minimum": 0, "description": "倾倒时液面到瓶口的有效液柱高 mm（流速物理输入）" },
+        "duration_ms": { "type": "integer", "minimum": 0, "description": "操作持续时间 ms" }
+      }
+    }
+  }
+}

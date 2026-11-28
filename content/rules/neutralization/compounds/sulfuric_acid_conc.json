@@ -37,6 +37,12 @@
     "solution_color": "无色",
     "notes": "密度约 1.84 g/mL，远大于水，故酸沉底、水浮面——决定稀释方向的危害差异。"
   },
+  "reagent_solution": {
+    "concentration_mol_L": 18.4,
+    "hazard": true,
+    "applicability": "浓硫酸 98%，浓区体系：不进稀区平衡，走热效应/飞溅后果写实路径",
+    "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+  },
   "source": {
     "kind": "authoritative_db",
     "ref": "NIST-JANAF (Chase 1998); Aspen Plus V14 物性库液相生成焓",

@@ -7,6 +7,9 @@ export const APPARATUS_SCHEMA_VERSION = "st.apparatus.v1" as const;
 export const REACTION_RULE_SCHEMA_VERSION = "st.reaction_rule.v1" as const;
 export const SOLUTION_SPECIATION_SCHEMA_VERSION = "st.solution_speciation.v1" as const;
 export const REPORT_SCHEMA_VERSION = "st.report.v1" as const;
+export const BENCH_WORLD_SCHEMA_VERSION = "st.bench_world.v1" as const;
+export const OPERATION_EVENT_SCHEMA_VERSION = "st.operation_event.v1" as const;
+export const CONTAINER_STATE_SCHEMA_VERSION = "st.container_state.v1" as const;
 
 export type { PhenomenonDirective } from "./generated/phenomenon.v1.js";
 export type { SaveGame, ApparatusPlacement, SubstanceRef } from "./generated/save.v1.js";
@@ -20,6 +23,9 @@ export type { Compound } from "./generated/compound.v1.js";
 export type { Apparatus } from "./generated/apparatus.v1.js";
 export type { ReactionRule } from "./generated/reaction_rule.v1.js";
 export type { SolutionSpeciation } from "./generated/solution_speciation.v1.js";
+export type { BenchWorld } from "./generated/bench_world.v1.js";
+export type { OperationEvent } from "./generated/operation_event.v1.js";
+export type { ContainerState } from "./generated/container_state.v1.js";
 export type {
   LabReport,
   Operation,

@@ -25,6 +25,7 @@ export interface Compound {
   properties?: CompoundProperties;
   safety?: Safety;
   presentation?: Presentation;
+  reagent_solution?: ReagentSolution;
   source: Source;
   confidence: Confidence;
   review: Review;
@@ -194,6 +195,31 @@ export interface Indicator {
    * 来源与观测说明
    */
   note?: string;
+}
+/**
+ * 试剂瓶标签浓度（008）：玩家从试剂架取用的瓶装溶液初始条件，非求解结果——故不违反诚实计算红线，但须来源锚定并经用户签核。仅可瓶装可玩物质填写；纯水等溶剂型物质以 solvent 标记、浓度仅作参考。
+ */
+export interface ReagentSolution {
+  /**
+   * 瓶装溶液标称浓度 mol/L（操作初始条件，非计算值）
+   */
+  concentration_mol_L: number;
+  /**
+   * 是否溶剂型（如蒸馏水）；浓度仅参考，求解按溶剂特例处理
+   */
+  solvent?: boolean;
+  /**
+   * 是否危险试剂（如浓硫酸）；走热效应/后果写实路径，不进稀区主求解
+   */
+  hazard?: boolean;
+  /**
+   * 适用范围/注意事项（如浓区体系、仅供滴加）
+   */
+  applicability?: string;
+  /**
+   * 浓度来源：实验室常规试剂规格 + 用户签核日期
+   */
+  source: string;
 }
 export interface Confidence {
   /**

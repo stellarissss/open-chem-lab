@@ -37,6 +37,10 @@
     "solution_color": "无色",
     "notes": "氨的水溶液，呈碱性"
   },
+  "reagent_solution": {
+    "concentration_mol_L": 0.1,
+    "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+  },
   "source": {
     "kind": "authoritative_db",
     "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",

@@ -24,6 +24,11 @@
       "note": "变色范围 pH 3.1–4.4：低于 3.1 红色，高于 4.4 黄色；中间按 Henderson–Hasselbalch 连续混色。来源：Bates(1964)、中科大指示剂表、Edgepedia。"
     }
   },
+  "reagent_solution": {
+    "concentration_mol_L": 0.001,
+    "applicability": "酸碱指示剂，痕量滴加，不参与稀区平衡求解",
+    "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+  },
   "source": {
     "kind": "literature",
     "ref": "中科大化学实验教学中心《常用酸碱指示剂》 + BenchChem 指示剂性能指南 + Bates, R.G. (1964)",

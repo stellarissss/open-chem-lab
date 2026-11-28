@@ -24,6 +24,12 @@
     "solution_color": "无色",
     "notes": "水溶液体系的溶剂与化学计量基准（PHREEQC 固定 1kg 水）。不贡献溶质元素、只贡献体积参与归一：加水稀释使溶质浓度按比例下降、pH 按强度量口径变化。纯水中性点随温度变化（Kw 温度依赖）：0°C≈7.45 / 25°C≈7.00 / 50°C≈6.62 / 100°C≈6.02，由 PHREEQC 原生 -temp 求解，对拍 IAPWS R11-24（2024）。比热 4.184 J/(g·K)、密度 1000 g/L 为热效应层常量（见 solver heat 路径），非新增化学事实参数。"
   },
+  "reagent_solution": {
+    "concentration_mol_L": 1.0,
+    "solvent": true,
+    "applicability": "溶剂型：浓度仅参考，求解按溶剂特例（体积归一/中性点）处理",
+    "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+  },
   "source": {
     "kind": "authoritative_db",
     "ref": "USGS PHREEQC wateq4f.dat/minteq.dat（H2O = OH- + H+，delta_h 13.345 kcal）；中性点 IAPWS R11-24",

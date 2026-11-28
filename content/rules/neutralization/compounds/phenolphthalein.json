@@ -24,6 +24,11 @@
       "note": "变色范围 pH 8.2–10.0：低于 8.2 无色，高于 10.0 粉红；中间按 Henderson–Hasselbalch 连续混色。强碱 pH>12 褪为无色（超出本切片范围）。来源：中科大化学实验中心指示剂表、Bates(1964)。"
     }
   },
+  "reagent_solution": {
+    "concentration_mol_L": 0.001,
+    "applicability": "酸碱指示剂，痕量滴加，不参与稀区平衡求解",
+    "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+  },
   "source": {
     "kind": "literature",
     "ref": "中科大化学实验教学中心《常用酸碱指示剂》 + Bates, R.G. (1964) Determination of pH",

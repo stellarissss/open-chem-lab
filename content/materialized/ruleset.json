@@ -44,6 +44,10 @@
         "solution_color": "无色",
         "notes": "食醋主要酸性成分（稀溶液）"
       },
+      "reagent_solution": {
+        "concentration_mol_L": 0.1,
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+      },
       "source": {
         "kind": "authoritative_db",
         "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
@@ -105,6 +109,10 @@
         "solution_color": "无色",
         "notes": "氨的水溶液，呈碱性"
       },
+      "reagent_solution": {
+        "concentration_mol_L": 0.1,
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+      },
       "source": {
         "kind": "authoritative_db",
         "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
@@ -164,6 +172,10 @@
         "appearance": "无色透明液体（浓盐酸有刺激性酸雾）",
         "solution_color": "无色",
         "notes": "盐酸为氯化氢水溶液"
+      },
+      "reagent_solution": {
+        "concentration_mol_L": 0.1,
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
       },
       "source": {
         "kind": "authoritative_db",
@@ -225,6 +237,10 @@
         "solution_color": "无色（浓硝酸因分解呈黄）",
         "notes": "浓硝酸见光分解出 NO2"
       },
+      "reagent_solution": {
+        "concentration_mol_L": 0.1,
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+      },
       "source": {
         "kind": "authoritative_db",
         "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
@@ -285,6 +301,10 @@
         "solution_color": "无色",
         "notes": "俗称苛性钾"
       },
+      "reagent_solution": {
+        "concentration_mol_L": 0.1,
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+      },
       "source": {
         "kind": "authoritative_db",
         "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
@@ -332,6 +352,11 @@
           "base_color": "yellow",
           "note": "变色范围 pH 3.1–4.4：低于 3.1 红色，高于 4.4 黄色；中间按 Henderson–Hasselbalch 连续混色。来源：Bates(1964)、中科大指示剂表、Edgepedia。"
         }
+      },
+      "reagent_solution": {
+        "concentration_mol_L": 0.001,
+        "applicability": "酸碱指示剂，痕量滴加，不参与稀区平衡求解",
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
       },
       "source": {
         "kind": "literature",
@@ -393,6 +418,10 @@
         "solution_color": "无色",
         "notes": "俗称烧碱"
       },
+      "reagent_solution": {
+        "concentration_mol_L": 0.1,
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+      },
       "source": {
         "kind": "authoritative_db",
         "ref": "USGS PHREEQC wateq4f.dat/minteq.dat",
@@ -440,6 +469,11 @@
           "base_color": "pink",
           "note": "变色范围 pH 8.2–10.0：低于 8.2 无色，高于 10.0 粉红；中间按 Henderson–Hasselbalch 连续混色。强碱 pH>12 褪为无色（超出本切片范围）。来源：中科大化学实验中心指示剂表、Bates(1964)。"
         }
+      },
+      "reagent_solution": {
+        "concentration_mol_L": 0.001,
+        "applicability": "酸碱指示剂，痕量滴加，不参与稀区平衡求解",
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
       },
       "source": {
         "kind": "literature",
@@ -502,6 +536,12 @@
         "solution_color": "无色",
         "notes": "密度约 1.84 g/mL，远大于水，故酸沉底、水浮面——决定稀释方向的危害差异。"
       },
+      "reagent_solution": {
+        "concentration_mol_L": 18.4,
+        "hazard": true,
+        "applicability": "浓硫酸 98%，浓区体系：不进稀区平衡，走热效应/飞溅后果写实路径",
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
+      },
       "source": {
         "kind": "authoritative_db",
         "ref": "NIST-JANAF (Chase 1998); Aspen Plus V14 物性库液相生成焓",
@@ -549,6 +589,12 @@
         "appearance": "无色透明液体",
         "solution_color": "无色",
         "notes": "水溶液体系的溶剂与化学计量基准（PHREEQC 固定 1kg 水）。不贡献溶质元素、只贡献体积参与归一：加水稀释使溶质浓度按比例下降、pH 按强度量口径变化。纯水中性点随温度变化（Kw 温度依赖）：0°C≈7.45 / 25°C≈7.00 / 50°C≈6.62 / 100°C≈6.02，由 PHREEQC 原生 -temp 求解，对拍 IAPWS R11-24（2024）。比热 4.184 J/(g·K)、密度 1000 g/L 为热效应层常量（见 solver heat 路径），非新增化学事实参数。"
+      },
+      "reagent_solution": {
+        "concentration_mol_L": 1.0,
+        "solvent": true,
+        "applicability": "溶剂型：浓度仅参考，求解按溶剂特例（体积归一/中性点）处理",
+        "source": "实验室常规试剂瓶标称规格；用户签核（008 从旧 UI 硬编码 REAGENTS 迁入事实层，2026-11-28）"
       },
       "source": {
         "kind": "authoritative_db",
@@ -1060,5 +1106,5 @@
       "rule_revision": 1
     }
   ],
-  "ruleset_sha256": "312955579379943054491deaa9cdb1965a72b0cb98f0ba956afae9a4ad0aad4d"
+  "ruleset_sha256": "6ed117e57a642726066d22e7a257ba397d6af67a69eb6a17061fca9c1e7dd6a1"
 }

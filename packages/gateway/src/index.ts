@@ -1,10 +1,16 @@
 import Fastify from "fastify";
 import websocket from "@fastify/websocket";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import {
   PHENOMENON_SCHEMA_VERSION,
   REPORT_SCHEMA_VERSION,
   SOLUTION_SPECIATION_SCHEMA_VERSION,
   TIMELINE_SCHEMA_VERSION,
+  BENCH_WORLD_SCHEMA_VERSION,
+  OPERATION_EVENT_SCHEMA_VERSION,
+  CONTAINER_STATE_SCHEMA_VERSION,
 } from "@st/protocol";
 import type { SolutionSpeciation, SpeciationTimeline, PhenomenonDirective } from "@st/protocol";
 
@@ -19,6 +25,51 @@ const startedAt = Date.now();
 const app = Fastify({ logger: true });
 
 await app.register(websocket);
+
+/**
+ * 台面目录（008）：试剂架 / 器材架从物化 ruleset 派生，web-ui 不再硬编码药品表。
+ * 路径由 ST_REPO_ROOT 指定（容器内为 /app），本地默认上溯仓库根。规则集只读、
+ * 构建期物化，gateway 启动时加载一次；版本随 ruleset_version 暴露供前端对齐。
+ */
+
+const REPO_ROOT = process.env.ST_REPO_ROOT
+  ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+let benchCatalogCache: { ruleset_version: string; reagents: unknown[]; apparatus: unknown[] } | null = null;
+
+function loadBenchCatalog(): { ruleset_version: string; reagents: unknown[]; apparatus: unknown[] } {
+  if (benchCatalogCache) return benchCatalogCache;
+  const ruleset = JSON.parse(readFileSync(path.join(REPO_ROOT, "content/materialized/ruleset.json"), "utf8")) as {
+    ruleset_version?: string;
+    compounds?: Array<Record<string, unknown>>;
+    apparatus?: unknown[];
+  };
+  const reagents = (ruleset.compounds ?? [])
+    .filter((c) => c.reagent_solution && typeof c.reagent_solution === "object")
+    .map((c) => {
+      const rs = c.reagent_solution as Record<string, unknown>;
+      return {
+        compound_id: c.compound_id,
+        label: (c.names as { zh?: string } | undefined)?.zh ?? String(c.compound_id),
+        formula: c.formula,
+        concentration_mol_L: rs.concentration_mol_L,
+        hazard: rs.hazard ?? false,
+        solvent: rs.solvent ?? false,
+        applicability: rs.applicability ?? null,
+        solution_color: (c.presentation as { solution_color?: string } | undefined)?.solution_color ?? null,
+      };
+    });
+  benchCatalogCache = {
+    ruleset_version: String(ruleset.ruleset_version ?? "unknown"),
+    reagents,
+    apparatus: ruleset.apparatus ?? [],
+  };
+  return benchCatalogCache;
+}
+
+app.get("/api/v1/bench/catalog", async (_request, reply) => {
+  reply.header("x-protocol", BENCH_WORLD_SCHEMA_VERSION);
+  return reply.send(loadBenchCatalog());
+});
 
 /** 本地求解端点代理：gateway 是唯一对外入口，求解细节不暴露给表现层。 */
 async function callSolver<T>(path: string, body: unknown): Promise<T> {
@@ -95,6 +146,20 @@ app.post("/api/v1/heat", async (request, reply) => {
   }
 });
 
+// 操作原语事件上报（008）：st.operation_event.v1 经 gateway 校验形状后计入会话计数。
+// 台面是持续沙盘、不存「实验」；事件用于可观测性（计数回显）与范式证据，不入库留存。
+let operationEventCount = 0;
+app.post("/api/v1/bench/operation", async (request, reply) => {
+  const body = request.body as Record<string, unknown> | null;
+  if (!body || typeof body.event_id !== "string" || typeof body.op_type !== "string"
+      || typeof body.timestamp_ms !== "number") {
+    return reply.code(400).send({ error: "expected st.operation_event.v1 core fields" });
+  }
+  operationEventCount += 1;
+  reply.header("x-protocol", OPERATION_EVENT_SCHEMA_VERSION);
+  return reply.send({ accepted: true, count: operationEventCount });
+});
+
 // 现象成因溯源：返回 st.phenomenon.v1 指令列表（只供面板展示 trigger，不渲染）。
 app.post("/api/v1/speciation/phenomena", async (request, reply) => {
   try {
@@ -166,9 +231,64 @@ app.post("/api/v1/report", async (request, reply) => {
   }
 });
 
-// WS 握手：保留 echo（兼容），并预留 phenomenon 订阅通道供 spec-005 下发现象指令。
-// 本切片只建立订阅关系与确认，不承载渲染逻辑。
-const phenomenonSubscribers = new Set<{ send: (data: string) => void }>();
+// WS 握手：echo（兼容）+ phenomenon 频道（兼容旧）+ container_state 按 container_id 定向订阅（008）。
+// container_state 替换旧 phenomenon 全局广播：订阅者的 key 为 container_id，只收本容器的状态。
+type WsSocket = { send: (data: string) => void };
+const phenomenonSubscribers = new Set<WsSocket>();
+/** container_id → 订阅该容器的 socket 集合。定向推送，多容器现象不串扰。 */
+const containerSubscribers = new Map<string, Set<WsSocket>>();
+
+/** 定向推送 container_state：只发给订阅该 container_id 的客户端。 */
+function pushContainerState(containerId: string, payload: unknown): number {
+  const subs = containerSubscribers.get(containerId);
+  if (!subs || subs.size === 0) return 0;
+  const data = JSON.stringify(payload);
+  let sent = 0;
+  for (const sub of subs) {
+    try { sub.send(data); sent += 1; } catch { /* 断连由 close 清理 */ }
+  }
+  return sent;
+}
+
+/** 倾倒结算：求解容器组成 → 定向推送 container_state → 同步返回（前端无需等 WS）。 */
+app.post("/api/v1/bench/container-state", async (request, reply) => {
+  const started = Date.now();
+  try {
+    const body = request.body as Record<string, unknown> | null;
+    if (!body || typeof body.container_id !== "string" || !Array.isArray(body.substances)) {
+      return reply.code(400).send({ error: "expected { container_id, substances: [...] }" });
+    }
+    const containerId = body.container_id;
+    const payload = {
+      container_id: containerId,
+      substances: body.substances,
+      addition_order: body.addition_order ?? "acid_into_water",
+    };
+    const [spec, directives] = await Promise.all([
+      callSolver<Record<string, unknown>>("/solve", payload),
+      callSolver<unknown[]>("/solve/phenomena", payload),
+    ]);
+    const state = {
+      schema_version: CONTAINER_STATE_SCHEMA_VERSION,
+      container_id: containerId,
+      speciation: spec,
+      directives,
+      solve_latency_ms: Date.now() - started,
+      solver_version: String(spec.solver_version ?? "unknown"),
+      ruleset_version: String(spec.ruleset_version ?? ""),
+    };
+    const delivered = pushContainerState(containerId, {
+      type: "container_state",
+      ...state,
+    });
+    reply.header("x-protocol", CONTAINER_STATE_SCHEMA_VERSION);
+    reply.header("x-container-delivered", String(delivered));
+    return reply.send(state);
+  } catch (err) {
+    request.log.error(err);
+    return reply.code(502).send({ error: "solver unavailable" });
+  }
+});
 
 app.register(async (instance) => {
   instance.get("/ws", { websocket: true }, (socket) => {
@@ -176,9 +296,9 @@ app.register(async (instance) => {
       JSON.stringify({ type: "welcome", protocol: PHENOMENON_SCHEMA_VERSION }),
     );
     socket.on("message", (raw: Buffer) => {
-      let msg: { type?: string; channel?: string };
+      let msg: { type?: string; channel?: string; container_id?: string };
       try {
-        msg = JSON.parse(raw.toString()) as { type?: string; channel?: string };
+        msg = JSON.parse(raw.toString()) as { type?: string; channel?: string; container_id?: string };
       } catch {
         socket.send(JSON.stringify({ type: "echo", payload: raw.toString() }));
         return;
@@ -186,9 +306,7 @@ app.register(async (instance) => {
       if (msg.type === "subscribe" && msg.channel === "phenomenon") {
         phenomenonSubscribers.add(socket);
         socket.send(JSON.stringify({
-          type: "subscribed",
-          channel: "phenomenon",
-          protocol: PHENOMENON_SCHEMA_VERSION,
+          type: "subscribed", channel: "phenomenon", protocol: PHENOMENON_SCHEMA_VERSION,
         }));
         return;
       }
@@ -197,9 +315,28 @@ app.register(async (instance) => {
         socket.send(JSON.stringify({ type: "unsubscribed", channel: "phenomenon" }));
         return;
       }
+      // 008：按 container_id 定向订阅容器状态（替换全局广播）
+      if (msg.type === "subscribe" && msg.channel === "container_state" && msg.container_id) {
+        let set = containerSubscribers.get(msg.container_id);
+        if (!set) { set = new Set(); containerSubscribers.set(msg.container_id, set); }
+        set.add(socket);
+        socket.send(JSON.stringify({
+          type: "subscribed", channel: "container_state", container_id: msg.container_id,
+          protocol: CONTAINER_STATE_SCHEMA_VERSION,
+        }));
+        return;
+      }
+      if (msg.type === "unsubscribe" && msg.channel === "container_state" && msg.container_id) {
+        containerSubscribers.get(msg.container_id)?.delete(socket);
+        socket.send(JSON.stringify({ type: "unsubscribed", channel: "container_state", container_id: msg.container_id }));
+        return;
+      }
       socket.send(JSON.stringify({ type: "echo", payload: raw.toString() }));
     });
-    socket.on("close", () => phenomenonSubscribers.delete(socket));
+    socket.on("close", () => {
+      phenomenonSubscribers.delete(socket);
+      for (const set of containerSubscribers.values()) set.delete(socket);
+    });
   });
 });
 

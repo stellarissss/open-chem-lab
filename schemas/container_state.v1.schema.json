@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stellarissss.github.io/open-chem-lab/schemas/container_state.v1.schema.json",
+  "title": "ContainerState",
+  "description": "st.container_state.v1 — 容器实时状态定向推送（008）：gateway 经 WS 按 container_id 定向推送，替换旧 phenomenon 全局广播。状态变化驱动求解的结果流，多容器现象不串扰。数值来自求解、原样转发不加工。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "container_id", "speciation", "directives", "solver_version"],
+  "properties": {
+    "schema_version": { "const": "st.container_state.v1" },
+    "container_id": { "type": "string", "minLength": 1, "description": "定向推送键：仅订阅该 container_id 的客户端收到" },
+    "speciation": { "type": "object", "description": "该容器的 st.solution_speciation.v1 求解结果（原样转发，含三态出口）" },
+    "directives": {
+      "type": "array",
+      "description": "该容器派生的 st.phenomenon.v1 现象指令（只含本容器）",
+      "items": { "type": "object" }
+    },
+    "solve_latency_ms": { "type": "number", "minimum": 0, "description": "本次求解耗时 ms（反馈真实开销，非虚标）" },
+    "solver_version": { "type": "string", "minLength": 1, "description": "求解器版本，供缓存失效与证据自证" },
+    "ruleset_version": { "type": "string", "description": "规则集版本（可选，与 bench_world 对齐）" }
+  }
+}

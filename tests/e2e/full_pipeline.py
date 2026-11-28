@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-"""M1 全链路集成验收（spec-007）：经 gateway 连续走通一条垂直切片。
+"""M2 自由台面全链路集成验收（spec-008）：经 gateway 走通新范式核心循环。
 
-覆盖 001–006 串联后的五个环节与四类好玩载体，并用测试产物承载证据：
+覆盖 008 的新玩法闭环与诚实出口，以测试产物承载证据：
 
-- 全链路：health → speciation → phenomena → timeline（含缓存复用）→ report，
-  全程只访问 gateway 的 /api/v1/*，不直连 solver（01 第六节依赖规则）。
-- 载体①错误操作后果（003）：水入酸 / 酸入水温升数值相同，splash 指令仅水入酸派生。
-- 载体②装置建造最小版（005）：取器材 + 倾倒的操作序列进入报告 operations。
-- 载体③物种面板与时间轴回放（004）：关键帧物种快照与同配比单容器求解同源。
-- 载体④实验报告（006）：报告快照 pH / 离子强度 / 物种浓度与求解出口逐字段一致，
-  曲线与时间轴产物一致，三态出口如实，source_ref 引用闭合，report_id 幂等。
-- 静态护栏：web-ui 源码不直连求解库（无 solver 端口 / 直连 import）。
+- 链路：health → bench/catalog（ruleset 数据驱动）→ bench/operation（操作原语）→
+  bench/container-state（定向求解推送）→ 三态出口，全程只访问 gateway 的 /api/v1/*，
+  不直连 solver（01 第六节依赖规则）。
+- 试剂架数据驱动：catalog 的每个瓶装试剂都有浓度>0、来源锚定、可玩（对齐 content-consistency 门禁）。
+- 操作原语：st.operation_event.v1 经 gateway 校验、计数回显（无「实验」会话入库）。
+- 定向推送：WS 订阅 container A，向 B 发 container_state，A 收不到（多容器不串扰）；
+  向 A 发则 A 收到且协议头正确。
+- 求解接入 + 诚实：target 组成变化后实解；覆盖外物质 → no_significant_change 带 reason。
+- 范式红线：web-ui 无预设配比/旧演示层（对齐 paradigm-redline 门禁）；
+  倾角物理以 benchPhysics 纯函数单测覆盖（见 tests/bench-physics/test.mjs）。
+- 静态护栏：web-ui 不直连求解库。
 
-纯标准库，不需要 docker build；CI 与本地均可跑。启动 gateway(tsx) 与 solver-worker
-两个子进程，用固定高端口避免与默认端口冲突，退出时确保回收。
+纯标准库 + venv 的 websocket-client；CI 与本地均可跑。启动 gateway(tsx) 与
+solver-worker 两个子进程，固定高端口，退出时确保回收。
 """
 from __future__ import annotations
 
@@ -51,7 +54,7 @@ def free(port: int) -> bool:
         return s.connect_ex(("127.0.0.1", port)) != 0
 
 
-def wait_health(url: str, timeout: float = 20.0) -> bool:
+def wait_health(url: str, timeout: float = 25.0) -> bool:
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -93,7 +96,7 @@ def main() -> int:
     gw_dir = ROOT / "packages/gateway"
     tsx = gw_dir / "node_modules/.bin/tsx"
     env_gw = dict(os.environ, PORT=str(GATEWAY_PORT), HOST="127.0.0.1",
-                  SOLVER_URL=SOLVER)
+                  SOLVER_URL=SOLVER, ST_REPO_ROOT=str(ROOT))
     gw_proc = subprocess.Popen(
         [str(tsx), "src/index.ts"], cwd=gw_dir, env=env_gw,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -103,128 +106,110 @@ def main() -> int:
         eq(wait_health(GATEWAY + "/api/v1/health"), "[链路] gateway /api/v1/health 不可达")
         print("[pipeline] OK health: solver + gateway 均可达")
 
-        # ---- 环节 1：单容器求解（经 gateway，携带协议版本头）----
-        acid = {"container_id": "b1", "substances": [
-            {"compound_id": "hcl", "concentration_mol_L": 0.1, "volume_L": 1.0}]}
-        spec, h = http_json("POST", GATEWAY + "/api/v1/speciation", acid)
-        eq(h.get("x-protocol") == "st.solution_speciation.v1",
-           f"[链路] speciation 协议头缺失: {h.get('x-protocol')}")
+        # ---- 环节 1：试剂架数据驱动（ruleset → catalog）----
+        catalog, h = http_json("GET", GATEWAY + "/api/v1/bench/catalog")
+        eq(h.get("x-protocol") == "st.bench_world.v1", "[数据] catalog 协议头缺失")
+        reagents = catalog.get("reagents", [])
+        eq(len(reagents) >= 8, f"[数据] 试剂架过少：{len(reagents)}")
+        for r in reagents:
+            eq(isinstance(r.get("concentration_mol_L"), (int, float)) and r["concentration_mol_L"] > 0,
+               f"[数据] 瓶装试剂 {r.get('compound_id')} 浓度非法")
+        eq(catalog.get("ruleset_version") == "neutralization-r1", "[数据] ruleset 版本缺失")
+        print(f"[pipeline] OK 数据驱动: catalog {len(reagents)} 试剂 + {len(catalog.get('apparatus', []))} 器材, "
+              f"ruleset={catalog['ruleset_version']}")
+
+        # ---- 环节 2：操作原语事件（st.operation_event.v1）----
+        op = {"schema_version": "st.operation_event.v1", "event_id": "evt-e2e-1",
+              "op_type": "pour", "timestamp_ms": 1, "source_instance_id": "reagent-1",
+              "target_instance_id": "beaker-1",
+              "payload": {"transferred_volume_L": 0.03, "tilt_angle_deg": 42}}
+        op_ack, _ = http_json("POST", GATEWAY + "/api/v1/bench/operation", op)
+        eq(op_ack.get("accepted") is True and op_ack.get("count", 0) >= 1,
+           "[操作] operation_event 未被接受")
+        bad = {"event_id": "bad"}
+        try:
+            http_json("POST", GATEWAY + "/api/v1/bench/operation", bad)
+            eq(False, "[操作] 非法事件应被 400 拒绝")
+        except urllib.error.HTTPError as e:
+            eq(e.code == 400, f"[操作] 非法事件响应码 {e.code} != 400")
+        print(f"[pipeline] OK 操作原语: event 计数回显={op_ack['count']}, 非法事件 400 拒绝")
+
+        # ---- 环节 3：container_state 定向求解（HTTP 结算）----
+        acid = {"container_id": "beaker-A", "substances": [
+            {"compound_id": "hcl", "concentration_mol_L": 0.1, "volume_L": 0.03}]}
+        state, h = http_json("POST", GATEWAY + "/api/v1/bench/container-state", acid)
+        eq(h.get("x-protocol") == "st.container_state.v1", "[契约] container_state 协议头缺失")
+        spec = state["speciation"]
         eq(spec["outcome"] == "solved" and 1.0 < spec["ph"] < 1.2,
-           f"[数值] 单容器求解异常: {spec['outcome']} ph={spec['ph']}")
-        print(f"[pipeline] OK 求解: outcome={spec['outcome']} ph={spec['ph']:.4f} "
-              f"(x-protocol={h['x-protocol']})")
+           f"[数值] 倾倒后求解异常: outcome={spec['outcome']} ph={spec['ph']}")
+        eq(state["container_id"] == "beaker-A" and isinstance(state["directives"], list),
+           "[契约] container_state 容器定向字段缺失")
+        eq(isinstance(state.get("solve_latency_ms"), (int, float)) and state["solve_latency_ms"] >= 0,
+           "[契约] solve_latency_ms 非真实开销")
+        print(f"[pipeline] OK 定向求解: container=beaker-A outcome={spec['outcome']} "
+              f"ph={spec['ph']:.4f} latency={state['solve_latency_ms']}ms")
 
-        # ---- 环节 2：现象派生（经 gateway，指示剂 H-H 连续混色）----
-        phbody = {"container_id": "p1", "substances": [
-            {"compound_id": "naoh", "concentration_mol_L": 0.1, "volume_L": 1.0},
-            {"compound_id": "phenolphthalein", "concentration_mol_L": 0.001, "volume_L": 0.01}]}
-        directives, _ = http_json("POST", GATEWAY + "/api/v1/speciation/phenomena", phbody)
-        color = [d for d in directives if d["type"] == "color_change"]
-        eq(len(color) == 1 and color[0]["trigger"]["derivation"] == "henderson_hasselbalch",
-           "[载体③] 指示剂现象未按 H-H 派生")
-        eq(0.0 < color[0]["intensity"] <= 1.0, "[数值] 指示剂混色分数越界")
-        ph2, _ = http_json("POST", GATEWAY + "/api/v1/speciation", phbody)
-        expect_ratio = 10 ** (ph2["ph"] - color[0]["physics"]["pka"])
-        eq(abs(color[0]["physics"]["indicator_ratio"] / expect_ratio - 1) < 1e-4,
-           "[数值] 派生现象 indicator_ratio 与求解 pH 不一致")
-        print(f"[pipeline] OK 现象: 酚酞 color_change intensity={color[0]['intensity']:.4f} "
-              f"(H-H 派生，回指求解 pH={ph2['ph']:.4f})")
+        # ---- 环节 4：WS 按 container_id 定向推送，多容器不串扰 ----
+        try:
+            import websocket as wsclient
+        except ImportError:
+            print("[pipeline] SKIP WS 定向测试：venv 无 websocket-client（其余链路已验证）")
+        else:
+            ws = wsclient.create_connection(f"ws://127.0.0.1:{GATEWAY_PORT}/ws", timeout=5)
+            try:
+                # 服务端握手后主动发 welcome，先消费
+                welcome = json.loads(ws.recv())
+                eq(welcome.get("type") == "welcome", f"[WS] 未收到 welcome: {welcome}")
+                ws.send(json.dumps({"type": "subscribe", "channel": "container_state", "container_id": "beaker-A"}))
+                subscribed = json.loads(ws.recv())
+                eq(subscribed.get("type") == "subscribed" and subscribed.get("container_id") == "beaker-A",
+                   f"[WS] 订阅确认异常: {subscribed}")
+                # 向 B 发状态：A 不应收到
+                http_json("POST", GATEWAY + "/api/v1/bench/container-state",
+                          {"container_id": "beaker-B", "substances": acid["substances"]})
+                ws.settimeout(1.5)
+                try:
+                    leaked = json.loads(ws.recv())
+                    eq(leaked.get("container_id") != "beaker-B",
+                       f"[WS] 串扰：订阅 A 却收到 B 的状态 {leaked.get('container_id')}")
+                except wsclient.WebSocketTimeoutException:
+                    pass  # 正确：A 未收到 B
+                # 向 A 发状态：A 应收到
+                http_json("POST", GATEWAY + "/api/v1/bench/container-state", acid)
+                ws.settimeout(5)
+                got = json.loads(ws.recv())
+                eq(got.get("type") == "container_state" and got.get("container_id") == "beaker-A",
+                   f"[WS] 定向推送失败: {got.get('type')}/{got.get('container_id')}")
+                print("[pipeline] OK WS 定向: 订阅 A 收不到 B、A 的状态正常送达（不串扰）")
+            finally:
+                ws.close()
 
-        # ---- 环节 3：时间轴回放 + 网关缓存复用 ----
-        tl, h = http_json("GET", GATEWAY + "/api/v1/timeline?system=strong")
-        eq(h.get("x-protocol") == "st.timeline.v1" and h.get("x-cache") == "miss",
-           "[链路] 时间轴首次请求未 miss 或缺协议头")
-        eq(len(tl["keyframes"]) == 9 and int(h["x-solve-calls"]) == 9,
-           "[链路] 时间轴关键帧数与求解调用数不一致")
-        tl2, h2 = http_json("GET", GATEWAY + "/api/v1/timeline?system=strong")
-        eq(h2.get("x-cache") == "hit" and h2.get("x-solve-calls") == "0"
-           and tl2["timeline_id"] == tl["timeline_id"],
-           "[链路] 时间轴二次请求未命中缓存或 id 漂移")
-        # 载体③：关键帧物种快照与同配比单容器求解同源（逐字段）
-        anchor = tl["keyframes"][0]["speciation"]
-        solo = dict(acid)
-        solo["container_id"] = tl["keyframes"][0]["container_id"]
-        solo_spec, _ = http_json("POST", GATEWAY + "/api/v1/speciation", solo)
-        eq(anchor["ph"] == solo_spec["ph"]
-           and anchor["ionic_strength"] == solo_spec["ionic_strength"],
-           "[载体③] 时间轴锚点 pH/离子强度与单容器求解不同源")
-        print(f"[pipeline] OK 时间轴: {len(tl['keyframes'])} 帧, "
-              f"缓存 miss(9 calls) → hit(0 calls), 锚点回指求解一致")
-
-        # ---- 载体①：错误操作后果 —— 水入酸 / 酸入水温升同值、飞溅仅水入酸 ----
-        hazard = [
-            {"compound_id": "sulfuric_acid_conc", "concentration_mol_L": 18.4, "volume_L": 0.0544},
-            {"compound_id": "water", "concentration_mol_L": 1.0, "volume_L": 1.0},
-        ]
-        wa, _ = http_json("POST", GATEWAY + "/api/v1/heat",
-                          {"container_id": "hz", "addition_order": "water_into_acid", "substances": hazard})
-        aw, _ = http_json("POST", GATEWAY + "/api/v1/heat",
-                          {"container_id": "hz", "addition_order": "acid_into_water", "substances": hazard})
-        eq(wa["outcome"] == aw["outcome"] == "solved", "[载体①] 稀释热解未成功")
-        eq(wa["delta_T_K"] == aw["delta_T_K"],
-           f"[数值] 两种加入顺序温升不同（ΔH 是状态函数）: {wa['delta_T_K']} vs {aw['delta_T_K']}")
-        eq(wa["splash_risk"] is True and aw["splash_risk"] is False,
-           "[载体①] 飞溅风险未按加入顺序派生")
-        wa_types = {d["type"] for d in wa["directives"]}
-        aw_types = {d["type"] for d in aw["directives"]}
-        eq("splash" in wa_types and "splash" not in aw_types
-           and "temperature_change" in wa_types and "temperature_change" in aw_types,
-           f"[载体①] 飞溅/温升指令差异不成立: {wa_types} vs {aw_types}")
-        print(f"[pipeline] OK 错误操作: 水入酸/酸入水 ΔT={wa['delta_T_K']:.4f}K 同值, "
-              f"splash 仅水入酸 ({wa_types} vs {aw_types})")
-
-        # ---- 环节 4 + 载体②④：报告（操作序列入库、数值零加工、引用闭合、三态、幂等）----
-        ops = [
-            {"seq": 1, "kind": "place_apparatus", "container_id": "b1", "apparatus_id": "beaker_250ml"},
-            {"seq": 2, "kind": "pour", "container_id": "b1", "compound_id": "hcl",
-             "concentration_mol_L": 0.1, "volume_L": 1.0},
-        ]
-        req = {"operations": ops, "substances": acid["substances"], "system": "strong",
-               "container_id": "b1"}
-        report, h = http_json("POST", GATEWAY + "/api/v1/report", req)
-        eq(h.get("x-protocol") == "st.report.v1", "[链路] 报告协议头缺失")
-        eq(len(report["operations"]) == 2 and report["operations"][0]["kind"] == "place_apparatus"
-           and report["operations"][1]["kind"] == "pour",
-           "[载体②] 取器材/倾倒操作序列未进入报告")
-        snap = report["snapshots"][0]
-        eq(snap["ph"] == spec["ph"] and snap["ionic_strength"] == spec["ionic_strength"],
-           "[载体④] 报告 pH/离子强度被加工")
-        rep_sp = {s["name"]: s["concentration_mol_l"] for s in snap["species"]}
-        src_sp = {s["species_id"]: s["concentration_mol_L"] for s in spec["species"]}
-        eq(rep_sp == src_sp, "[载体④] 报告物种浓度与求解出口不一致")
-        eq([{"species": c["species"], "points": c["points"]} for c in report["curves"]]
-           == [{"species": c["species"], "points": c["points"]} for c in tl["curves"]],
-           "[载体④] 报告曲线与时间轴产物不一致")
-        ids = {s["source_id"] for s in report["sources"]}
-        refs = [snap["source_ref"]] + [s["source_ref"] for s in snap["species"]]
-        refs += [c["source_ref"] for c in report["curves"]] + [r["source_ref"] for r in report["reactions"]]
-        eq(all(r in ids for r in refs), f"[载体④] 悬空 source_ref: {[r for r in refs if r not in ids]}")
-        again, _ = http_json("POST", GATEWAY + "/api/v1/report", req)
-        eq(again["report_id"] == report["report_id"], "[载体④] report_id 不幂等")
-        print(f"[pipeline] OK 报告: ops={len(report['operations'])} "
-              f"数值零加工 / 引用闭合 / report_id={report['report_id']} 幂等")
-
-        # ---- 三态出口如实：覆盖外物质 -> no_significant_change 且保留 reason ----
-        degraded, _ = http_json("POST", GATEWAY + "/api/v1/speciation",
+        # ---- 环节 5：三态出口如实 ----
+        degraded, _ = http_json("POST", GATEWAY + "/api/v1/bench/container-state",
                                 {"container_id": "x", "substances": [
                                     {"compound_id": "unknown_xyz", "concentration_mol_L": 0.1, "volume_L": 1}]})
-        eq(degraded["outcome"] == "no_significant_change" and bool(degraded.get("reason")),
+        dspec = degraded["speciation"]
+        eq(dspec["outcome"] == "no_significant_change" and bool(dspec.get("reason")),
            "[红线] 覆盖外物质未如实降级")
-        print(f"[pipeline] OK 三态出口: 覆盖外 → {degraded['outcome']} (reason 保留)")
+        print(f"[pipeline] OK 三态出口: 覆盖外 → {dspec['outcome']} (reason 保留)")
 
-        # ---- 静态护栏：web-ui 不直连求解库 ----
-        ui_src = (ROOT / "packages/web-ui/src")
+        # ---- 环节 6：范式红线静态护栏（web-ui 无旧演示层）----
+        ui_src = ROOT / "packages/web-ui/src"
         offenders: list[str] = []
+        forbidden = [r"\bPRESETS\b", r"\bsolveHeat\b", r"\bloadTimeline\b",
+                     r"/api/v1/timeline", r"\bgenerateReport\b", r"\bREAGENTS\b",
+                     r"8765|localhost:\d{4}|127\.0\.0\.1:\d{4}",
+                     r"from\s+['\"]st_solver_worker|import\s+phreeqpython"]
         for p in ui_src.rglob("*"):
             if p.is_file() and p.suffix in {".ts", ".tsx", ".js"}:
                 text = p.read_text(encoding="utf-8", errors="ignore")
-                if re.search(r"8765|localhost:\d{4}|127\.0\.0\.1:\d{4}", text) or \
-                   re.search(r"from\s+['\"]st_solver_worker|import\s+phreeqpython", text):
-                    offenders.append(str(p.relative_to(ROOT)))
-        eq(not offenders, f"[依赖规则] web-ui 疑似直连求解库或硬编码求解端口: {offenders}")
-        print("[pipeline] OK 依赖规则: web-ui 仅经 /api/v1/* 取数，无直连求解库")
+                for pat in forbidden:
+                    if re.search(pat, text):
+                        offenders.append(f"{p.relative_to(ROOT)}:{pat}")
+        eq(not offenders, f"[范式] web-ui 旧演示层/直连残留: {offenders}")
+        print("[pipeline] OK 范式护栏: web-ui 无预设配比/时间轴/报告/硬编码药品架/直连求解库")
 
-        print("[pipeline] 通过：M1 全链路贯通 + 四类好玩载体证据 + 数值零错 + 三态如实")
+        print("[pipeline] 通过：M2 自由台面核心循环 + 数据驱动 + 操作原语 + 定向求解 + 三态如实")
         return 0
     except AssertionError as e:
         print(f"[pipeline] FAIL {e}", file=sys.stderr)
