@@ -30,8 +30,8 @@
 
 ### 验证与门禁（敏捷轻量，见 03）
 
-- 不在每个任务收尾强制跑全套 CI；以「数值零错红线 + 最小充分证据 + 用户随时可打断」保障质量，验证结果由测试产物与 git log 承载。
-- 产品级强制门禁已接入 CI：构建（`build`/`typecheck`）、`schema-validate`、`asset-attribution`、`content-consistency`（可取药品全部可玩）、物化幂等、`golden-cases`（数值零错）、`evidence-check`、`report`（报告汇编零加工）、`doc-hygiene-check`、`license-scan`、部署可达 `e2e`（完整清单见 `docs/01-Architecture.md` §7.2）；`lgpl-link-check`、`rule-lint`、`dual-platform` 随相关切片接入。
+- 不在每个任务收尾强制跑全套 CI；以「诚实计算红线 + 最小充分证据 + 用户随时可打断」保障质量，验证结果由测试产物与 git log 承载。
+- 产品级强制门禁已接入 CI：构建（`build`/`typecheck`）、`schema-validate`、`asset-attribution`、`content-consistency`（可取药品全部可玩）、物化幂等、`golden-cases`（工程质量对拍）、`evidence-check`、`report`（过渡期，随台面快照改造替换）、`doc-hygiene-check`、`license-scan`、部署可达 `e2e`（完整清单见 `docs/01-Architecture.md` §7.2）；`lgpl-link-check`、`rule-lint`、`dual-platform` 随相关切片接入。
 
 ### 内容（真实反应）贡献要求
 
@@ -51,7 +51,7 @@ effects: [ ... ]                              # 现象指令 ID，不是渲染�
 
 完整样例见 `content/rules/neutralization/compounds/hcl.json` 与 `content/rules/neutralization/rules/strong_acid_strong_base.json`。
 
-流程：**权威源 → AI 用独立解析解 + chempy/Cantera/phreeqpython 交叉对拍 → 用户人工签核 → 黄金用例进 CI**，错了不许进沙盒。黄金用例须同时校验 `sane` 与 `success`，PHREEQC `-999` 哨兵值列为非法输入。**数值零错红线**：方向、产物、计量、守恒、平衡趋势、pH/浓度数值准确，近似不得进化学事实层。参数改动走 `rule_revision`（禁止原地覆盖）并补黄金用例。字段名英文 snake_case；物质名/术语/方程式双语（文档仅简体中文）。详见 `01-Architecture.md` 第五节。
+流程：**权威源 → AI 用独立解析解 + chempy/Cantera/phreeqpython 交叉对拍 → 用户人工签核 → 黄金用例进 CI**，错了不许进沙盒。黄金用例须同时校验 `sane` 与 `success`，PHREEQC `-999` 哨兵值列为非法输入。**诚实计算**：一切数值来自实时求解引擎，不虚构、不硬编码、来源锚定；黄金用例承担数值正确性回归（数值错误属常规 bug，发现即修），禁止以预设数值冒充计算结果。参数改动走 `rule_revision`（禁止原地覆盖）并补黄金用例。字段名英文 snake_case；物质名/术语/方程式双语（文档仅简体中文）。详见 `01-Architecture.md` 第五节。
 
 ### 美术资产贡献要求
 
@@ -69,7 +69,7 @@ effects: [ ... ]                              # 现象指令 ID，不是渲染�
 - 简体中文为主，技术术语保留英文；事实带**一级来源**，推测标注「判断」；star 数标快照日期。
 - 尊重上游：不破解、不绕授权、不复制商业产品素材与文案。
 - 科学准确性声明常驻；本产品不是实验级数据源；危险实验提示「现实操作勿模仿」。
-- 遇到不确定的化学事实，宁可留空并标注，不要编造（**数值零错**）。
+- 遇到不确定的化学事实，宁可留空并标注，不要编造（**诚实计算**）。
 - 涉及玩法设计须**逐一向需求方确认细节**，不省略、不自行假设。
 
 ## 报告问题
