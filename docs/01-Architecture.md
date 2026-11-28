@@ -18,6 +18,8 @@
 4. **规模**（可验算物种数 1000+ 为下限，长线不封顶；真实反应由物种网络联立涌现，数量天然远超物种数，规模以前三条为前提）
 5. **性能与可维护性**（自适应调度、双平台、契约先行；是达成前四项的手段）
 
+> **优先级 ≠ 开发顺序**：上述排序是**冲突裁决顺序**（当两项目标冲突时谁让步），不是开发先后。M1 先建底座（求解/事实层/schema/门禁/资产/渲染）而非先做玩法，是因为玩法必须站在可复用底座上；玩法在 M2 成为主线，恰恰是优先级第一的落实。两者维度不同，不矛盾。
+
 **「超自由」的精确定义**：写实 2D 台面上器材自由拖放、玩家以真实实验室的方式手动操作一切器材与物质；物质按真实物理化学法则**实时**相互作用，后果如实发生；涌现来自海量物种网络组合与玩家的认知未知——引擎是确定性物理化学，惊喜来自玩家不知道混合会发生什么，而非伪随机。**绝不**接受虚构物质、用户自制物质、自定义规则、MOD 或规则包工坊；**绝不**预设「实验」「反应单元」「配比方案」让玩家按按钮。
 
 **能力现状（当前 M1）与目标（分栏，避免把目标语气读成现状）**：
@@ -26,6 +28,7 @@
 |---|---|---|
 | 化学体系 | 中和体系 1 个；可玩物质以 `content/materialized/ruleset.json` 为准（含水溶剂特例），反应规则以同文件为准 | 1000+ 可验算物种下限、长线不封顶；真实反应由物种网络涌现；典型危险反应（活泼金属入水、爆炸等）走终态半定量+定性现象的诚实覆盖 |
 | 求解 | phreeqpython 水溶液主解 + chempy 真对拍 + 三态出口；纯水/稀释/温度依赖已守门；**当前为单次快照求解，实时演化未实现** | **实时求解**：状态变化驱动重算 + 稳态冻结 + 焦点配额（009 落地）；SciPy 长线、Cantera/reaktoro-service 多相高温高压与瞬态动力学 |
+| 台面契约 | **无**（四个新契约尚未发布，schemas/ 现仅 8 个；详见 §5.1 规划段） | 008 发布 `st.bench_world.v1` / `st.operation_event.v1` / `container_state`（WS 定向）/ `st.bench_snapshot.v1`；schema 先行、类型生成、代码接入后回填 §5.1 |
 | 现象 | `st.phenomenon.v1` 协议预留 12 类，当前实装 3 类（指示剂连续混色 / 温升 / 飞溅）；其余类别只有枚举无实现 | 12 类逐步实装（沸腾/气泡/沉淀/火焰/分层等），扩类走协议版本升级；现象始终由求解状态实时派生 |
 | 表现 | React/PixiJS 容器内现象 + 写实 2D SVG 资产 + 物种面板；**旧范式演示 UI（预设按钮/预置时间轴）废弃中** | **自由 2D 台面**（拖放/取放/倾倒转移）+ 台面快照 + 图鉴与进度；自适应调度器（关注度分数 / 16.7ms 帧预算）在 009 落地；固定 60fps 目标 |
 | 玩法 | **旧范式演示器（预设配比/错误操作按钮/预置时间轴）正在被 008–011 切片重构废弃** | 自由台面手动操作范式：取放/倾倒转移/逐滴/加热/搅拌/称量配液/测温/固定气液装置；危险后果写实发生、不阻止；物质为本体、无「实验」单位 |
@@ -49,7 +52,7 @@
 | 教学层 | 附加内容、后置长线，不进前期阶段验收；教学由使用方教师承担 |
 | 对标 | **开发文档一律对标「现实里的化学实验室」**（开放性、自由度、还原度以现实实验室为标尺）；`README.md` 对外层保留「对标并超越 NB实验室」+「独立开源实现、与其无关联无背书」合规声明 |
 
-**科学边界与求解出口（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。求解通过 `st.solution_speciation.v1` 的 `outcome` 如实返回三种状态：覆盖范围内给出定量解（`solved`）；条件在事实层覆盖范围外给出「当前条件下无明显变化」（`no_significant_change`，合法结论）；数值不收敛或活度模型超出适用域给出标注置信度的降级提示（`degraded`）。三种出口均由求解出口如实返回，不掩盖为定量结论。已制作的体系必须既好玩又科学、零科学性错误。
+**科学边界与求解出口（诚实声明）**：「任意两种物质混合生成什么」在化学上不可判定（取决于温度/浓度/溶剂/pH/压强/相态/催化剂/光照/时间/容器）。求解通过 `st.solution_speciation.v1` 的 `outcome` 如实返回三种状态：覆盖范围内给出定量解（`solved`）；条件在事实层覆盖范围外给出「当前条件下无明显变化」（`no_significant_change`，合法结论）；数值不收敛或活度模型超出适用域给出标注置信度的降级提示（`degraded`）。三种出口均由求解出口如实返回，不掩盖为定量结论。已制作的体系必须既好玩又科学、零科学性错误。**覆盖外体验**：事实层覆盖尚小时，玩家会频繁遇到 `no_significant_change`——表现层须给出**友好且诚实**的表达（说明当前条件与已知结论的边界，而非干巴巴一句提示），具体呈现由相关玩法切片逐项确认，不预设数值、不虚构结论。
 
 ---
 
@@ -145,7 +148,9 @@ flowchart TB
 
 > 各层的"唯一"只在本层成立：文档层以 `01` 为真理源、结构层以 schema 为准、数值层以 `.dat` 快照为准、运行层以物化 ruleset 为准。判定现状数字一律下沉到对应权威文件，不在上层文档复写。
 
-### 5.1 核心实体（单一事实源：`schemas/`）
+### 5.1 核心实体（现行 = `schemas/` 已发布；规划另列）
+
+**现行实体（单一事实源：`schemas/`，CI 核验表内实体均已发布）**：
 
 | 实体 | 作用 | 关键字段 |
 |---|---|---|
@@ -153,11 +158,9 @@ flowchart TB
 | `apparatus` | 实验台器材（参数单一事实源，驱动 2D SVG/容量/物理约束） | `capacity_mL`、`graduations`、`max_temp_K`、`sealable`、`asset`、`physics` |
 | `reaction_rule` | 条件化真实反应（核心） | `equilibrium`/`kinetics`/`thermo`(定量)、`applicability`、`numerics`、`effects`、`source`/`confidence`/`ai_crosscheck`、`data_class` |
 | `solution_speciation` | 每容器隐藏化学态（不可见反应也真实发生） | `species[]`、`ph`、`ionic_strength`、`temperature_K`、`equilibria`、`hidden_reactions`、`outcome`（三态出口）、`confidence`、`indicators`（实际加入的指示剂，供现象派生）、`physics_note` |
-| `bench_world` | 自由台面世界状态（`st.bench_world.v1`）：器材实例/位置/容器内容，前端权威、网关与求解侧按需订阅 | `apparatus_instances[]`（id/类型/位置/容器内容）、`bench_bounds`、`ruleset_version` |
-| `operation_event` | 玩家操作原语事件（`st.operation_event.v1`）：倾倒转移/逐滴/加热/搅拌/称量等，一切数值由操作与求解产生、绝无预设配比 | `op_type`、`source_container`、`target_container`、`物理量`（按操作类型）、`timestamp_ms` |
-| `container_state` | 容器实时状态定向推送（WS 按 `container_id` 定向）：状态变化驱动重算的结果流 | `container_id`、`speciation`、`directives[]`、`solve_latency_ms`、`solver_version` |
-| `bench_snapshot` | 台面快照（`st.bench_snapshot.v1`，汇编投影，非事实层）：当前所有容器/物质状态的诚实快照 | `containers[]`（每容器物质/状态/出口）、`source_refs[]`、`snapshot_id`（内容寻址幂等） |
 | `phenomenon` | 现象类别注册表（`st.phenomenon.v1` 指令）：协议预留 12 类，当前实装 3 类（见第一节能力现状表） | `type`、`trigger`（可观测状态触发器）、`关联物理量` |
+
+**规划中实体（008 发布后回填上表，当前 schemas/ 无对应文件）**：`bench_world`（`st.bench_world.v1`：器材实例/位置/容器内容，字段 `apparatus_instances[]`/`bench_bounds`/`ruleset_version`）、`operation_event`（`st.operation_event.v1`：操作原语事件，字段 `op_type`/`source_container`/`target_container`/物理量/`timestamp_ms`）、`container_state`（WS 按 `container_id` 定向推送，字段 `container_id`/`speciation`/`directives[]`/`solve_latency_ms`/`solver_version`）、`bench_snapshot`（`st.bench_snapshot.v1` 汇编投影、非事实层，字段 `containers[]`/`source_refs[]`/`snapshot_id`）。规格见 `specs/spec-008-自由台面核心循环.md`。
 
 **三类数据分层**：`fact`（计量/热力学/动力学，零错签核）、`presentation`（颜色/焰色/外观，可夸张但标来源，不受零错红线）、`safety`（GHS/危害，严谨签核，驱动错误操作后果）。
 
@@ -214,16 +217,16 @@ open-chem-lab/
 │   ├── rules/          # 按体系分目录的 YAML 参数
 │   ├── golden-cases/   # 黄金用例（数值正确性对拍回归）
 │   └── ai-crosscheck/  # AI 独立对拍记录
-├── packages/
-│   ├── protocol/       # TS：现象/台面/操作/容器状态契约与类型(最底层，不依赖任何包)
-│   ├── solver-worker/  # Python 3.11 动态定量求解（常驻 worker 进程）
-│   ├── reaktoro-service/ # 独立微服务(conda + UDS/protobuf)
-│   ├── scheduler/      # 自适应调度
-│   ├── speciation/  reaction-library/  phenomenon/  apparatus/
-│   ├── wasm-view/      # Rust→WASM 容器内现象
-│   ├── web-ui/         # React+Vite 自由实验台/面板/台面快照/图鉴
-│   ├── gateway/        # Fastify REST+WS
-│   └── save/  data-pipeline/  shared/  (teaching/ 长线)
+├── packages/           # [已存在] = 当前在库；[规划] = 目标态、未建，勿 import
+│   ├── protocol/       # [已存在] TS：现象/台面/操作/容器状态契约与类型(最底层，不依赖任何包)
+│   ├── solver-worker/  # [已存在] Python 3.11 动态定量求解（常驻 worker 进程）
+│   ├── reaktoro-service/ # [已存在] 独立微服务(conda + UDS/protobuf)
+│   ├── wasm-view/      # [已存在] Rust→WASM 容器内现象
+│   ├── web-ui/         # [已存在] React+Vite 自由实验台/面板/台面快照/图鉴
+│   ├── gateway/        # [已存在] Fastify REST+WS
+│   ├── scheduler/      # [规划] 自适应调度（009 落地）
+│   ├── speciation/  reaction-library/  phenomenon/  apparatus/  # [规划] 按切片需要落地
+│   └── save/  data-pipeline/  shared/  (teaching/ 长线)  # [规划] save 机制已废，勿按旧范式重建
 ├── tools/asset-pipeline/   # 美术资产转换
 ├── tools/materialize-rules.py      # 构建期物化 content/rules → content/materialized
 ├── tools/doc-hygiene-check.py      # 文档纯净门禁（单一状态 + 无过程痕迹 + 正向规格）
@@ -258,17 +261,18 @@ open-chem-lab/
 - **任务内按需验证、产品级门禁由 CI 统一守门**：单个任务收尾只跑与该任务相关的最小充分证据，不要求每个任务跑全套；质量由「诚实计算红线 + CI 强制门禁 + 用户随时可打断」保障，验证结果由测试产物与 git log 承载。
 - **已接入 CI 的强制门禁**：构建（`build`/`typecheck`）、内容 schema 与护栏（`schema-validate`）、美术资产署名与存在性（`asset-attribution`：逐 SVG 署名、许可白名单、纯 path、器材卡 asset 路径闭合）、UI-事实层一致性（`content-consistency`：可取药品全部可玩）、物化幂等、`golden-cases`（**工程质量对拍**：黄金用例继续承担数值正确性回归，数值错误按常规 bug 修复，不再作为阻塞玩法的绝对红线）、证据自证（`evidence-check`）、报告汇编（`report`：**过渡期保留**，随 008–010 改造为台面快照校验后替换）、文档纯净（`doc-hygiene-check`）、依赖许可证（`license-scan`）、文档结构与合规红线、部署可达（`e2e`）。随切片继续接入：`lgpl-link-check`、`rule-lint`、`dual-platform`、范式红线检查（禁止预设数值硬编码进表现层）。
 - **证据自证**：凡验收声称用某工具独立对拍，须在代码中真实调用、运行时打印版本与调用指纹、CI 校验一致；黄金用例期望标注来源（独立对拍/权威源快照/解析式）并锚定权威源哈希；关键量纲不变量（体积无关性、浓度十倍 pH 降一）固化为断言（流程见 `03-DocDD-Process.md` 第四节）。
+- **doc-hygiene 门禁能力边界**：该门禁只做**字面/结构级**检查（过程痕迹词、spec 状态单一、「状态：X」四态词、§5.1 现行实体 ↔ `schemas/` 对应）；**语义级矛盾**（目标冒充现状、跨文档状态语气不一致、承诺与实现脱节）不在其能力内，门禁绿 ≠ 文档语义自洽——后者靠 `03-DocDD-Process.md` 2.3 回写前查漏与人工审查守门。
 
 ### 7.3 对外口径（不可拆分的三层）
 
 | 层次 | 内容 | 标注 |
 |---|---|---|
 | 当前已独有 | 开源 LGPL-3.0 + 可自托管 + 无会员墙 | 已具备 |
-| 目标超越维度 | 规模（1000+ 可验算物种 vs NB 化学单科近 200 实验）、自由度（自由台面手动操作一切+实时演化 vs 预设实验演示）、用户体验（写实后果/物种面板/台面快照/诚实计算/写实实验台） | 规划目标·待达成，逐项标状态、不冒充既成事实 |
+| 目标超越维度 | 规模（物种网络覆盖：1000+ 可验算物种下限 vs NB 化学单科近 200 个预设实验——**物种数与实验数为不同量纲，此处只表达"覆盖面目标"，不作数值优劣对比**）、自由度（自由台面手动操作一切+实时演化 vs 预设实验演示）、用户体验（写实后果/物种面板/台面快照/诚实计算/写实实验台） | 规划目标·待达成，逐项标状态、不冒充既成事实 |
 | 合规兜底 | 点名「对标并超越」+「独立开源实现·无关联无背书」声明；NB 侧只用一级来源，禁用「几万种物质」「免费版 20%」未证实表述 | 强制 |
 
 > 法律边界：本项目合规分析为工程判断、非法律意见。商业化前就 CC-BY-SA 衍生边界、LPPL 输出物商用、CC-BY 署名充分性、比较广告合规四项做法务确认。
 
 ### 7.4 已知限制（当前形态可接受、条件变化时须修）
 
-- **WS 现象通道按房间全局广播**：gateway 的 `phenomenon` 订阅把热效应指令推给所有订阅者，指令自带 `container_id` 但前端按"最新一条"渲染、不按容器过滤。当前 compose 仅回环发布、面向单机单用户，无实际串扰触发路径；**进入多用户/多实验台形态前，须改为按 `container_id` 定向推送或前端按当前容器过滤**，否则 A 的错误操作现象会显示在 B 的容器上。属体验隔离限制，不影响诚实计算红线；008 切片以 `container_state` 按 `container_id` 定向推送落地解决。
+- **WS 现象通道按房间全局广播**：gateway 的 `phenomenon` 订阅把热效应指令推给所有订阅者，指令自带 `container_id` 但前端按"最新一条"渲染、不按容器过滤。当前 compose 仅回环发布、面向单机单用户，无实际串扰触发路径；**进入多用户/多实验台形态前，须改为按 `container_id` 定向推送或前端按当前容器过滤**，否则 A 的错误操作现象会显示在 B 的容器上。属体验隔离限制，不影响诚实计算红线；规划由 008 切片以 `container_state` 按 `container_id` 定向推送解决（切片尚未开始，当前仍为全局广播）。

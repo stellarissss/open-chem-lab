@@ -13,6 +13,12 @@ docs/03-DocDD-Process.md、docs/specs/*.md、README.md、CONTRIBUTING.md、SECUR
 2. 现行文档不含过程痕迹词（见 PROCESS_MARKERS）。
 3. spec 状态行与状态区一致（粗稿在顶部声明，正式稿在文末声明，二者不共存于同一文件）；
    正文「状态：X」只允许四态词，其他取值视为逃逸状态声明。
+4. 01 §5.1「现行实体」表中的每个实体，必须在 schemas/ 有对应 *.v1.schema.json
+   （防未来契约冒充现行；规划中实体单列不检查）。
+
+能力边界（勿高估本门禁）：以上均为**字面/结构级**检查。语义级问题——目标冒充现状、
+跨文档状态语气不一致、承诺与实现脱节——本门禁抓不住，须靠 03 §2.3 回写前查漏与人工审查。
+本门禁通过 ≠ 文档已语义自洽。
 
 用法：python3 tools/doc-hygiene-check.py [repo_root]
 依赖：仅标准库。
@@ -94,10 +100,24 @@ def main() -> int:
                 if raw.strip("「」*") not in STATUS_WORDS:
                     fail(f"{rel}: 正文夹带无法识别的状态声明「状态：{raw}」（只允许 {'/'.join(STATUS_WORDS)}）")
 
+    # 规则 4：01 §5.1 现行实体 ↔ schemas/ 对应（规划实体单列、不检查）
+    arch = (root / "docs" / "01-Architecture.md").read_text(encoding="utf-8")
+    if "### 5.1" in arch:
+        section = arch.split("### 5.1", 1)[1]
+        current_part = section.split("**规划中实体", 1)[0]
+        declared = set(re.findall(r"^\|\s*`([a-z_]+)`\s*\|", current_part, re.MULTILINE))
+        published = {p.name.replace(".v1.schema.json", "") for p in (root / "schemas").glob("*.v1.schema.json")}
+        for entity in sorted(declared - published):
+            fail(f"01 §5.1 现行实体「{entity}」在 schemas/ 无对应文件（应移入规划段或先发 schema）")
+        print(f"[doc-hygiene] 实体核对：§5.1 现行 {len(declared)} 个，schemas 已发布 {len(published)} 个")
+    else:
+        fail("01-Architecture.md 缺 §5.1 节")
+
     if errors:
         print(f"[doc-hygiene] 失败 {len(errors)} 项", file=sys.stderr)
         return 1
     print(f"[doc-hygiene] 通过：{len(targets)} 份现行文档状态单一、无过程痕迹、只含正向规格")
+    print("[doc-hygiene] 注意：本门禁仅字面/结构级检查，语义级矛盾须靠回写查漏与人工审查")
     return 0
 
 
