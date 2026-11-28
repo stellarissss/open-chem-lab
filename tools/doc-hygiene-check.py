@@ -6,12 +6,13 @@
 - 每份 spec 只保留唯一现行状态，状态声明与状态区保持一致。
 
 检查范围：AGENTS.md、docs/01-Architecture.md、docs/02-Roadmap.md、
-docs/03-DocDD-Process.md、docs/specs/*.md。
+docs/03-DocDD-Process.md、docs/specs/*.md、README.md、CONTRIBUTING.md、SECURITY.md。
 
 判定规则（正向表述即通过）：
 1. specs 每份只有单一现行状态：状态区（文末「## 状态」）唯一；正文不再夹带旧状态声明。
 2. 现行文档不含过程痕迹词（见 PROCESS_MARKERS）。
-3. spec 状态行与状态区一致（粗稿在顶部声明，正式稿在文末声明，二者不共存于同一文件）。
+3. spec 状态行与状态区一致（粗稿在顶部声明，正式稿在文末声明，二者不共存于同一文件）；
+   正文「状态：X」只允许四态词，其他取值视为逃逸状态声明。
 
 用法：python3 tools/doc-hygiene-check.py [repo_root]
 依赖：仅标准库。
@@ -49,7 +50,8 @@ def find_root(start: Path) -> Path:
 def main() -> int:
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else find_root(Path(__file__).resolve().parent)
     targets = [root / "AGENTS.md", root / "docs" / "01-Architecture.md",
-               root / "docs" / "02-Roadmap.md", root / "docs" / "03-DocDD-Process.md"]
+               root / "docs" / "02-Roadmap.md", root / "docs" / "03-DocDD-Process.md",
+               root / "README.md", root / "CONTRIBUTING.md", root / "SECURITY.md"]
     targets += sorted((root / "docs" / "specs").glob("*.md"))
     print(f"[doc-hygiene] root: {root}")
 
@@ -85,6 +87,12 @@ def main() -> int:
             for val in inline:
                 if section_val and val != section_val:
                     fail(f"{rel}: 正文状态「{val}」与状态区「{section_val}」并存")
+
+            # 状态逃逸：正文「状态：X」只允许四态词，其他取值一律拦截
+            for m in re.finditer(r"状态[：:]\s*\**\s*([^，。；\s]+)", head):
+                raw = m.group(1)
+                if raw.strip("「」*") not in STATUS_WORDS:
+                    fail(f"{rel}: 正文夹带无法识别的状态声明「状态：{raw}」（只允许 {'/'.join(STATUS_WORDS)}）")
 
     if errors:
         print(f"[doc-hygiene] 失败 {len(errors)} 项", file=sys.stderr)
